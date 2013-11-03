@@ -249,22 +249,22 @@ Class Validatore {
 }
 $NUMERATORE = 	new Validatore(array('tipo'=>'INTEGER', 'lunghezza'=>6));
 $DATA = 		new Validatore(array('tipo'=>'INTEGER', 'lunghezza'=>10));
-$CODICE = 		new Validatore(array('tipo'=>'TEXT'),   'lunghezza'=>6);
-$IMPORTO = 		new Validatore(array('tipo'=>'REAL'),   'lunghezza'=>10);
-$TESTO = 		new Validatore(array('tipo'=>'TEXT'),   'lunghezza'=>'');
-$NUMERO = 		new Validatore(array('tipo'=>'INTEGER'),'lunghezza'=>6);
-$ALBO = 		new Validatore(array('tipo'=>'TEXT'), '  lunghezza'=>20);
-$PARTITAIVA = 	new Validatore(array('tipo'=>'INTEGER'),'lunghezza'=>11);
-$CODFISCALE = 	new Validatore(array('tipo'=>'TEXT'),   'lunghezza'=>16);
-$TELEFONO = 	new Validatore(array('tipo'=>'TEXT'),   'lunghezza'=>11);
-$MAIL = 		new Validatore(array('tipo'=>'TEXT'),   'lunghezza'=>30);
-$URL = 			new Validatore(array('tipo'=>'TEXT'),   'lunghezza'=>50);
+$CODICE = 		new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>6));
+$IMPORTO = 		new Validatore(array('tipo'=>'REAL',   'lunghezza'=>10));
+$TESTO = 		new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>''));
+$NUMERO = 		new Validatore(array('tipo'=>'INTEGER','lunghezza'=>6));
+$ALBO = 		new Validatore(array('tipo'=>'TEXT', '  lunghezza'=>20));
+$PARTITAIVA = 	new Validatore(array('tipo'=>'INTEGER','lunghezza'=>11));
+$CODFISCALE = 	new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>16));
+$TELEFONO = 	new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>11));
+$MAIL = 		new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>30));
+$URL = 			new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>50));
 
 /*########################################################################################*/
 class Ddt  extends MyClass {
 	function __construct($params) {
 		$this->addProp('numero', $NUMERATORE);
-  		$this->addProp('data', $DATA);
+		$this->addProp('data', $DATA);
 		$this->addProp('causale_codice', $CODICE);
 		$this->addProp('mezzo_codice', $CODICE);
 		$this->addProp('vettore_codice', $CODICE);
@@ -276,7 +276,7 @@ class Ddt  extends MyClass {
 		//$this->righe=array();
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
-		//$this->mergeParams($params);
+		$this->mergeParams($params);
 	}
 	function getDbKeys(){
 		return array('numero','data');
@@ -337,7 +337,7 @@ class Imballaggio extends MyClass {
 	}
 }
 
-class ClienteFornitore extends MyClass {
+class Clientefornitore extends MyClass {
 	function __construct($params) {
 		$this->addProp('codice', $CODICE);
 		$this->addProp('ragionesociale', $TESTO);

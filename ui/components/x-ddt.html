@@ -7,8 +7,8 @@
 			<x-causale></x-causale>
 			<x-mezzo></x-mezzo>
 			<x-vettore></x-vettore>
-			<x-note></x-note>
 			<!--
+			<x-note></x-note>
 			Righe: <x-righe></x-righe>
 			Inserimento: <x-riga></x-riga>
 			-->
@@ -17,37 +17,63 @@
 	<script>
 	Polymer('x-ddt',{
 		ready:function (){
-
-/*
-			//put placeholers
-			var list = this.shadowRoot.getElementsByTagName("x-window")[0].getElementsByTagName("*");
-			for (var i =0; i<= list.length ; i++){
-				var myElement = list[i];
-				//console.log(myElement.tagName);
-				//myElement.value="11";
-				//myElement.placeholder= myElement.tagName;
-			}
-*/
-
 			//manage keyboard events
 			$(this).keydown(function(event) {
 				switch (event.which){
 					case 13:
 						//return this.focusNext();
 					case 112:
-						var list = this.shadowRoot.getElementsByTagName("x-window")[0].getElementsByTagName("*");
-						for (var i =0; i<= list.length ; i++){
-							var myElement = list[i];
-							console.log( myElement.tagName + " = " +  myElement.value);
-						}
+						this.saveToDb();
 
 					//default: console.log(event);
 				}
 			});
 		},
 		toJson:function (){
-			console.log(this.getElementsByTagName(x-numero));
-		}
+			//utility function
+			function capitalize(string){
+				string = string.toLowerCase();
+				return string.charAt(0).toUpperCase() + string.slice(1);
+			}
+			
+			//my actula json object
+			var myJson ={};
+			myJson._type ='Ddt';
+
+			var list = this.shadowRoot.getElementsByTagName("x-window")[0].getElementsByTagName("*");
+			for (var i = 0; i< list.length ; i++){
+				var myElement = list[i];
+				//console.log(i+" "+list.length );
+				var propName = capitalize(myElement.tagName.replace("X-",""));
+				console.log(propName);
+				myJson[propName] = myElement.value;
+			}
+			var jsonString =  JSON.stringify(myJson);
+			console.log(jsonString);
+			return jsonString;
+		},
+		saveToDb : function (){
+			//perform an ajax request to get the list to display*
+			$.ajax({
+				type: "POST",
+				url: "./../do.php",
+				data: { action: 'save',
+						params: this.toJson(),
+				},
+				context: this,
+			}).done(function( msg ) {
+				if (msg){
+				//console.log(msg);
+					//rimpiazzo gli "a capo" con uno "spazio"
+					//msg = msg.replace(/\r/gm,' ');
+					console.log('ServerReply:');
+					console.log(msg);
+					//
+					//var jsonList = $.parseJSON(msg);
+					//this.jsonToTable(jsonList, $.parseJSON(this.params));
+				}
+			});
+		},
 	});
 	</script>
 </polymer-element>
