@@ -1,0 +1,26 @@
+<polymer-element name="x-input" attributes="value size placeholder">
+	<template>
+	<style>
+		input {
+			border:1px solid;
+			border-color:grey;
+			outline: none;
+			box-shadow: 0 0 0px orange;
+		}
+		input:focus {
+			border-color:orange;
+			outline: none;
+			box-shadow: 0 0 10px orange;
+		}
+	</style>
+		<input id="myInput" value="{{value}}" size="{{size}}" maxlength="{{size}}" placeholder="{{placeholder}}"></input>
+	</template>
+	<script>
+	Polymer('x-input', {
+		created:function (){
+			//var name=this.parentElement.parentElement.tagName;
+			//document.getElementByID('#myInput').placeholder= name;
+		},
+	});
+	</script>
+</polymer-element>

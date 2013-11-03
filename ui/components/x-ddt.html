@@ -1,0 +1,53 @@
+<polymer-element name="x-ddt">
+	<template>
+		<x-window title="Gestione Ddt">
+			<x-clientefornitore></x-clientefornitore>
+			<x-numero></x-numero>
+			<x-data></x-data>
+			<x-causale></x-causale>
+			<x-mezzo></x-mezzo>
+			<x-vettore></x-vettore>
+			<x-note></x-note>
+			<!--
+			Righe: <x-righe></x-righe>
+			Inserimento: <x-riga></x-riga>
+			-->
+		</x-window>	
+	</template>
+	<script>
+	Polymer('x-ddt',{
+		ready:function (){
+
+/*
+			//put placeholers
+			var list = this.shadowRoot.getElementsByTagName("x-window")[0].getElementsByTagName("*");
+			for (var i =0; i<= list.length ; i++){
+				var myElement = list[i];
+				//console.log(myElement.tagName);
+				//myElement.value="11";
+				//myElement.placeholder= myElement.tagName;
+			}
+*/
+
+			//manage keyboard events
+			$(this).keydown(function(event) {
+				switch (event.which){
+					case 13:
+						//return this.focusNext();
+					case 112:
+						var list = this.shadowRoot.getElementsByTagName("x-window")[0].getElementsByTagName("*");
+						for (var i =0; i<= list.length ; i++){
+							var myElement = list[i];
+							console.log( myElement.tagName + " = " +  myElement.value);
+						}
+
+					//default: console.log(event);
+				}
+			});
+		},
+		toJson:function (){
+			console.log(this.getElementsByTagName(x-numero));
+		}
+	});
+	</script>
+</polymer-element>

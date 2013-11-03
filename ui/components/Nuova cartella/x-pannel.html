@@ -1,0 +1,53 @@
+<polymer-element name="x-pannel" attributes="title">
+	<template>	
+	<style>
+	.hidden {
+		width: 0px;
+		height: 0px;
+		visibility:hidden;
+		display:none;
+		overflow:hidden;
+	}
+
+	</style>
+		<content></content>
+	</template>
+<script>
+	Polymer('x-pannel', {
+		uiOnly: true,
+		ready: function() {
+
+			//manage keyboard events
+			$(this).keydown(function(event) {
+				switch (event.which){
+						case 13:
+							var test= this.focusNext();
+							//console.log(test);
+							return test;
+					//default: console.log(event.which);
+				}
+			});
+
+			/*focus management*/
+			this.focusAbleContainer = this;	
+		},
+		hide: function (){
+			this.hidden = true;
+		},
+		show: function (){
+			this.hidden = false;
+		},
+		onleaving: function (){
+			console.log('leaving', this);
+		},
+ 
+		/*focus management*/
+/*
+		focusedID: -1,
+		myfocus: myfocus,
+		focusNext: focusNext,
+		getFocusAble : getFocusAble,
+*/
+	});
+</script>
+</polymer-element>

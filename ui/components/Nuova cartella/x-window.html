@@ -1,0 +1,63 @@
+<polymer-element name="x-window" attributes="title">
+	<template>
+		<style>
+		.window {
+			box-shadow: 3px 3px 5px 1px #ccc;
+			border: 1px solid #a1a1a1;
+			position:fixed;
+			background-color:white;
+			min-width:30%;
+			min-heigth:30%;
+			max-width:90%;
+			max-heigth:90%;
+			z-index: 100;
+		}
+		.title {
+		font-family:arial;
+			font-weight: bolder;
+			background-color: #e1e1e1;
+			border-bottom: 1px solid #a1a1a1; 
+			padding: 0.3em;
+			color:black;
+		}
+		.content{
+  			padding:1em;
+			/*color: #dbdbdb;*/
+		}
+		</style>
+		<div class="window">
+			<div class="title"> &rang; {{title}}</div>
+			<div class="content"><content></content></div>
+		</div>
+	</template>
+	<script>
+	Polymer('x-window', {
+		uiOnly: true,
+		title: '',
+		close: function (){},
+		hide: function () {},
+		minimize: function (){},
+  
+		created: function (){
+			this.myfocus();
+		},
+		setPosition: function (htmlElement, htmlElementPoint, myPoint){
+
+			target = htmlElement;
+
+			this.webkitShadowRoot.querySelector('.window').style.left='110px';
+			this.webkitShadowRoot.querySelector('.window').style.top='110px';
+			
+			setTimeout(getOffset, 0, target, function (position){
+				this.webkitShadowRoot.querySelector('.window').style.left=position.left+'px';
+				this.webkitShadowRoot.querySelector('.window').style.top=position.top+'px';
+			}.bind(this));
+		},
+		myfocus: function () {
+			setTimeout(function (){
+				this.focus();
+			}.bind(this), 10);
+		}
+	});
+	</script>
+</polymer-element>
