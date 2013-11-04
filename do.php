@@ -25,8 +25,6 @@ switch ($_POST["action"]){
 			global $out;
 			$out.="{";
 			$out.= $myObj->toJson(1);
-			//$out.="}";
-			//$out.= ',';
 		});
 		//remove the last ","
 		$out=substr($out, 0, -1);
@@ -36,12 +34,9 @@ switch ($_POST["action"]){
 		break;
 	case "save":
 		echo "\n!!!!!!!!!!!!!!decoding!!!!!!!!!!!!!!!!";
-print_r($_POST["params"]);
 		$params = json_decode($_POST["params"], true);
 		echo "\n!!!!!!!!!!!!!!creatin object!!!!!!!!!!!!!!!!";
 		$myObj = new $params["_type"]($params);
-		print_r($myObj);
-
 		echo "\n!!!!!!!!!!!!!!saving object!!!!!!!!!!!!!!!!";
 		$myObj->saveToDb();
 		break;

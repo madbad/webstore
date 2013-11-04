@@ -1,18 +1,18 @@
 <polymer-element name="x-ddt">
 	<template>
 		<x-window title="Gestione Ddt">
-			<x-clientefornitore></x-clientefornitore>
+			<x-clientefornitore_codice></x-clientefornitore_codice>
 			<x-numero></x-numero>
 			<x-data></x-data>
-			<x-causale></x-causale>
-			<x-mezzo></x-mezzo>
-			<x-vettore></x-vettore>
+			<x-causale_codice></x-causale_codice>
+			<x-mezzo_codice></x-mezzo_codice>
+			<x-vettore_codice></x-vettore_codice>
 			<!--
 			<x-note></x-note>
-			Righe: <x-righe></x-righe>
-			Inserimento: <x-riga></x-riga>
+			<x-righe></x-righe>
+			<x-riga></x-riga>
 			-->
-		</x-window>	
+		</x-window>
 	</template>
 	<script>
 	Polymer('x-ddt',{
@@ -20,36 +20,38 @@
 			//manage keyboard events
 			$(this).keydown(function(event) {
 				switch (event.which){
-					case 13:
-						//return this.focusNext();
-					case 112:
+					case 13://invio
 						this.saveToDb();
-
+					case 112://f1
+						console.log('Delivering HELP to:');
+						console.log(document.activeElement.parentNode.parentNode.tagName);
 					//default: console.log(event);
 				}
 			});
+
+			this.async(function() {
+
+				var list = this.shadowRoot.getElementsByTagName("x-window")[0].getElementsByTagName("*");
+				for (var i = 0; i< list.length; i++){
+					var myElement = list[i];
+					myElement.shadowRoot.getElementsByTagName("x-input")[0].mytitle = myElement.tagName.replace("X-","").toLowerCase();
+				};
+
+			}, null, 300);
 		},
 		toJson:function (){
-			//utility function
-			function capitalize(string){
-				string = string.toLowerCase();
-				return string.charAt(0).toUpperCase() + string.slice(1);
-			}
-			
-			//my actula json object
+			//my actual json object
 			var myJson ={};
 			myJson._type ='Ddt';
 
 			var list = this.shadowRoot.getElementsByTagName("x-window")[0].getElementsByTagName("*");
 			for (var i = 0; i< list.length ; i++){
 				var myElement = list[i];
-				//console.log(i+" "+list.length );
-				var propName = capitalize(myElement.tagName.replace("X-",""));
-				console.log(propName);
-				myJson[propName] = myElement.value;
+				var propName = myElement.tagName.replace("X-","").toLowerCase();
+				myJson[propName] = myElement.value+Math.random();
 			}
 			var jsonString =  JSON.stringify(myJson);
-			console.log(jsonString);
+			//console.log(jsonString);
 			return jsonString;
 		},
 		saveToDb : function (){
@@ -63,9 +65,6 @@
 				context: this,
 			}).done(function( msg ) {
 				if (msg){
-				//console.log(msg);
-					//rimpiazzo gli "a capo" con uno "spazio"
-					//msg = msg.replace(/\r/gm,' ');
 					console.log('ServerReply:');
 					console.log(msg);
 					//
