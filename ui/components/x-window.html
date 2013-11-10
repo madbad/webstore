@@ -1,4 +1,4 @@
-<polymer-element name="x-window" attributes="title">
+<polymer-element name="x-window">
 	<template>
 		<style>
 		.window {
@@ -32,14 +32,11 @@
 	</template>
 	<script>
 	Polymer('x-window', {
-		uiOnly: true,
-		title: '',
-		close: function (){},
-		hide: function () {},
-		minimize: function (){},
-  
-		created: function (){
-			this.myfocus();
+		ready:function (){
+
+			this.async(function() {
+				this.focus();
+			}, null, 100);
 		},
 		setPosition: function (htmlElement, htmlElementPoint, myPoint){
 
@@ -53,11 +50,6 @@
 				this.webkitShadowRoot.querySelector('.window').style.top=position.top+'px';
 			}.bind(this));
 		},
-		myfocus: function () {
-			setTimeout(function (){
-				this.focus();
-			}.bind(this), 10);
-		}
 	});
 	</script>
 </polymer-element>

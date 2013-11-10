@@ -22,8 +22,7 @@
 		
 		created: function (){
 			this.tabIndex = 0;
-		console.log('x-menu has been activated')
-			this.myfocus();
+			console.log('x-menu has been activated')
 			//manage keyboard events
 			$(this).keydown(function(event) {
 				switch (event.which){
@@ -33,7 +32,7 @@
 					case 27: this.cancel(); break; //esc
 				}
 			});
-		},	
+		},
 		confirm : function (){
 			//remove me from the dom
 			this.parentNode.removeChild(this);
@@ -44,15 +43,6 @@
 			//remove me from the dom without returning any value
 			this.parentNode.removeChild(this);
 		},
-	
-	/*focus management*/
-		myfocus: function (){
-			setTimeout(function (){
-				console.log('the focus is now on the menu')
-				this.webkitShadowRoot.querySelector('div').focus();
-			}.bind(this), 1);
-		}
-
 });
 	</script>
 </polymer-element>

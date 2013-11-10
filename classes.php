@@ -304,7 +304,7 @@ class Riga extends MyClass {
 		$this->addProp('iva_codice', 'CODICE');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
-		//$this->mergeParams($params);
+		$this->mergeParams($params);
 	}
 	function getDbKeys(){
 		return array('ddt_data','ddt_numero','numero');
@@ -319,7 +319,7 @@ class Articolo extends MyClass {
 		$this->addProp('iva_codice', 'CODICE');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
-		//$this->mergeParams($params);
+		$this->mergeParams($params);
 	}
 	function getDbKeys(){
 		return array('codice');
@@ -334,7 +334,7 @@ class Imballaggio extends MyClass {
 		$this->addProp('taravendita', 'NUMERO');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
-		//$this->mergeParams($params);
+		$this->mergeParams($params);
 	}
 	function getDbKeys(){
 		return array('codice');
@@ -364,7 +364,7 @@ class Clientefornitore extends MyClass {
 		$this->addProp('valuta', 'TESTO');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
-		//$this->mergeParams($params);
+		$this->mergeParams($params);
 	}
 	function getDbKeys(){
 		return array('codice');
@@ -377,7 +377,7 @@ class Iva extends MyClass {
 		$this->addProp('descrizione', 'TESTO');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
-		//$this->mergeParams($params);
+		$this->mergeParams($params);
 	}
 	function getDbKeys(){
 		return array('codice');
@@ -391,7 +391,7 @@ class Causale extends MyClass {
 		$this->addProp('segno', 'SEGNO');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
-		//$this->mergeParams($params);
+		$this->mergeParams($params);
 	}
 	function getDbKeys(){
 		return array('codice');
@@ -403,7 +403,7 @@ class Mezzo extends MyClass { //mittente / destinatario / vettore carico mittent
 		$this->addProp('descrizione', 'TESTO');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
-		//$this->mergeParams($params);
+		$this->mergeParams($params);
 	}
 	function getDbKeys(){
 		return array('codice');
@@ -415,10 +415,233 @@ class Um extends MyClass {
 		$this->addProp('descrizione', 'TESTO');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
-		//$this->mergeParams($params);
+		$this->mergeParams($params);
 	}
 	function getDbKeys(){
 		return array('codice');
+	}
+}
+
+
+
+class MyList {
+/*
+example usage
+$test=new MyList(
+	array(
+		'_type'=>'Ddt',
+		'_select'=>'numero,data',		
+		'data'=>array('=','17/02/12'),		
+		'data'=>array('>','28/03/09'),
+		'data'=>array('<','17/02/12'),
+		'data'=>array('<>','01/01/09','01/01/11'),
+		'data'=>'28/03/09',	
+		'numero'=>'784'
+	)
+);
+*/
+	function __construct($params) {
+	
+		$this->_params=$params;
+		$numeroDiValori=0;
+		//inizializzo larray che conterrà gli oggetti della lista
+		$this->arr=array();
+	
+		$objType=$params['_type'];
+		$fakeObj=new $objType(array('_autoExtend'=>'-1'
+									));
+		$condition=array();
+		$i=0;		
+		$operator=null;
+		$newVal=null;
+		$newKey=null;
+		
+		foreach ($params as $key => $value) {
+			//se non si tratta di una proprietà interna
+			if($key['0']!='_'){
+				//se c'è un operatore '=' '<' '>' '<>' '>=' '<=' '!='
+				//il primo valore della variabile $value sarà la stringa dell'operatore
+				//altrimenti è solo un "valore/array di possibili valori" per la $key
+				switch ($value[0]){
+					case '=':
+						$tOperator='=';
+						array_shift($value);//rimuovo la condizione e lascio il valore/valori
+						$numeroDiValori=count($value);
+						break;
+					case '<':
+						$tOperator='<';
+						array_shift($value);//rimuovo la condizione e lascio il valore/valori
+						break;
+					case '>':
+						$tOperator='>';
+						array_shift($value);//rimuovo la condizione e lascio il valore/valori
+						break;
+					case '<=':
+						$tOperator='<=';
+						array_shift($value);//rimuovo la condizione e lascio il valore/valori
+						break;
+					case '>=':
+						$tOperator='>=';
+						array_shift($value);//rimuovo la condizione e lascio il valore/valori
+						break;
+					case '<>'://compreso tra
+						//inverto i simboli per mia comodita
+						$tOperator=array('>=','<=');
+						array_shift($value);//rimuovo la condizione e lascio il valore/valori
+						break;
+					case '!='://diverso da
+						$tOperator='<>';
+						array_shift($value);//rimuovo la condizione e lascio il valore/valori
+						//$numeroDiValori=count($value);
+						break;
+					default:
+						//se non è nessuno dei precedenti vuol dire che ho passato solo uno /dei valori da confrontare
+						//e quindi presumo che l'operatore sia '='
+						$tOperator='=';
+						//$numeroDiValori=count($value);
+						break;
+				}
+				//se ho un array di valori e un arrai di operatori (caso del '<>' compreso tra)
+				if (is_array($value) && is_array($tOperator)){
+					foreach ($value as $tKey => $tVal){
+						$operator[]=$tOperator[$tKey];
+						$newVal[]=$value[$tKey];	
+						$newKey[]=$key;						
+					}
+				//altrimenti si ho un array di valori ma un solo operatore allora presumo che l'operatore sia lo stesso per tutti i valori
+				}else if (is_array($value) && !is_array($tOperator)){
+					foreach ($value as $tVal){
+						$operator[]=$tOperator;
+						$newVal[]=$tVal;
+						$newKey[]=$key;								
+					}
+				}else{
+				//se innfino ho un solo valore e un solo operatore allora è tutto semplice 
+					$operator[]=$tOperator;
+					$newVal[]=$value;
+					$newKey[]=$key;							
+				}
+			}
+		}
+
+		//trasferisco il tutto dentro l'array conditions
+		for ($h=0; $h<count($operator); $h++){
+				$val=$fakeObj->$newKey[$h]->setVal($newVal[$h]);
+				//echo $operator;
+				$condition[$newKey[$h]][$operator[$h]][]=$val;
+		}			
+
+
+		$where='WHERE ';
+		$order=' ORDER BY ';
+
+		//recupero i campi di ordinamento // clausola order
+		$indexes=$fakeObj->getDbKeys();
+		foreach($indexes as $key => $property){
+			if($key>0){
+				$order.=',';
+			}
+			$order.=$fakeObj->$property->nome;
+		}
+		//e creo la clausola where
+		//per ogni chiave
+		$c1=0;
+		foreach($condition as $key => $operator){
+			$myKey=$key;
+			//per ogni operatore della chiave
+			if ($c1>0){
+				$where.=' AND (';
+			}
+			$c2=0;
+			foreach($operator as $operatorKey => $operatorValue){
+				$myOperatorKey=$operatorKey;
+				//per ogni valore dell'operatore
+				if ($c2>0){
+					$where.=' AND ';
+				}
+				$c3=0;
+				foreach ($operatorValue as $val){
+					//echo $c3.' '.$myOperatorKey.'<br>';
+					if ($c3>0){
+						if($myOperatorKey=='='){
+							$where.=' OR ';
+						}else{
+							$where.=' AND ';
+						}
+					}	
+			
+					$property=$myKey;
+					$val=$val;
+					$operator=$myOperatorKey;
+					
+					$info=$fakeObj->$property->getDataType();
+					switch($info['type']){
+						case 'Date': $separatore="#";break;
+						case 'Numeric': $separatore="";break;
+						default: $separatore="'";break;
+			
+					}
+					$where.=$fakeObj->$property->nome.$operator.$separatore.$val.$separatore;
+					$c3++;
+				}
+				$c2++;
+			}
+			if ($c1>0){
+				$where.=') ';
+			}
+			$c1++;
+		}	
+		
+		/*compose the select statement
+			if nothing is specified just select all
+		*/
+		$select="";
+		if($params['_select']){
+			$indexes = explode(",", $params['_select']);
+			foreach($indexes as $key => $property){
+				if($key>0){
+					$select.=',';
+				}
+				$select.=$fakeObj->$property->nome;
+			}
+		}else{
+			$select = '*';
+		}
+
+		$sqlite=$GLOBALS['config']->sqlite;
+		$table=$fakeObj->getDbName();
+		$query='SELECT '.$select.' FROM '.$table.' '.$where.$order;
+		//apro il $DATAbase ed eseguo la query
+		$db = new SQLite3($sqlite->database);
+		$results = $db->query($query) or die($query);
+		//importo i risultati nel mio oggetto
+		while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+			//$obj=new $objType(array(
+			//		'_result'=>$row,
+			//));
+			$obj=new $objType($row);
+			$this->add($obj);
+		}
+	}
+	function sum($propName){
+		//restituisce la somma della proprietà indicata degli oggetti della lista
+		$out=0;
+		foreach ($this->arr as $key => $value){
+			$out+=$value->$propName->getVal();
+		}
+		return $out;
+	}
+	function add($newObj){
+		//add a new object to the current array
+		array_push($this->arr, $newObj);
+	}
+	function remove(){
+	}
+	function iterate($function,$args=null){
+		//esegue una funzione su ogni riga
+		foreach ($this->arr as $key => $value){
+			$function($value,$args);
+		}
 	}
 }
 

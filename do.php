@@ -9,7 +9,7 @@ foreach ($myClasses as $myClass) {
 
 }
 */
-echo "\n!!!!!!!!!!!!!!test!!!!!!!!!!!!!!!!";
+//echo "\n!!!!!!!!!!!!!!test!!!!!!!!!!!!!!!!";
 
 switch ($_POST["action"]){
 	case "getOne":
@@ -33,11 +33,11 @@ switch ($_POST["action"]){
 		
 		break;
 	case "save":
-		echo "\n!!!!!!!!!!!!!!decoding!!!!!!!!!!!!!!!!";
+		//echo "\n!!!!!!!!!!!!!!decoding!!!!!!!!!!!!!!!!";
 		$params = json_decode($_POST["params"], true);
-		echo "\n!!!!!!!!!!!!!!creatin object!!!!!!!!!!!!!!!!";
+		//echo "\n!!!!!!!!!!!!!!creatin object!!!!!!!!!!!!!!!!";
 		$myObj = new $params["_type"]($params);
-		echo "\n!!!!!!!!!!!!!!saving object!!!!!!!!!!!!!!!!";
+		//echo "\n!!!!!!!!!!!!!!saving object!!!!!!!!!!!!!!!!";
 		$myObj->saveToDb();
 		break;
 

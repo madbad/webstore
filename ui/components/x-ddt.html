@@ -15,6 +15,27 @@
 		</x-window>
 	</template>
 	<script>
+	function getComponentInfo(elementName){
+
+		var fullName = elementName.replace("X-","").toLowerCase();
+		var fragments = fullName.split("_");
+//console.log('retieving info');
+
+		var out= {
+			'name': capitalise(fragments[0]),
+			'prop': fragments[1],
+			'fullname': fullName,
+		};
+
+		//console.log(out);
+
+		return out;
+	}
+	function capitalise(string){
+		return string.charAt(0).toUpperCase() + string.slice(1);
+	}
+
+
 	Polymer('x-ddt',{
 		ready:function (){
 			//manage keyboard events
@@ -22,9 +43,29 @@
 				switch (event.which){
 					case 13://invio
 						this.saveToDb();
+						break;
 					case 112://f1
-						console.log('Delivering HELP to:');
-						console.log(document.activeElement.parentNode.parentNode.tagName);
+						console.log('Delivering HELP..');
+						var helpTarget = document.activeElement.parentNode.parentNode;
+						var componentInfo = getComponentInfo(helpTarget.tagName);
+						var helpWindow = document.createElement('x-query-window');
+						var params={
+							_type: componentInfo.name,
+							_select: "codice,descrizione",
+							codice: ["!=",""],
+						};
+						helpWindow.params = JSON.stringify(params);
+						this.webkitShadowRoot.appendChild(helpWindow);
+
+						helpWindow.onConfirm = function(selection){
+							var neededValue= getComponentInfo(helpTarget.tagName).prop;
+							var realTarget = helpTarget.getElementsByTagName("x-input")[0].getElementsByTagName("input")[0];
+							//var realTarger = helpTarget;
+							realTarget.value = selection[neededValue];
+							realTarget.focus();
+						}
+
+						break;
 					//default: console.log(event);
 				}
 			});
@@ -48,7 +89,7 @@
 			for (var i = 0; i< list.length ; i++){
 				var myElement = list[i];
 				var propName = myElement.tagName.replace("X-","").toLowerCase();
-				myJson[propName] = myElement.value+Math.random();
+				myJson[propName] = myElement.value;
 			}
 			var jsonString =  JSON.stringify(myJson);
 			//console.log(jsonString);

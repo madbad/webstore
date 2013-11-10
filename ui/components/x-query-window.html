@@ -90,14 +90,13 @@
 			}
 			//return false;
 		});
-		this.myfocus();
 	},
 	
 	getFromServer : function (){
 		/*perform an ajax request to get the list to display*/
 		$.ajax({
 			type: "POST",
-			url: "./../webContab/my/php/core/do.php",
+			url: "./../do.php",
 			data: { action: 'getAll',
 					params: $.parseJSON(this.params)
 			},
@@ -300,12 +299,6 @@ function toObject(arr) {
 		this.parentNode.removeChild(this);
 	},
 	onConfirm: function (selection){/*use this as a callback*/
-	},
-	
-	myfocus: function () {
-		setTimeout(function (){
-				this.focus();
-		}.bind(this), 10);
 	},
 	paramsChanged: function (){
 		//creo i parametri della query da una stringa json
