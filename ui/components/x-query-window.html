@@ -295,10 +295,13 @@ function toObject(arr) {
 		return this.table.getSelection();
 	},
 	cancel : function (){
+		this.onCancel();
 		//remove me from the dom without returning any value
 		this.parentNode.removeChild(this);
 	},
 	onConfirm: function (selection){/*use this as a callback*/
+	},
+	onCancel: function (){/*use this as a callback*/
 	},
 	paramsChanged: function (){
 		//creo i parametri della query da una stringa json

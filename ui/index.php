@@ -1,9 +1,11 @@
 <!doctype html>
 <html>
 <head>
-	
- <script src="./polymer/polymer.min.js" log=""></script>
- <script src="./jquery.min.js"></script>
+
+	<script src="./polymer/polymer.min.js" log=""></script>
+	<script src="./jquery.min.js"></script>
+	<script src="./autoNumeric.js"></script>
+	<script type="text/javascript" src="./masked_input_1.3.js"></script>
 	<script>
 		
 		// Recusively up-traverse the "dom" (and the "shadowdom") to get the relative position of an element

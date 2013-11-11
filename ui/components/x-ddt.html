@@ -42,7 +42,15 @@
 			$(this).keydown(function(event) {
 				switch (event.which){
 					case 13://invio
-						this.saveToDb();
+						var list = this.shadowRoot.getElementsByTagName("x-window")[0].getElementsByTagName("*");
+						for (var i = 0; i< (list.length-1) ; i++){
+							var curElement = list[i];
+							if (curElement.tagName == document.activeElement.parentNode.parentNode.tagName){
+								list[i+1].shadowRoot.getElementsByTagName("x-input")[0].shadowRoot.getElementsByTagName("input")[0].focus();
+								break;
+							}
+						}
+						//this.saveToDb();
 						break;
 					case 112://f1
 						console.log('Delivering HELP..');
@@ -64,20 +72,25 @@
 							realTarget.value = selection[neededValue];
 							realTarget.focus();
 						}
-
+						helpWindow.onCancel = function(){
+							console.log('cancelling event');
+							var realTarget = helpTarget.getElementsByTagName("x-input")[0].getElementsByTagName("input")[0];
+							realTarget.focus();
+						}
 						break;
 					//default: console.log(event);
 				}
 			});
-
+			//select the first element available
+			//other stuff
 			this.async(function() {
-
 				var list = this.shadowRoot.getElementsByTagName("x-window")[0].getElementsByTagName("*");
 				for (var i = 0; i< list.length; i++){
 					var myElement = list[i];
 					myElement.shadowRoot.getElementsByTagName("x-input")[0].mytitle = myElement.tagName.replace("X-","").toLowerCase();
 				};
-
+				//select the first input field
+				this.shadowRoot.getElementsByTagName("x-window")[0].getElementsByTagName("*")[0].shadowRoot.getElementsByTagName("x-input")[0].shadowRoot.getElementsByTagName("input")[0].focus();
 			}, null, 300);
 		},
 		toJson:function (){
