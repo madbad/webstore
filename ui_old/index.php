@@ -4,8 +4,6 @@
 
 	<script src="./polymer/polymer.min.js" log=""></script>
 	<script src="./jquery.min.js"></script>
-<!--
-
 	<script src="./autoNumeric.js"></script>
 	<script type="text/javascript" src="./masked_input_1.3.js"></script>
 	<script>
@@ -32,15 +30,35 @@
 		}
 
 	</script>
--->
-<!--
+
 	<script>
 		window.addEventListener('WebComponentsReady', function() {
 			document.body.style.opacity = 1; // show body now that registration is done.
 			document.body.innerHTML = '<x-ddt></x-ddt>'
 		});
 	</script>
--->
+	
+	<?php
+	$components='';
+		function loadComponentsFromDir ($dir){
+		global $components;
+			// create a handler for the directory
+			$handler = opendir($dir);
+
+			// open directory and walk through the filenames
+			while ($file = readdir($handler)) {
+				if (strpos($file, '.html')) {
+					echo "\n".'<link rel="import" href="./'.$dir.'/'.$file.'">';
+					$components.= "\n<br><br><br><br><br><hr>".$file."<br> <".str_replace('.html','',$file).'></'.str_replace('.html','',$file).'>';
+				}
+			}
+		echo $components;
+		};
+		
+
+		loadComponentsFromDir('components');
+	?>
+
 <style>
 input {
 	color:black;
@@ -71,26 +89,6 @@ color:blue;
 </style>
 </head>
 <body>
-	<?php
-	$components='';
-		function loadComponentsFromDir ($dir){
-		global $components;
-			// create a handler for the directory
-			$handler = opendir($dir);
 
-			// open directory and walk through the filenames
-			while ($file = readdir($handler)) {
-				if (strpos($file, '.html')) {
-					echo "\n".'<link rel="import" href="./'.$dir.'/'.$file.'">';
-					$components.= "\n<br><br><br><br><br><hr>".$file."<br> <".str_replace('.html','',$file).'></'.str_replace('.html','',$file).'>';
-				}
-			}
-		//echo $components;
-		};
-		
-
-		loadComponentsFromDir('components');
-	?>
-<x-ddt></x-ddt>
 </body>
 </html>

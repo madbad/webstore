@@ -1,0 +1,132 @@
+<polymer-element name="x-ddt">
+	<template>
+		<x-window title="Gestione Ddt">
+			<x-clientefornitore_codice></x-clientefornitore_codice>
+			<x-numero></x-numero>
+			<x-data></x-data>
+			<x-causale_codice></x-causale_codice>
+			<x-mezzo_codice></x-mezzo_codice>
+			<x-vettore_codice></x-vettore_codice>
+			<!--
+			<x-note></x-note>
+			<x-righe></x-righe>
+			<x-riga></x-riga>
+			-->
+		</x-window>
+	</template>
+	<script>
+	function getComponentInfo(elementName){
+
+		var fullName = elementName.replace("X-","").toLowerCase();
+		var fragments = fullName.split("_");
+//console.log('retieving info');
+
+		var out= {
+			'name': capitalise(fragments[0]),
+			'prop': fragments[1],
+			'fullname': fullName,
+		};
+
+		//console.log(out);
+
+		return out;
+	}
+	function capitalise(string){
+		return string.charAt(0).toUpperCase() + string.slice(1);
+	}
+
+
+	Polymer('x-ddt',{
+		ready:function (){
+			//manage keyboard events
+			$(this).keydown(function(event) {
+				switch (event.which){
+					case 13://invio
+						var list = this.shadowRoot.getElementsByTagName("x-window")[0].getElementsByTagName("*");
+						for (var i = 0; i< (list.length-1) ; i++){
+							var curElement = list[i];
+							if (curElement.tagName == document.activeElement.parentNode.parentNode.tagName){
+								list[i+1].shadowRoot.getElementsByTagName("x-input")[0].shadowRoot.getElementsByTagName("input")[0].focus();
+								break;
+							}
+						}
+						//this.saveToDb();
+						break;
+					case 112://f1
+						console.log('Delivering HELP..');
+						var helpTarget = document.activeElement.parentNode.parentNode;
+						var componentInfo = getComponentInfo(helpTarget.tagName);
+						var helpWindow = document.createElement('x-query-window');
+						var params={
+							_type: componentInfo.name,
+							_select: "codice,descrizione",
+							codice: ["!=",""],
+						};
+						helpWindow.params = JSON.stringify(params);
+						this.webkitShadowRoot.appendChild(helpWindow);
+
+						helpWindow.onConfirm = function(selection){
+							var neededValue= getComponentInfo(helpTarget.tagName).prop;
+							var realTarget = helpTarget.getElementsByTagName("x-input")[0].getElementsByTagName("input")[0];
+							//var realTarger = helpTarget;
+							realTarget.value = selection[neededValue];
+							realTarget.focus();
+						}
+						helpWindow.onCancel = function(){
+							console.log('cancelling event');
+							var realTarget = helpTarget.getElementsByTagName("x-input")[0].getElementsByTagName("input")[0];
+							realTarget.focus();
+						}
+						break;
+					//default: console.log(event);
+				}
+			});
+			//select the first element available
+			//other stuff
+			this.async(function() {
+				var list = this.shadowRoot.getElementsByTagName("x-window")[0].getElementsByTagName("*");
+				for (var i = 0; i< list.length; i++){
+					var myElement = list[i];
+					myElement.shadowRoot.getElementsByTagName("x-input")[0].mytitle = myElement.tagName.replace("X-","").toLowerCase();
+				};
+				//select the first input field
+				this.shadowRoot.getElementsByTagName("x-window")[0].getElementsByTagName("*")[0].shadowRoot.getElementsByTagName("x-input")[0].shadowRoot.getElementsByTagName("input")[0].focus();
+			}, null, 300);
+		},
+		toJson:function (){
+			//my actual json object
+			var myJson ={};
+			myJson._type ='Ddt';
+
+			var list = this.shadowRoot.getElementsByTagName("x-window")[0].getElementsByTagName("*");
+			for (var i = 0; i< list.length ; i++){
+				var myElement = list[i];
+				var propName = myElement.tagName.replace("X-","").toLowerCase();
+				myJson[propName] = myElement.value;
+			}
+			var jsonString =  JSON.stringify(myJson);
+			//console.log(jsonString);
+			return jsonString;
+		},
+		saveToDb : function (){
+			//perform an ajax request to get the list to display*
+			$.ajax({
+				type: "POST",
+				url: "./../do.php",
+				data: { action: 'save',
+						params: this.toJson(),
+				},
+				context: this,
+			}).done(function( msg ) {
+				if (msg){
+					console.log('ServerReply:');
+					console.log(msg);
+					//
+					//var jsonList = $.parseJSON(msg);
+					//this.jsonToTable(jsonList, $.parseJSON(this.params));
+				}
+			});
+		},
+	});
+	</script>
+</polymer-element>

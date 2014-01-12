@@ -1,0 +1,48 @@
+<polymer-element name="x-menu">
+	<template>
+		<style>
+		  .menu {
+			box-shadow: 3px 3px 5px 1px #ccc;
+			border: 1px solid #a1a1a1;
+			color: #000000;
+			display: inline-block;
+			min-width:15em;
+			position:relative;
+			bottom: 2em;
+			right: 2em;
+			background-color:white;
+		  }
+		</style>
+		<div class="menu">
+			<content></content>
+		</div>
+	</template>
+	<script>
+	Polymer('x-menu',{
+		
+		created: function (){
+			this.tabIndex = 0;
+			console.log('x-menu has been activated')
+			//manage keyboard events
+			$(this).keydown(function(event) {
+				switch (event.which){
+					case 38: this.table.prev();	break; //up
+					case 40: this.table.next();	break; //down
+					case 13: this.confirm(); break; //enter
+					case 27: this.cancel(); break; //esc
+				}
+			});
+		},
+		confirm : function (){
+			//remove me from the dom
+			this.parentNode.removeChild(this);
+			//and return the value
+			return this.table.getSelection();
+		},
+		cancel : function (){
+			//remove me from the dom without returning any value
+			this.parentNode.removeChild(this);
+		},
+});
+	</script>
+</polymer-element>

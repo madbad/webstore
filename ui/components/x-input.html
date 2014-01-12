@@ -1,71 +1,183 @@
-<polymer-element name="x-input" attributes="value size placeholder mytitle">
+<polymer-element name="x-input" extends="input" attributes="val,label,descrizionecodice">
 	<template>
-		<style>
-			input {
-				border:1px solid;
-				border-color:grey;
-				outline: none;
-				box-shadow: 0 0 0px orange;
-				margin-left:-2em;
-			}
-			input:focus {
-				border-color:orange;
-				outline: none;
-				box-shadow: 0 0 10px orange;
-			}
-			:host[title]:before {
-				background-color:#a1a1a1;
-				content: attr(title);
-				padding: 0.1em;
-				color: #333;
-				position: relative;
-				z-index:10;
-				white-space: nowrap;
-				border-radius: 5px;
-				box-shadow: 0px 0px 4px #222;
-				content: 'sadasdasd';/*attr(title) ": ";*/
-			}
-			label{
-				padding:0.2em;
-				padding-right: 2em;
-				border-radius: 0.7em;
-				position:relative;
-				color: #e1e1e1;
-				background-color:#a1a1a1;
-				border: 1px solid #e1e1e1;
-				z-index: -1;
-			}
-
-		</style>
-		<label>{{mytitle}}</label>
-		<input id="myInput" value="{{value}}" size="{{size}}" maxlength="{{size}}" placeholder="{{placeholder}}" title="{{mytitle}}"></input>
-		<br>
+	<label>
+		{{label}}
+		<input id="field" value="{{val}}" size="{{l}}" maxlength="{{l}}">
+		{{descrizionecodice}}
+	</label>
 	</template>
 	<script>
-	Polymer('x-input', {
-		ready:function (){
+		Polymer('x-input',{
+			getProperties: function (){
+				//console.log(this.impl.nodeName);
+				if(!this.label){
+					this.label = this.impl.nodeName;
+				}
+				/*
+				if(this.numeri){
+					this.$.field.size=this.numeri;
+					this.$.field.maxlength=this.numeri;
+				}
+				if(this.testo){
+					this.$.field.size=this.testo;
+					//this.$.field.maxlength=this.testo;
+				}
+				if(this.data){
+					//this.$.field.size=this.data;
+					//this.$.field.maxlength=this.data;
+				}
+				*/
+			},
+			aggiornaDescrizioneCodice: function (){
+				if(this.impl.nodeName.search('CODICE')>0){
+					console.log(this.impl.nodeName);
+					//var objType = this.impl.nodeName.replace('X-CODICE').toLowerCase();
+					var objType = this.impl.nodeName.replace('X-CODICE', '').toLowerCase();
+					//now capitalize it: the php class has it capitalized
+					objType = objType.charAt(0).toUpperCase() + objType.slice(1);
+					console.log(objType);
+					console.log(this.val);
+					
+					//this.descrizionecodice = 
 
-var type="importo";
-			switch (type){
-				case 'date':
-					MaskedInput({
-						elm: this.shadowRoot.getElementById('myInput'),
-						format: '  /  /    ',
-						separator: '\/',
-						typeon: ' '
+
+					//perform an ajax request to get the data from the server
+					$.ajax({
+						type: "POST",
+						url: "./../do.php",
+						data: { action: 'getOne',
+								params: {
+											_type: objType,
+											codice: this.val
+											//_autoExtend: -2,
+								},
+						},
+						context: this,
+					}).done(function( msg ) {
+						console.log(msg)
+						var myFullObj = $.parseJSON(msg);
+						var objType=objType.toLowerCase();
+						//se l'oggetto ha una proprietà descrizine uso quella
+						if(myFullObj[objType].descrizione){ 
+							this.descrizionecodice = myFullObj[type].descrizione;
+						}
+						//se invece ha una proprietà ragione sociale uso quella
+						if(myFullObj[objType].ragionesociale){ 
+							this.descrizionecodice = myFullObj[type].ragionesociale;
+						}
+
 					});
-					break;
-				case 'importo':
-					var element = this.shadowRoot.getElementById('myInput');
-					$(element).autoNumeric('init', {aSep: '.', aDec: ',', wEmpty: 'zero', lZero: 'keep'}); 
-					break;
-				default:
-					console.log('default');
-				break;
+
+
+
+				}else{
+					//this.descrizionecodice='';
+				}
+			},
+			valChanged : function(attrName, oldVal, newVal) {
+				this.aggiornaDescrizioneCodice();
+			},
+			ready: function (){
+				this.descrizionecodice='';
+				this.getProperties();
 			}
+		});
+	</script>
+</polymer-element>
 
 
-		},
-	});
+<polymer-element name="x-numerodoc" extends="x-input">
+	<script>
+		Polymer('x-numerodoc',{tipo:'numeri',l:6});
+	</script>
+</polymer-element>
+
+<polymer-element name="x-numeroriga" extends="x-input">
+	<script>
+		Polymer('x-numeroriga',{tipo:'numeri',l:4});
+	</script>
+</polymer-element>
+
+<polymer-element name="x-numerocolli" extends="x-input">
+	<script>
+		Polymer('x-numerocolli',{tipo:'numeri',l:5});
+	</script>
+</polymer-element>
+
+<polymer-element name="x-peso" extends="x-input">
+	<script>
+		Polymer('x-peso',{tipo:'numeri',l:5});
+	</script>
+</polymer-element>
+
+<polymer-element name="x-prezzo" extends="x-input">
+	<script>
+		Polymer('x-prezzo',{tipo:'prezzo',l:10});
+	</script>
+</polymer-element>
+
+<polymer-element name="x-data" extends="x-input">
+	<script>
+		Polymer('x-data',{tipo:'data',l:10});
+	</script>
+</polymer-element>
+
+<polymer-element name="x-codiceclientefornitore" extends="x-input">
+	<script>
+		Polymer('x-codiceclientefornitore',{tipo:'testo',l:6});
+	</script>
+</polymer-element>
+<!--
+<polymer-element name="x-codicevettore" extends="x-input">
+	<script>
+		Polymer('x-codicevettore',{tipo:'testo',l:6});
+	</script>
+</polymer-element>
+-->
+<polymer-element name="x-causale" extends="x-input">
+	<script>
+		Polymer('x-causale',{tipo:'testo',l:2});
+	</script>
+</polymer-element>
+
+<polymer-element name="x-codicemezzo" extends="x-input">
+	<script>
+		Polymer('x-codicemezzo',{tipo:'testo',l:2});
+	</script>
+</polymer-element>
+
+<polymer-element name="x-codicearticolo" extends="x-input">
+	<script>
+		Polymer('x-codicearticolo',{tipo:'testo',l:6});
+	</script>
+</polymer-element>
+
+<polymer-element name="x-codiceum" extends="x-input">
+	<script>
+		Polymer('x-codiceum',{tipo:'testo',l:2});
+	</script>
+</polymer-element>
+
+<polymer-element name="x-codiceimballaggio" extends="x-input">
+	<script>
+		Polymer('x-codiceimballaggio',{tipo:'testo',l:5});
+	</script>
+</polymer-element>
+
+<polymer-element name="x-codiceiva" extends="x-input">
+	<script>
+		Polymer('x-codiceiva',{tipo:'testo',l:3});
+	</script>
+</polymer-element>
+
+<polymer-element name="x-lotto" extends="x-input">
+	<script>
+		Polymer('x-lotto',{tipo:'testo',l:15});
+	</script>
+</polymer-element>
+
+<polymer-element name="x-note" extends="x-input">
+	<script>
+		Polymer('x-note',{tipo:'testo',l:100});
 	</script>
 </polymer-element>

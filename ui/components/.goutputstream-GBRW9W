@@ -1,0 +1,36 @@
+<polymer-element name="x-ddt">
+  <template bind="dati">
+	  
+	
+      <template repeat="{{r in dati.ddt.righe}}">
+        <li>{{r.numero}}: <input type="text" value="{{r.articolo}}"></li>
+      </template>
+  </template>
+  <script>
+    Polymer('x-ddt', {
+      ready: function() {
+		this.dati = {
+		   ddt:{
+			  _type:"ddt",
+			  numero:"",
+			  data:"",
+			  clientefornitore_codice:"",
+			  causale_codice:"",
+			  mezzo_codice:"",
+			  vettore_codice:"",
+			  fattura_numero:"",
+			  fattura_data:"",
+			  note:"",
+			  righe: [
+						  {numero: 1, articolo: '01'},
+						  {numero: 2, articolo: '02'},
+						  {numero: 3, articolo: '03'},
+						  {numero: 4, articolo: '04'}
+						]
+		   }
+		}
+        console.log(this.dati)
+      }
+    });
+  </script>
+</polymer-element>

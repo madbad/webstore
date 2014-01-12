@@ -192,6 +192,7 @@ class MyClass extends DefaultClass{
 		
 		$where='WHERE ';
 		$order=' ORDER BY ';
+		$separatore="'";
 		
 		foreach($indexes as $key => $property){
 			if($key>0){
@@ -203,6 +204,7 @@ class MyClass extends DefaultClass{
 		}			
 		//la stringa della query
 		$query='SELECT * FROM '.$table.' '.$where.$order;
+		//echo $query;
 		//apro il $DATAbase ed eseguo la query
 		$db = new SQLite3($sqlite->database);
 		$results = $db->query($query) or die($query);
@@ -250,17 +252,18 @@ Class Validatore {
 	}
 }
 $t = (object)"validatore";
+$t->NUMERODOC = 	new Validatore(array('tipo'=>'INTEGER', 'lunghezza'=>6));
 $t->NUMERATORE = 	new Validatore(array('tipo'=>'INTEGER', 'lunghezza'=>6));
-$t->DATA = 		new Validatore(array('tipo'=>'INTEGER', 'lunghezza'=>10));
+$t->DATA = 			new Validatore(array('tipo'=>'INTEGER', 'lunghezza'=>10));
 $t->CODICE = 		new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>6));
 $t->IMPORTO = 		new Validatore(array('tipo'=>'REAL',   'lunghezza'=>10));
 $t->TESTO = 		new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>''));
 $t->NUMERO = 		new Validatore(array('tipo'=>'INTEGER','lunghezza'=>6));
-$t->ALBO = 		new Validatore(array('tipo'=>'TEXT', '  lunghezza'=>20));
+$t->ALBO = 			new Validatore(array('tipo'=>'TEXT', '  lunghezza'=>20));
 $t->PARTITAIVA = 	new Validatore(array('tipo'=>'INTEGER','lunghezza'=>11));
 $t->CODFISCALE = 	new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>16));
-$t->TELEFONO = 	new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>11));
-$t->MAIL = 		new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>30));
+$t->TELEFONO = 		new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>11));
+$t->MAIL = 			new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>30));
 $t->URL = 			new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>50));
 
 /*########################################################################################*/

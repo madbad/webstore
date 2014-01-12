@@ -10,10 +10,15 @@ foreach ($myClasses as $myClass) {
 }
 */
 //echo "\n!!!!!!!!!!!!!!test!!!!!!!!!!!!!!!!";
-
+/*
+$mytest= new Mezzo(array(codice=>'01'));
+$mytest->getFromDb();
+echo '<br>'.$mytest->toJson();
+*/
 switch ($_POST["action"]){
 	case "getOne":
 		$myObj = new $_POST["params"]["_type"]($_POST["params"]);
+		$myObj->getFromDb();
 		echo $myObj->toJson();
 		break;
 	case "getAll":
@@ -44,4 +49,5 @@ switch ($_POST["action"]){
 	default:
 		break;
 }
+
 ?>
