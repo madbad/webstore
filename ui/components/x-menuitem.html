@@ -5,20 +5,23 @@
 			padding:0em;
 			padding-left: 1.5em;
 			border-bottom: 1px solid #e1e1e1;
-		  }	  
-		.menuitem:focus {
+		  }
+		.menuitem: focus {
 			background-color: yellow;
 		  }	  
 		</style>
 
-		<div class="menuitem">
+		<div class="menuitem" tabindex="0">
 			<content></content> ({{action}})
 		</div>
 
 	</template>
 	<script>
 	Polymer('x-menuitem', {
-		action: ''
+		action: '',
+		created: function (){
+			//this.tabIndex = 0;
+		}
 	});
 	</script>
 </polymer-element>

@@ -1,33 +1,37 @@
-<polymer-element name="x-menu">
+<polymer-element name="x-menu" solectedItem="{{selected}}">
 	<template>
 		<style>
-		  .menu {
+		.menu {
 			box-shadow: 3px 3px 5px 1px #ccc;
 			border: 1px solid #a1a1a1;
 			color: #000000;
 			display: inline-block;
 			min-width:15em;
 			position:relative;
-			bottom: 2em;
-			right: 2em;
+			/*bottom: 2em;
+			right: 2em;*/
 			background-color:white;
-		  }
+		}
+		.menu:focus(){
+			border: 1px solid red;
+		 }
 		</style>
-		<div class="menu">
+		<div class="menu" tabindex="0">
 			<content></content>
 		</div>
 	</template>
 	<script>
 	Polymer('x-menu',{
-		
 		created: function (){
-			this.tabIndex = 0;
+			this.children[0].focus();
+			//this.tabIndex = 0;
 			console.log('x-menu has been activated')
+			//this.focus();
 			//manage keyboard events
 			$(this).keydown(function(event) {
 				switch (event.which){
-					case 38: this.table.prev();	break; //up
-					case 40: this.table.next();	break; //down
+					case 38: this.prev();	break; //up
+					case 40: this.next();	break; //down
 					case 13: this.confirm(); break; //enter
 					case 27: this.cancel(); break; //esc
 				}
@@ -43,6 +47,10 @@
 			//remove me from the dom without returning any value
 			this.parentNode.removeChild(this);
 		},
+		next : function(){},
+		prev : function(){},
+		last : function(){},
+		first : function(){},
 });
 	</script>
 </polymer-element>

@@ -90,10 +90,6 @@
 					}
 				}
 			}.bind(this), 5);
-			
-			/*focus management*/
-			this.focusAbleContainer = this;
-
 		},
 	 
 		select: function (event){
@@ -112,19 +108,13 @@
 				if(tabTitle == curTabPanel.title){
 					curTabPanel.show();
 					curTabLabel.className='selected';
-					curTabPanel.myfocus();
+					//curTabPanel.myfocus();
 				}else{
 					curTabPanel.hide();
 					curTabLabel.className='';
 				}
 			}
-		},		
-	  
-		/*focus management*/
-		focusedID: -1,
-		myfocus: myfocus,
-		focusNext: focusNext,
-		getFocusAble: getFocusAble,
+		}
     });
 	</script>
 </polymer-element>

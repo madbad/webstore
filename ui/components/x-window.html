@@ -26,7 +26,7 @@
 		}
 		</style>
 		<div class="window">
-			<div class="title"> &rang; {{title}}</div>
+			<div class="title"> &rang; {{title}} {{maximize}}{{minimize}}{{close}}</div>
 			<div class="content"><content></content></div>
 		</div>
 	</template>
@@ -49,7 +49,11 @@
 				this.webkitShadowRoot.querySelector('.window').style.left=position.left+'px';
 				this.webkitShadowRoot.querySelector('.window').style.top=position.top+'px';
 			}.bind(this));
-		},
+		},/*
+		close: function (){
+			//remove me from the dom
+			this.parentNode.removeChild(this);
+		}*/
 	});
 	</script>
 </polymer-element>

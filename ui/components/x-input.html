@@ -1,7 +1,7 @@
 <polymer-element name="x-input" extends="input" attributes="val,label,descrizionecodice">
 	<template>
 	<label>
-		{{label}}
+		<span style="color:grey">{{label}}</span>
 		<input id="field" value="{{val}}" size="{{l}}" maxlength="{{l}}">
 		{{descrizionecodice}}
 	</label>
@@ -67,11 +67,6 @@
 						}
 
 					});
-
-
-
-				}else{
-					//this.descrizionecodice='';
 				}
 			},
 			valChanged : function(attrName, oldVal, newVal) {

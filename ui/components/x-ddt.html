@@ -1,4 +1,4 @@
-<polymer-element name="x-ddt" rigadamodificare>
+<polymer-element name="x-ddt" attributes="rigadamodificare">
 	<template>
 		<x-numerodoc val="{{ddt.numero}}" label="Numero"></x-numerodoc>
 		<x-data val="{{ddt.data}}" label="Data"></x-data>
@@ -18,26 +18,28 @@
 		<x-note val="{{ddt.note}}" label="Note"></x-note>
 		<br>
 		Righe:
+		<div style="heigth:10px;overflow-y: scroll;height: 50px;border:0.1em solid grey;box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.333333);padding:1em;">
 		<template repeat="{{r in ddt.righe}}">
-			<br>
 			<x-numeroriga val="{{r.numero}}" label="N."></x-numeroriga>
 			<x-codicearticolo val="{{r.articolo_codice}}" label="Art."></x-codicearticolo>
 			<x-codiceum val="{{r.um_codice}}" label="UM"></x-codiceum>
 			<x-prezzo val="{{r.prezzo}}" label="Prezzo"></x-prezzo>
 			<x-numerocolli val="{{r.colli}}" label="Colli"></x-numerocolli>
-			<x-codiceimballaggio val="{{r.imballaggio_codice}}" label="Tipo Imball."></x-codiceimballaggio>
+			<x-codiceimballaggio val="{{r.imballaggio_codice}}" label="Tipo Imb."></x-codiceimballaggio>
 			<x-peso val="{{r.pesolordo}}" label="Lordo"></x-peso>
 			<x-peso val="{{r.tara}}" label="Tara"></x-peso>
 			<x-peso val="{{r.pesonetto}}" label="Netto"></x-peso>
 			<x-lotto val="{{r.lotto}}" label="Lotto"></x-lotto>
 			<x-codiceiva val="{{r.iva_codice}}" label="Iva"></x-codiceiva>
+			<hr>
 		</template>
+		</div>
 	<!-- -->
 	<br>
 	Modifica Riga
 	<br>
 	<template bind="{{rigadamodificare}}">
-		<x-numeroriga val="{{numero}}" label="N."></x-numeroriga>
+		<x-numeroriga val="{{numero}}" label="N." id="numRigaDaModificare"></x-numeroriga>
 		<x-codicearticolo val="{{articolo_codice}}" label="Art."></x-codicearticolo>
 		<x-codiceum val="{{um_codice}}" label="UM"></x-codiceum>
 		<x-prezzo val="{{prezzo}}" label="Prezzo"></x-prezzo>
@@ -67,7 +69,7 @@
 					fattura_data:"",
 					note:"Note per il ddt",
 					righe: [
-						{	numero: 1,
+						{	numero: 0,
 							articolo_codice: '01',
 							um_codice: 'KG',
 							prezzo: '0,001',
@@ -79,15 +81,53 @@
 							lotto:'1/A',
 							iva_codice:'4',
 							},
+						{	numero: 1,
+							articolo_codice: '03',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
 						{numero: 2, articolo: '02'},
+						{numero: 3, articolo: '02'},
+						{numero: 4, articolo: '02'},
+						{numero: 5, articolo: '02'},
 						]
 				   }
 				}
 				this.ddt= ajax.ddt;
 				//lavoro su una copia dell'oggetto
-				//this.rigadamodificare = JSON.parse(JSON.stringify(this.ddt.righe[0]));
+				
+				this.rigadamodificare = {
+							numero: '',
+							articolo_codice: '01',
+							um_codice: '',
+							prezzo: '',
+							colli: '',
+							imballaggio_codice: '',
+							pesolordo:'',
+							tara:'',
+							pesonetto:'',
+							lotto:'',
+							iva_codice:'',
+							}//JSON.parse(JSON.stringify(this.ddt.righe[0]));
 				console.log(this.ddt);
-			}
+				
+				//tengo traccia di quale riga del mio ddt sto modificando
+				var numRigaWatcher = function (id, oldval, newval){
+					console.log('numero changed: ',newval);
+					this.rigadamodificare=JSON.parse(JSON.stringify(this.ddt.righe[newval]));
+					//re register the watcher
+					this.rigadamodificare.watch('numero',numRigaWatcher)
+				}.bind(this)
+				this.rigadamodificare.watch('numero',numRigaWatcher)
+			},
+
 		});
 	</script>
 </polymer-element>
