@@ -1,8 +1,9 @@
 <!doctype html>
 <html>
 <head>
-
-	<script src="./polymer/polymer.min.js" log=""></script>
+	<!--<script src="./polymer/polymer.min.js" log=""></script>-->
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/polymer/0.1.1/platform.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/polymer/0.1.1/polymer.js"></script>
 	<script src="./jquery.min.js"></script>
 <!--
 

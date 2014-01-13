@@ -9,7 +9,7 @@
 		<x-data val="{{ddt.fattura_data}}" label="Data.Fatt."></x-data>
 
 		<br>
-		<x-causale val="{{ddt.causale_codice}}" label="Causale di spedizione"></x-causale>
+		<x-codicecausale val="{{ddt.causale_codice}}" label="Causale di spedizione"></x-codicecausale>
 		<br>
 		<x-codicemezzo val="{{ddt.mezzo_codice}}" label="Mezzo di spedizione"></x-codicemezzo>
 		<br>
@@ -59,18 +59,27 @@
 					_type:"ddt",
 					numero:"1934",
 					data:"16/11/2013",
-					clientefornitore_codice:"LAFISO",
-					causale_codice:"V",
+					clientefornitore_codice:"LAFAVO",
+					causale_codice:"01",
 					mezzo_codice:"01",
 					vettore_codice:"03",
 					fattura_numero:"",
 					fattura_data:"",
 					note:"Note per il ddt",
 					righe: [
-						{numero: 1, articolo: '01'},
+						{	numero: 1,
+							articolo_codice: '01',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
 						{numero: 2, articolo: '02'},
-						{numero: 3, articolo: '03'},
-						{numero: 4, articolo: '04'}
 						]
 				   }
 				}

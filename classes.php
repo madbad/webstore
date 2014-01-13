@@ -299,7 +299,7 @@ class Riga extends MyClass {
 		$this->addProp('um_codice', 'CODICE');
 		$this->addProp('prezzo', 'IMPORTO');
 		$this->addProp('colli', 'NUMERO');
-		$this->addProp('imballo_codice', 'CODICE');
+		$this->addProp('imballaggio_codice', 'CODICE');
 		$this->addProp('pesolordo', 'NUMERO');
 		$this->addProp('tara', 'NUMERO');
 		$this->addProp('pesonetto', 'NUMERO');

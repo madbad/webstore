@@ -30,16 +30,12 @@
 			},
 			aggiornaDescrizioneCodice: function (){
 				if(this.impl.nodeName.search('CODICE')>0){
-					console.log(this.impl.nodeName);
-					//var objType = this.impl.nodeName.replace('X-CODICE').toLowerCase();
-					var objType = this.impl.nodeName.replace('X-CODICE', '').toLowerCase();
-					//now capitalize it: the php class has it capitalized
+					//make sure the nodeName is lowercase
+					var nodeName = this.impl.nodeName.toLowerCase();
+					//extract from the nodeName the object type removing the 'x-codice' string
+					var objType = nodeName.replace('x-codice', '');
+					//now capitalize it: the php class has it capitalized: so we need it
 					objType = objType.charAt(0).toUpperCase() + objType.slice(1);
-					console.log(objType);
-					console.log(this.val);
-					
-					//this.descrizionecodice = 
-
 
 					//perform an ajax request to get the data from the server
 					$.ajax({
@@ -56,14 +52,18 @@
 					}).done(function( msg ) {
 						console.log(msg)
 						var myFullObj = $.parseJSON(msg);
-						var objType=objType.toLowerCase();
-						//se l'oggetto ha una proprietà descrizine uso quella
+						//make sure the nodeName is lowercase
+						var nodeName = this.impl.nodeName.toLowerCase();
+						//extract from the nodeName the object type removing the 'x-codice' string
+						var objType = nodeName.replace('x-codice', '');
 						if(myFullObj[objType].descrizione){ 
-							this.descrizionecodice = myFullObj[type].descrizione;
-						}
-						//se invece ha una proprietà ragione sociale uso quella
-						if(myFullObj[objType].ragionesociale){ 
-							this.descrizionecodice = myFullObj[type].ragionesociale;
+							//se l'oggetto ha una proprietà descrizine mostro quella
+							this.descrizionecodice = myFullObj[objType].descrizione;
+						}else if(myFullObj[objType].ragionesociale){ 
+							//se invece ha una proprietà ragione sociale mostro quella
+							this.descrizionecodice = myFullObj[objType].ragionesociale;
+						}else{
+							this.descrizionecodice = '';
 						}
 
 					});
@@ -134,9 +134,9 @@
 	</script>
 </polymer-element>
 -->
-<polymer-element name="x-causale" extends="x-input">
+<polymer-element name="x-codicecausale" extends="x-input">
 	<script>
-		Polymer('x-causale',{tipo:'testo',l:2});
+		Polymer('x-codicecausale',{tipo:'testo',l:2});
 	</script>
 </polymer-element>
 
