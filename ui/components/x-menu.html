@@ -1,7 +1,7 @@
 <polymer-element name="x-menu" extends="div" tabindex="0">
 	<template>
 		<style>
-		@host {
+		:host {
 			box-shadow: 3px 3px 5px 1px #ccc;
 			border: 1px solid #a1a1a1;
 			color: #000000;
@@ -12,6 +12,9 @@
 			right: 2em;*/
 			background-color:white;
 			width:100px;
+			border-radius: 0.8em;
+			overflow:hidden;
+			z-index: 100;
 		}
 		.selected {
 			border-color:orange;
@@ -26,7 +29,21 @@
 			display:none;
 			overflow:hidden;
 		}
+		.title {
+			background: linear-gradient(to bottom, #cdd2d8 8%,#989a9b 100%); /* W3C */
+			text-shadow:#CECECE 0px 1px 0, #000 0 -1px 0;
+			font-weight:bold;
+			font-size:0.8em;
+			color: #757575;
+			padding-left:1em;
+		}
+		.title span {
+			position:absolute;
+			top:0px;
+			right:1em; 
+		}
 		</style>
+		<div class="title">Menu <span>pag.{{page}}/{{pages}}</span></div>
 		<content></content>
 		</template>
 	<script>
@@ -81,18 +98,25 @@
 				//deseleziona vecchio elemento
 				if (this.selected != null){
 					this.querySelector('#element'+this.selected).classList.toggle('selected');
-					this.querySelector('#element'+this.selected).focus();
 				}
 			
 				//nascondo la vecchia pagina
 				this.hidePage(this.getCurPage());
 
 				//mostro la nuova
-				this.showPage(this.getPageOfTheElement(id));
+				this.page = this.getPageOfTheElement(id);
+				this.pages = this.getPagesNumber();
+				this.showPage(this.page);
+				
 
 				//seleziona il nuovo elemento
 				this.querySelector('#element'+id).classList.toggle('selected');
+				
+				//ricordo la selezione
 				this.selected = id;
+				
+				//give the new element the focus
+				this.querySelector('#element'+this.selected).focus();
 			};
 			this.prev = function (){
 				console.log('select prev');

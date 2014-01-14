@@ -1,0 +1,76 @@
+<polymer-element name="x-query-menu" extends="x-menu" attributes="params">
+	<template>
+		<div class="title">Menu <span>pag.{{page}}/{{pages}}</span></div>
+		<content></content>
+	</template>
+	<script>
+	Polymer('x-query-menu',{
+		created: function (){
+			/*
+			this.params = {
+				_type:"Clientefornitore",
+				codice: ['!=','']
+			}
+			this.params =  JSON.stringify(this.params);
+			*/
+			this.getFromServer();
+		},
+		
+		getFromServer : function (){
+			//perform an ajax request to get the list to display
+			
+			$.ajax({
+				type: "POST",
+				url: "./../do.php",
+				data: {
+						action: 'getAll',
+						params: $.parseJSON(this.params)
+						},
+				context: this,
+			}).done(function( msg ) {
+					console.log(msg)
+					var jsonList = $.parseJSON(msg);
+					console.log(jsonList);
+					var rows = this.generateRows (jsonList, $.parseJSON(this.params));
+					this.querySelector('content').appendChild(rows);
+					this.createMenu (rows);
+			});
+			
+		},
+		generateRows : function (list, params){
+			var rows =[];
+			for (var i=0; i < list.length; i++){
+				//for each item generate a row
+				var item = list[i];
+				var row = document.createElement('tr');
+				for (prop in item){
+					var field = document.createElement('td');
+					field.innerHTML =item[prop];
+					row.appendChild(field);
+				}
+				rows.push(row);
+			}
+			console.log(rows);
+			return rows;
+		},
+		onConfirm: function (selection){/*use this as a callback*/
+		},
+		onCancel: function (){/*use this as a callback*/
+		},
+		paramsChanged: function (){
+			//creo i parametri della query da una stringa json
+			if(this.params){
+				this.params = this.params.replace("'/g", '"');
+				//ricavo i dati con cui riempire la finestra
+				this.getFromServer();
+			}
+			
+			if(this.jsonList){
+				this.jsonList = $.parseJSON(this.jsonList)
+				this.jsonToTable(this.jsonList);
+			}
+		}
+		
+	});
+	</script>
+</polymer-element>

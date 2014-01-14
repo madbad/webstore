@@ -8,6 +8,37 @@
 	</template>
 	<script>
 		Polymer('x-input',{
+			ready: function (){
+				this.descrizionecodice='';
+				this.getProperties();
+				//manage keyboard events
+				$(this).keydown(function(event) {
+					console.log(event.which);
+					switch (event.which){
+						case 112: this.getHelp();break; //f1
+					}
+				});
+			},
+			getHelp: function (){
+				
+				//extract from the nodeName the object type removing the 'x-codice' string
+				var objType = this.getFieldType();
+				//now capitalize it: the php class has it capitalized: so we need it
+				objType = objType.charAt(0).toUpperCase() + objType.slice(1);
+					
+				var params={
+					_type: objType,
+					codice: ['!=','']
+				};
+				console.log(params);
+				params = JSON.stringify(params);
+				console.log(params);
+				var helpWindow = document.createElement('x-query-menu');
+				helpWindow.params = params;
+
+				document.append(helpWindow);
+				
+			},
 			getProperties: function (){
 				//console.log(this.impl.nodeName);
 				if(!this.label){
@@ -30,10 +61,8 @@
 			},
 			aggiornaDescrizioneCodice: function (){
 				if(this.impl.nodeName.search('CODICE')>0){
-					//make sure the nodeName is lowercase
-					var nodeName = this.impl.nodeName.toLowerCase();
 					//extract from the nodeName the object type removing the 'x-codice' string
-					var objType = nodeName.replace('x-codice', '');
+					var objType = this.getFieldType();
 					//now capitalize it: the php class has it capitalized: so we need it
 					objType = objType.charAt(0).toUpperCase() + objType.slice(1);
 
@@ -52,10 +81,9 @@
 					}).done(function( msg ) {
 						console.log(msg)
 						var myFullObj = $.parseJSON(msg);
-						//make sure the nodeName is lowercase
-						var nodeName = this.impl.nodeName.toLowerCase();
+						
 						//extract from the nodeName the object type removing the 'x-codice' string
-						var objType = nodeName.replace('x-codice', '');
+						var objType = this.getFieldType();
 						if(myFullObj[objType].descrizione){ 
 							//se l'oggetto ha una proprietà descrizine mostro quella
 							this.descrizionecodice = myFullObj[objType].descrizione;
@@ -72,9 +100,12 @@
 			valChanged : function(attrName, oldVal, newVal) {
 				this.aggiornaDescrizioneCodice();
 			},
-			ready: function (){
-				this.descrizionecodice='';
-				this.getProperties();
+			getFieldType: function(){
+				//make sure the nodeName is lowercase
+				var nodeName = this.impl.nodeName.toLowerCase();
+				//extract from the nodeName the object type removing the 'x-codice' string
+				var objType = nodeName.replace('x-codice', '');
+				return objType;
 			}
 		});
 	</script>

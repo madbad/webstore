@@ -92,16 +92,38 @@ color:blue;
 
 		loadComponentsFromDir('components');
 	?>
-<!--
+
 <x-window title="Gestione DDT">
 	<x-ddt></x-ddt>
 </x-window>
--->
+
+<!--
 <x-menu>
 	<x-menuitem>test</x-menuitem>
 	<x-menuitem>test 1</x-menuitem>
 	<x-menuitem>test 2</x-menuitem>
 	<x-menuitem>test 3</x-menuitem>
+	<x-menuitem>test 4</x-menuitem>
+	<x-menuitem>test 5</x-menuitem>
+	<x-menuitem>test 6</x-menuitem>
+	<x-menuitem>test 7</x-menuitem>
+	<x-menuitem>test 8</x-menuitem>
+	<x-menuitem>test 9</x-menuitem>
+	<x-menuitem>test 10</x-menuitem>
+	<x-menuitem>test 11</x-menuitem>
+	<x-menuitem>test 12</x-menuitem>
+	<x-menuitem>test 13</x-menuitem>
+	<x-menuitem>test 14</x-menuitem>
+	<x-menuitem>test 15</x-menuitem>
+	<x-menuitem>test 16</x-menuitem>
+	<x-menuitem>test 17</x-menuitem>
+	<x-menuitem>test 18</x-menuitem>
+	<x-menuitem>test 19</x-menuitem>
+	<x-menuitem>test 20</x-menuitem>
+	<x-menuitem>test 21</x-menuitem>
+	<x-menuitem>test 22</x-menuitem>
 </x-menu>
+-->
+<x-query-menu></x-query-menu>
 </body>
 </html>

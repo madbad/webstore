@@ -599,7 +599,8 @@ $test=new MyList(
 			if nothing is specified just select all
 		*/
 		$select="";
-		if($params['_select']){
+		//if($params['_select']){
+		if(in_array('_select', $params)){//this should fix a "notice error"
 			$indexes = explode(",", $params['_select']);
 			foreach($indexes as $key => $property){
 				if($key>0){
