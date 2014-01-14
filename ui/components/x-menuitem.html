@@ -1,19 +1,21 @@
-<polymer-element name="x-menuitem" attributes="action">
+<polymer-element name="x-menuitem" attributes="action" extends="div" tabindex="0">
 	<template>
 		<style>
-		  .menuitem {
+		  @host {
 			padding:0em;
 			padding-left: 1.5em;
 			border-bottom: 1px solid #e1e1e1;
+			width:100%;
 		  }
-		.menuitem: focus {
-			background-color: yellow;
-		  }	  
+		@host.x-menutitem: focus{
+			border-color:orange;
+			outline: none;
+			box-shadow: 0 0 10px orange;
+			background-color: orange;
+		}
 		</style>
 
-		<div class="menuitem" tabindex="0">
-			<content></content> ({{action}})
-		</div>
+			<content></content>
 
 	</template>
 	<script>

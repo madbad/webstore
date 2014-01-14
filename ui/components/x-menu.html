@@ -1,7 +1,7 @@
-<polymer-element name="x-menu" solectedItem="{{selected}}">
+<polymer-element name="x-menu" extends="div" tabindex="0">
 	<template>
 		<style>
-		.menu {
+		@host {
 			box-shadow: 3px 3px 5px 1px #ccc;
 			border: 1px solid #a1a1a1;
 			color: #000000;
@@ -11,46 +11,176 @@
 			/*bottom: 2em;
 			right: 2em;*/
 			background-color:white;
+			width:100px;
 		}
-		.menu:focus(){
-			border: 1px solid red;
-		 }
+		.selected {
+			border-color:orange;
+			outline: none;
+			box-shadow: 0 0 10px orange;
+			background-color: orange;
+		}
+		.hidden {
+			width: 0px;
+			height: 0px;
+			visibility:hidden;
+			display:none;
+			overflow:hidden;
+		}
 		</style>
-		<div class="menu" tabindex="0">
-			<content></content>
-		</div>
-	</template>
+		<content></content>
+		</template>
 	<script>
+//NOTE: this.shadowRoot.activeElement
 	Polymer('x-menu',{
 		created: function (){
-			this.children[0].focus();
-			//this.tabIndex = 0;
 			console.log('x-menu has been activated')
-			//this.focus();
+			//this.focus();//give me focus
+			this.createMenu (this.children);
+			
+			//set the focus on us //we need to delay it a bit to be sure it works
+			setTimeout(function (){
+					this.focus();
+			}.bind(this), 10);
+			
 			//manage keyboard events
 			$(this).keydown(function(event) {
+				console.log(event.which);
 				switch (event.which){
-					case 38: this.prev();	break; //up
-					case 40: this.next();	break; //down
+					case 38: this.prev();break; //up
+					case 40: this.next();break; //down
+					case 33: this.selectFirstOfThePage();break; //pgup
+					case 34: this.selectLastOfThePage();break; //pgdown
 					case 13: this.confirm(); break; //enter
 					case 27: this.cancel(); break; //esc
 				}
 			});
 		},
+
 		confirm : function (){
 			//remove me from the dom
 			this.parentNode.removeChild(this);
 			//and return the value
-			return this.table.getSelection();
+			return this.getSelection();
 		},
 		cancel : function (){
 			//remove me from the dom without returning any value
 			this.parentNode.removeChild(this);
 		},
-		next : function(){},
-		prev : function(){},
-		last : function(){},
-		first : function(){},
-});
+		
+		createMenu : function (list){
+			this.elementsPerPage=10;
+		
+			//console.log('STO CREANDO LA TABELLA')
+			for (var i=0; i < list.length; i++){
+				//assign for each item an unique id
+				list[i].id = 'element'+i;
+			}
+
+			//seleziona una riga della tabella
+			this.select = function (id){
+				//deseleziona vecchio elemento
+				if (this.selected != null){
+					this.querySelector('#element'+this.selected).classList.toggle('selected');
+					this.querySelector('#element'+this.selected).focus();
+				}
+			
+				//nascondo la vecchia pagina
+				this.hidePage(this.getCurPage());
+
+				//mostro la nuova
+				this.showPage(this.getPageOfTheElement(id));
+
+				//seleziona il nuovo elemento
+				this.querySelector('#element'+id).classList.toggle('selected');
+				this.selected = id;
+			};
+			this.prev = function (){
+				console.log('select prev');
+				if (this.selected > 0){
+					this.select ( this.selected-1);
+				}
+			};
+			this.next = function (){
+				console.log('select prev');
+				if (this.selected < (list.length-1)){
+					this.select ( this.selected+1);
+				}
+			};
+			this.first = function (){
+				this.select(0);
+			};
+			this.last = function (){
+				this.select(list.length);
+			};
+			this.selectFirstOfThePage = function (page){
+				this.select(this.getFirstOfThePage(page));
+			};
+			this.selectLastOfThePage = function (page){
+				//console.log('selecting: '+element);
+				this.select(this.getLastOfThePage(page));
+			};
+			this.getSelection = function (){
+				//return the current selected object
+				return this.list[this.selected];
+			};
+			this.getLastOfThePage = function (page){
+				if(!page){page=this.getCurPage()-1}else{page=page-1;}
+				if((this.elementsPerPage-1) > list.length){pageElement=list.length-1}else{pageElement=this.elementsPerPage-1 }
+				var element = (page * this.elementsPerPage) + pageElement;
+				return element;
+			}
+
+			this.getFirstOfThePage = function (page){
+				if(!page){page=this.getCurPage()-1}else{page=page-1;}
+				var element = (page * this.elementsPerPage);
+				return element;
+			}
+
+			this.showPage = function (pageNum){
+				var showFrom = ((pageNum-1) * this.elementsPerPage);
+				var showTo = pageNum * this.elementsPerPage-1;
+				//hide the prev page
+				for (var i=showFrom; i <= showTo; i++){
+						//console.log('try to show: ' +i);
+					if(i >=0 && i <list.length ){
+						//console.log('ok');
+						this.querySelector('#element'+i).classList.remove('hidden');
+					}
+				}
+			};
+			this.hidePage = function (pageNum){
+				var hideFrom = ((pageNum-1) * this.elementsPerPage);
+				var hideTo = pageNum * this.elementsPerPage-1;
+				//hide the prev page
+				for (var i=hideFrom; i <= hideTo; i++){
+						//console.log('try to hide: ' +i);
+					if(i >=0 && i <list.length ){
+						//console.log('ok');
+						this.querySelector('#element'+i).classList.add('hidden');
+					}
+				}		
+			};
+			this.getCurPage = function (){
+				return parseInt((this.selected | 1)/this.elementsPerPage)+1;
+			};
+			this.getPagesNumber = function (){
+				return parseInt(list.length/this.elementsPerPage)+1;
+			};
+			this.getPageOfTheElement = function (element){
+				return parseInt(element/this.elementsPerPage)+1;
+			};
+			this.hideAllPages = function (){
+				var pages = this.getPagesNumber();
+				for (var i=1; i <= pages; i++){
+					this.hidePage(i);
+				}
+			}
+			
+			//nascondo tutte le pagine
+			this.hideAllPages();
+			//di default seleziono la prima riga todo bisognerebbe selezionare l'elemento corrente
+			this.select(0);
+		}
+	});
 	</script>
 </polymer-element>
