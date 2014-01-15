@@ -1,8 +1,51 @@
 <polymer-element name="x-query-menu" extends="x-menu" attributes="params">
 	<template>
+		<style>
+		:host {
+			box-shadow: 3px 3px 5px 1px #ccc;
+			border: 1px solid #a1a1a1;
+			color: #000000;
+			display: inline-block;
+			min-width:15em;
+			position:relative;
+			/*bottom: 2em;
+			right: 2em;*/
+			background-color:white;
+			width:100px;
+			border-radius: 0.8em;
+			overflow:hidden;
+			z-index: 100;
+		}
+		.selected {
+			border-color:orange;
+			outline: none;
+			box-shadow: 0 0 10px orange;
+			background-color: orange;
+		}
+		.hidden {
+			width: 0px;
+			height: 0px;
+			visibility:hidden;
+			display:none;
+			overflow:hidden;
+		}
+		.title {
+			background: linear-gradient(to bottom, #cdd2d8 8%,#989a9b 100%); /* W3C */
+			text-shadow:#CECECE 0px 1px 0, #000 0 -1px 0;
+			font-weight:bold;
+			font-size:0.8em;
+			color: #757575;
+			padding-left:1em;
+		}
+		.title span {
+			position:absolute;
+			top:0px;
+			right:1em; 
+		}
+		</style>
 		<div class="title">Menu <span>pag.{{page}}/{{pages}}</span></div>
-		<content></content>
-	</template>
+		<div id="items"></div>
+		</template>
 	<script>
 	Polymer('x-query-menu',{
 		created: function (){
@@ -13,12 +56,16 @@
 			}
 			this.params =  JSON.stringify(this.params);
 			*/
-			this.getFromServer();
+			if(this.params!=null){
+				console.log('Im going to send request with params: ',this.params);
+				this.getFromServer();
+			}else{
+				console.log('No params set wait for some');
+			}
 		},
 		
 		getFromServer : function (){
 			//perform an ajax request to get the list to display
-			
 			$.ajax({
 				type: "POST",
 				url: "./../do.php",
@@ -28,16 +75,21 @@
 						},
 				context: this,
 			}).done(function( msg ) {
-					console.log(msg)
+					console.log(msg);
+					console.log('Jsonize the reponse:');
 					var jsonList = $.parseJSON(msg);
 					console.log(jsonList);
-					var rows = this.generateRows (jsonList, $.parseJSON(this.params));
-					this.querySelector('content').appendChild(rows);
-					this.createMenu (rows);
+					console.log('Create the table');
+					var table = this.generateTable (jsonList, $.parseJSON(this.params));
+					console.log('Append the table to the shadow dom');
+					this.$.items.appendChild(table);
+					console.log('Generate the menu');
+					this.createMenu (table.children);
 			});
 			
 		},
-		generateRows : function (list, params){
+		generateTable : function (list, params){
+			var table = document.createElement('table');
 			var rows =[];
 			for (var i=0; i < list.length; i++){
 				//for each item generate a row
@@ -48,10 +100,9 @@
 					field.innerHTML =item[prop];
 					row.appendChild(field);
 				}
-				rows.push(row);
+				table.appendChild(row);
 			}
-			console.log(rows);
-			return rows;
+			return table;
 		},
 		onConfirm: function (selection){/*use this as a callback*/
 		},

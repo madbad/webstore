@@ -58,7 +58,7 @@
 			ready: function() {
 				var ajax = {
 				ddt:{
-					_type:"ddt",
+					_type:"Ddt",
 					numero:"1934",
 					data:"16/11/2013",
 					clientefornitore_codice:"LAFAVO",
@@ -121,7 +121,12 @@
 				//tengo traccia di quale riga del mio ddt sto modificando
 				var numRigaWatcher = function (id, oldval, newval){
 					console.log('numero changed: ',newval);
-					this.rigadamodificare=JSON.parse(JSON.stringify(this.ddt.righe[newval]));
+					if(newval!=''){
+						//una nuova riga è stata selezionate... ricerco i dati
+						this.rigadamodificare=JSON.parse(JSON.stringify(this.ddt.righe[newval]));
+					}else{
+						//do nothing
+					}
 					//re register the watcher
 					this.rigadamodificare.watch('numero',numRigaWatcher)
 				}.bind(this)

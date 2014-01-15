@@ -1,4 +1,4 @@
-<polymer-element name="x-menu" extends="div" tabindex="0">
+<polymer-element name="x-menu" extends="div" tabindex="0" attributes="items">
 	<template>
 		<style>
 		:host {
@@ -44,15 +44,22 @@
 		}
 		</style>
 		<div class="title">Menu <span>pag.{{page}}/{{pages}}</span></div>
-		<content></content>
+		<div id="items"></div>
 		</template>
 	<script>
 //NOTE: this.shadowRoot.activeElement
 	Polymer('x-menu',{
 		created: function (){
 			console.log('x-menu has been activated')
-			//this.focus();//give me focus
-			this.createMenu (this.children);
+			
+			//if we passed something inside <x-menu></x-menu>
+			//we use it to generate the actual menu into the shadowDOM
+			if(this.innerHTML!=''){
+				setTimeout(function (){
+					this.$.items.innerHTML = this.innerHTML;
+					this.createMenu (this.$.items.children);
+				}.bind(this), 10);
+			}
 			
 			//set the focus on us //we need to delay it a bit to be sure it works
 			setTimeout(function (){
@@ -86,9 +93,10 @@
 		
 		createMenu : function (list){
 			this.elementsPerPage=10;
-		
+console.log('Creating the menu');
 			//console.log('STO CREANDO LA TABELLA')
 			for (var i=0; i < list.length; i++){
+console.log('item done:', i)
 				//assign for each item an unique id
 				list[i].id = 'element'+i;
 			}
@@ -97,7 +105,7 @@
 			this.select = function (id){
 				//deseleziona vecchio elemento
 				if (this.selected != null){
-					this.querySelector('#element'+this.selected).classList.toggle('selected');
+					this.$.items.querySelector('#element'+this.selected).classList.toggle('selected');
 				}
 			
 				//nascondo la vecchia pagina
@@ -110,13 +118,13 @@
 				
 
 				//seleziona il nuovo elemento
-				this.querySelector('#element'+id).classList.toggle('selected');
+				this.$.items.querySelector('#element'+id).classList.toggle('selected');
 				
 				//ricordo la selezione
 				this.selected = id;
 				
 				//give the new element the focus
-				this.querySelector('#element'+this.selected).focus();
+				this.$.items.querySelector('#element'+this.selected).focus();
 			};
 			this.prev = function (){
 				console.log('select prev');
@@ -168,7 +176,7 @@
 						//console.log('try to show: ' +i);
 					if(i >=0 && i <list.length ){
 						//console.log('ok');
-						this.querySelector('#element'+i).classList.remove('hidden');
+						this.$.items.querySelector('#element'+i).classList.remove('hidden');
 					}
 				}
 			};
@@ -180,7 +188,7 @@
 						//console.log('try to hide: ' +i);
 					if(i >=0 && i <list.length ){
 						//console.log('ok');
-						this.querySelector('#element'+i).classList.add('hidden');
+						this.$.items.querySelector('#element'+i).classList.add('hidden');
 					}
 				}		
 			};
@@ -204,6 +212,9 @@
 			this.hideAllPages();
 			//di default seleziono la prima riga todo bisognerebbe selezionare l'elemento corrente
 			this.select(0);
+		},
+		changedItems:function(){
+			console.log('rebuild the menu');
 		}
 	});
 	</script>

@@ -33,10 +33,14 @@
 				console.log(params);
 				params = JSON.stringify(params);
 				console.log(params);
+console.log('create the menu');
 				var helpWindow = document.createElement('x-query-menu');
+console.log('modify params');
 				helpWindow.params = params;
+console.log(helpWindow);
+console.log('append menu');
 
-				document.append(helpWindow);
+				document.body.appendChild(helpWindow);
 				
 			},
 			getProperties: function (){

@@ -93,9 +93,6 @@ color:blue;
 		loadComponentsFromDir('components');
 	?>
 
-<x-window title="Gestione DDT">
-	<x-ddt></x-ddt>
-</x-window>
 
 <!--
 <x-menu>
@@ -124,6 +121,12 @@ color:blue;
 	<x-menuitem>test 22</x-menuitem>
 </x-menu>
 -->
+<x-window title="Gestione DDT">
+	<x-ddt></x-ddt>
+</x-window>
+<!--
 <x-query-menu></x-query-menu>
+-->
+
 </body>
 </html>
