@@ -1,4 +1,4 @@
-<polymer-element name="x-menu" extends="div" tabindex="0" attributes="items">
+<polymer-element name="x-menu" extends="div" tabindex="0" attributes="items params searchstring">
 	<template>
 		<style>
 		:host {
@@ -11,12 +11,13 @@
 			/*bottom: 2em;
 			right: 2em;*/
 			background-color:white;
-			width:100px;
+			/*width:100px;*/
 			border-radius: 0.8em;
 			overflow:hidden;
 			z-index: 100;
 		}
 		.selected {
+			background-image: none;
 			border-color:orange;
 			outline: none;
 			box-shadow: 0 0 10px orange;
@@ -35,22 +36,68 @@
 			font-weight:bold;
 			font-size:0.8em;
 			color: #757575;
-			padding-left:1em;
+			text-align: center;
 		}
 		.title span {
 			position:absolute;
 			top:0px;
 			right:1em; 
 		}
+		.title input {
+			padding:0.4em;
+			border-radius: 0.4em;
+			color: grey;
+			font-size:1.2em;
+			width:90%;
+			margin:0.8em;
+			margin-top:0px;
+		}
+		table, thead, tbody, tfooter {
+			width: 100%;
+			border: 0px;
+			padding:0px;
+			margin:0px;
+			border-collapse: collapse;
+			border-spacing: 0;
+		}
+		table{
+
+		}
+		thead {
+			font-weight:bold;
+			color:white;
+			font-size: 0.8em;
+		}
+		thead td{
+			background: linear-gradient(15deg, #616161 0%,#616161 4%,#7c7c7c 100%); /* W3C */
+			padding: 0.2em;
+		}
+		tbody tr {
+			background-image: linear-gradient(to bottom, #ffffff 0%,#ffffff 88%,#eaeaea 100%);
+		}
+		tbody td {
+			border-left: 1px solid #e1e1e1;
+			padding: 0.2em;
+
+		}
 		</style>
-		<div class="title">Menu <span>pag.{{page}}/{{pages}}</span></div>
+		<div class="title">
+			Menu <span>pag.{{page}}/{{pages}}</span>
+			<input id="searchfield" type="text" tabindex="0" value="{{searchstring}}">
+			</div>
 		<div id="items"></div>
 		</template>
 	<script>
-//NOTE: this.shadowRoot.activeElement
 	Polymer('x-menu',{
 		created: function (){
-			console.log('x-menu has been activated')
+			console.log('XMENU: activated')
+			
+			if(this.params!=null){
+				console.log('XMENU: Send a request to the server with params: ',this.params);
+				this.getFromServer();
+			}else{
+				console.log('XMENU: No params set at creation time, wait for some');
+			}
 			
 			//if we passed something inside <x-menu></x-menu>
 			//we use it to generate the actual menu into the shadowDOM
@@ -64,7 +111,8 @@
 			//set the focus on us //we need to delay it a bit to be sure it works
 			setTimeout(function (){
 					this.focus();
-			}.bind(this), 10);
+					this.$.searchfield.focus();
+			}.bind(this), 20);
 			
 			//manage keyboard events
 			$(this).keydown(function(event) {
@@ -81,22 +129,30 @@
 		},
 
 		confirm : function (){
+			this.onConfirm(this.getSelection());
 			//remove me from the dom
 			this.parentNode.removeChild(this);
 			//and return the value
-			return this.getSelection();
+			return;
 		},
 		cancel : function (){
+			this.onCancel();
 			//remove me from the dom without returning any value
 			this.parentNode.removeChild(this);
 		},
-		
+		onConfirm: function(selectedObj){
+			//use this as a callback
+			//return an obj of the selected menu-entry
+		},
+		onCancel: function(){
+			//use this as a callback
+		},
 		createMenu : function (list){
 			this.elementsPerPage=10;
-console.log('Creating the menu');
+			console.log('Creating the menu');
 			//console.log('STO CREANDO LA TABELLA')
 			for (var i=0; i < list.length; i++){
-console.log('item done:', i)
+				console.log('item done:', i)
 				//assign for each item an unique id
 				list[i].id = 'element'+i;
 			}
@@ -152,6 +208,7 @@ console.log('item done:', i)
 				this.select(this.getLastOfThePage(page));
 			};
 			this.getSelection = function (){
+				console.log('XMENU: you have selected: ', this.list[this.selected]);
 				//return the current selected object
 				return this.list[this.selected];
 			};
@@ -213,8 +270,111 @@ console.log('item done:', i)
 			//di default seleziono la prima riga todo bisognerebbe selezionare l'elemento corrente
 			this.select(0);
 		},
-		changedItems:function(){
-			console.log('rebuild the menu');
+		getFromServer : function (){
+			//perform an ajax request to get the list to display
+			$.ajax({
+				type: "POST",
+				url: "./../do.php",
+				data: {
+						action: 'getAll',
+						params: $.parseJSON(this.params)
+						},
+				context: this,
+			}).done(function( msg ) {
+					console.log(msg);
+					console.log('Jsonize the reponse:');
+					var jsonList = $.parseJSON(msg);
+					//the full array of objects we will use
+					this.fulllist = jsonList;
+					//generate a copy of the array to use
+					this.list = this.fulllist.slice(0);
+					console.log(jsonList);
+					console.log('Create the table');
+					var table = this.generateTable (this.list, $.parseJSON(this.params));
+					console.log('Append the table to the shadow dom');
+					this.$.items.appendChild(table);
+					console.log('Generate the menu');
+					//console.log(table.tBodies)
+					this.createMenu (table.tBodies[0].children);
+			});
+			
+		},
+		generateTable : function (list, params){
+			var table = document.createElement('table');
+			var tableHead = document.createElement('thead');
+			var tableBody = document.createElement('tbody');
+			var tableFoot = document.createElement('tfoot');
+			var rows =[];
+			for (var i=0; i < list.length; i++){
+				var item = list[i];
+				//if is the first iteration.. 
+				//generate the table header with the names of the properties we will show
+				if(i==0){
+					var headRow = document.createElement('tr');
+					for (prop in item){
+						var headField = document.createElement('td');
+						headField.innerHTML =prop;
+						headRow.appendChild(headField);
+					}
+					tableHead.appendChild(headRow);
+				}
+				
+				//for each property of the current item a field with the data
+				var row = document.createElement('tr');
+				for (prop in item){
+					var field = document.createElement('td');
+					field.innerHTML =item[prop];
+					row.appendChild(field);
+				}
+				tableBody.appendChild(row);
+			}
+			table.appendChild(tableHead);
+			table.appendChild(tableBody);
+			table.appendChild(tableFoot);
+			return table;
+		},
+		paramsChanged: function (){
+			//creo i parametri della query da una stringa json
+			if(this.params){
+				this.params = this.params.replace("'/g", '"');
+				//ricavo i dati con cui riempire la finestra
+				this.getFromServer();
+			}
+			
+			if(this.jsonList){
+				this.jsonList = $.parseJSON(this.jsonList)
+				this.jsonToTable(this.jsonList);
+			}
+		},
+		searchstringChanged: function(){
+			console.log('XMENU: searching for >'+this.searchstring+'< into: ', this.list);
+			var searchstring = this.searchstring.toLowerCase();
+			
+			var filteredItems = this.fulllist.filter(function(item){
+				var result = false;
+				for (prop in item){
+					var fullstring = item[prop].toLowerCase();
+					result = fullstring.search(searchstring);
+					console.log('XMENU: scanned: ', fullstring, ' for: ', searchstring, 'with result: ', result)
+					if (result > -1) return true;
+					}
+				});
+				
+			
+			this.list = filteredItems;
+			console.log('XMENU: found:', filteredItems)
+			//reset the prev selection;
+			this.selected = null;
+			//regenerate the menu
+			var table = this.generateTable (this.list, $.parseJSON(this.params));
+			console.log('delette the prev table')
+			this.$.items.innerHTML = '';
+			console.log('Append the new table to the shadow dom');
+			this.$.items.appendChild(table);
+			console.log('Generate the menu');
+			//console.log(table.tBodies)
+			this.createMenu (table.tBodies[0].children);
+			
 		}
 	});
 	</script>

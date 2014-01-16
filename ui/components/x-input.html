@@ -33,15 +33,26 @@
 				console.log(params);
 				params = JSON.stringify(params);
 				console.log(params);
-console.log('create the menu');
-				var helpWindow = document.createElement('x-query-menu');
-console.log('modify params');
+				console.log('create the menu');
+				var helpWindow = document.createElement('x-menu');
+				console.log('modify params');
 				helpWindow.params = params;
-console.log(helpWindow);
-console.log('append menu');
-
+				console.log(helpWindow);
+				console.log('append menu');
+				helpWindow.onConfirm = function (selection){
+					console.log('XINPUT: HELP CONFIRMED, retrieving data');
+					//retrieve the data
+					this.val=selection.codice;
+					console.log('XINPUT: HELP CONFIRMED, claim focus back from the help menu');
+					//get the focus back
+					this.$.field.focus();
+				}.bind(this);
+				helpWindow.onCancel = function (selection){
+					console.log('XINPUT: HELP CANCELLED, claim focus back from the help menu');
+					//get the focus back
+					this.$.field.focus();
+				}.bind(this);
 				document.body.appendChild(helpWindow);
-				
 			},
 			getProperties: function (){
 				//console.log(this.impl.nodeName);

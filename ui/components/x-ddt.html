@@ -18,7 +18,7 @@
 		<x-note val="{{ddt.note}}" label="Note"></x-note>
 		<br>
 		Righe:
-		<div style="heigth:10px;overflow-y: scroll;height: 50px;border:0.1em solid grey;box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.333333);padding:1em;">
+		<div style="heigth:10px;overflow-y: scroll;height: 50px;border:0.1em solid grey;box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.333333);padding:1em;" tabindex="">
 		<template repeat="{{r in ddt.righe}}">
 			<x-numeroriga val="{{r.numero}}" label="N."></x-numeroriga>
 			<x-codicearticolo val="{{r.articolo_codice}}" label="Art."></x-codicearticolo>

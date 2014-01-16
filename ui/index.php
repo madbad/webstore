@@ -124,6 +124,7 @@ color:blue;
 <x-window title="Gestione DDT">
 	<x-ddt></x-ddt>
 </x-window>
+
 <!--
 <x-query-menu></x-query-menu>
 -->
