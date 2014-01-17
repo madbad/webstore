@@ -53,6 +53,18 @@
 					this.$.field.focus();
 				}.bind(this);
 				document.body.appendChild(helpWindow);
+
+				//wait a little and then position the help window in the middle of the body
+				//and remember his width so that it does not change during future modifcation of contents
+				//and show us
+				setTimeout(function (){
+					this.setPosition('tc','tc',document.body);
+					console.log(this.offsetWidth);
+					this.style.width = this.offsetWidth+'px';
+					this.show();
+					this.focus();
+				}.bind(helpWindow), 150);
+
 			},
 			getProperties: function (){
 				//console.log(this.impl.nodeName);

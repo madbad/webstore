@@ -7,14 +7,16 @@
 			color: #000000;
 			display: inline-block;
 			min-width:15em;
+			max-width:90%;
 			position:relative;
-			/*bottom: 2em;
-			right: 2em;*/
 			background-color:white;
-			/*width:100px;*/
 			border-radius: 0.8em;
 			overflow:hidden;
 			z-index: 100;
+			margin-left:50%
+			margin-rigth:50%;
+			visibility: hidden;/*by default we are hidden*/
+			
 		}
 		.selected {
 			background-image: none;
@@ -111,7 +113,6 @@
 			//set the focus on us //we need to delay it a bit to be sure it works
 			setTimeout(function (){
 					this.focus();
-					this.$.searchfield.focus();
 			}.bind(this), 20);
 			
 			//manage keyboard events
@@ -297,7 +298,6 @@
 					//console.log(table.tBodies)
 					this.createMenu (table.tBodies[0].children);
 			});
-			
 		},
 		generateTable : function (list, params){
 			var table = document.createElement('table');
@@ -332,6 +332,78 @@
 			table.appendChild(tableBody);
 			table.appendChild(tableFoot);
 			return table;
+		},
+		setPosition: function (myPoint, targetPoint, targetElement){
+			console.log('XMENU: my current position: ', this.getPosition(this))
+			console.log(this.impl)
+
+			
+			var targetPosition = this.getPosition(targetElement);
+			var targetDimensions = {
+				width : targetElement.offsetWidth,
+				height:  targetElement.offsetHeight,
+			};
+			var myDimensions = {
+				width : this.offsetWidth,
+				height:  this.offsetHeight,
+			};
+			
+			var np ={
+				top:0,
+				left:0,
+			}
+			
+			switch(myPoint[0]){
+				case 't':np.top+=0;break;
+				case 'b':np.top-=myDimensions.height;break;
+				case 'c':np.top-=myDimensions.height/2;break;
+			}
+
+			switch(targetPoint[0]){
+				case 't':np.top+=0;break;
+				case 'b':np.top+=targetDimensions.height;break;
+				case 'c':np.top+=targetDimensions.height/2;break;
+			}
+			
+			switch(myPoint[1]){
+				case 'l':np.left+=0;break;
+				case 'r':np.left-=myDimensions.width;break;
+				case 'c':np.left-=myDimensions.width/2;break;
+			}
+
+			switch(targetPoint[1]){
+				case 'l':np.left+=0;break;
+				case 'r':np.left+=targetDimensions.width;break;
+				case 'c':np.left+=targetDimensions.width/2;break;
+			}
+			
+			np.left+=targetPosition.left;
+			np.top+=targetPosition.top;
+			
+			console.log('XMENU: new position:', np);
+			
+			//assign the new position
+			this.style.top = np.top+'px';
+			this.style.left = np.left+'px';
+			
+			console.log('XMENU: targetPOS', targetPosition, 'targetDIM: ', targetDimensions, 'myDIM: ', myDimensions);
+			
+		},
+		getPosition: function (element) {
+			var xPosition = 0;
+			var yPosition = 0;
+			while(element) {
+				xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+				yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
+				element = element.offsetParent;
+			}
+			return { left: xPosition, top: yPosition };
+		},
+		show : function (){
+			this.style.visibility='visible';
+		},
+		hide : function (){
+			this.style.visibility='hidden';
 		},
 		paramsChanged: function (){
 			//creo i parametri della query da una stringa json
@@ -375,6 +447,10 @@
 			//console.log(table.tBodies)
 			this.createMenu (table.tBodies[0].children);
 			
+		},
+		focus: function (){
+			//send the focus to the input field
+			this.$.searchfield.focus();
 		}
 	});
 	</script>

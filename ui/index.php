@@ -50,10 +50,15 @@ input {
 	font-size:1em;
 	font-family: 'Inconsolata', sans-serif;
 }
-
+html, body{
+	height: 100%;
+	margin:0px;
+	padding:0px;
+}
 body{
 	font-size:1em;
 	line-height: 2;
+	width:100%;
 }
 
 
