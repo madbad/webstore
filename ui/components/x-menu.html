@@ -2,7 +2,7 @@
 	<template>
 		<style>
 		:host {
-			box-shadow: 3px 3px 5px 1px #ccc;
+			/*box-shadow: 3px 3px 5px 1px #ccc;*/
 			border: 1px solid #a1a1a1;
 			color: #000000;
 			display: inline-block;
@@ -82,6 +82,7 @@
 			padding: 0.2em;
 
 		}
+
 		</style>
 		<div class="title">
 			Menu <span>pag.{{page}}/{{pages}}</span>
@@ -100,7 +101,8 @@
 			}else{
 				console.log('XMENU: No params set at creation time, wait for some');
 			}
-			
+
+/*
 			//if we passed something inside <x-menu></x-menu>
 			//we use it to generate the actual menu into the shadowDOM
 			if(this.innerHTML!=''){
@@ -109,7 +111,8 @@
 					this.createMenu (this.$.items.children);
 				}.bind(this), 10);
 			}
-			
+*/
+
 			//set the focus on us //we need to delay it a bit to be sure it works
 			setTimeout(function (){
 					this.focus();
@@ -131,6 +134,10 @@
 
 		confirm : function (){
 			this.onConfirm(this.getSelection());
+			//if is present remove the modalbackground
+			if(this.modalBackground){
+				this.parentNode.removeChild(this.modalBackground);
+			}
 			//remove me from the dom
 			this.parentNode.removeChild(this);
 			//and return the value
@@ -138,6 +145,10 @@
 		},
 		cancel : function (){
 			this.onCancel();
+			//if is present remove the modalbackground
+			if(this.modalBackground){
+				this.parentNode.removeChild(this.modalBackground);
+			}
 			//remove me from the dom without returning any value
 			this.parentNode.removeChild(this);
 		},
@@ -150,10 +161,10 @@
 		},
 		createMenu : function (list){
 			this.elementsPerPage=10;
-			console.log('Creating the menu');
-			//console.log('STO CREANDO LA TABELLA')
+			console.log('XMENU: Creating the menu');
+			console.log('XMENU: Assign an unique ID to each html element');
 			for (var i=0; i < list.length; i++){
-				console.log('item done:', i)
+				console.log('XMENU: new item ID assigned:', i)
 				//assign for each item an unique id
 				list[i].id = 'element'+i;
 			}
@@ -241,12 +252,16 @@
 			this.hidePage = function (pageNum){
 				var hideFrom = ((pageNum-1) * this.elementsPerPage);
 				var hideTo = pageNum * this.elementsPerPage-1;
+				console.log('XMENU: executing requesto to hide page from', hideFrom,' to ',hideTo);
 				//hide the prev page
 				for (var i=hideFrom; i <= hideTo; i++){
-						//console.log('try to hide: ' +i);
+						console.log('try to hide page: ' +i);
 					if(i >=0 && i <list.length ){
-						//console.log('ok');
+						console.log('ok');
+						console.log('XMENU: those are our elements:', this.$.items)
+						console.log('XMENU: hiding element:',this.$.items.querySelector('#element'+i), i,' list is long', list.length );
 						this.$.items.querySelector('#element'+i).classList.add('hidden');
+						console.log('@@@@@@did we passed  this?');
 					}
 				}		
 			};
@@ -260,14 +275,18 @@
 				return parseInt(element/this.elementsPerPage)+1;
 			};
 			this.hideAllPages = function (){
+				console.log('XMENU: hide all page request received');
 				var pages = this.getPagesNumber();
+				console.log('XMENU: pages found:', pages);
 				for (var i=1; i <= pages; i++){
+					console.log('XMENU: send requesto to hide page:', i);
 					this.hidePage(i);
 				}
 			}
-			
+			console.log('XMENU: On start hide all pages');
 			//nascondo tutte le pagine
 			this.hideAllPages();
+			console.log('XMENU: Selecting the first page');
 			//di default seleziono la prima riga todo bisognerebbe selezionare l'elemento corrente
 			this.select(0);
 		},
@@ -300,18 +319,22 @@
 			});
 		},
 		generateTable : function (list, params){
+			console.log('XMENU: generating table content from list:', list);
 			var table = document.createElement('table');
 			var tableHead = document.createElement('thead');
 			var tableBody = document.createElement('tbody');
 			var tableFoot = document.createElement('tfoot');
 			var rows =[];
 			for (var i=0; i < list.length; i++){
+				console.log('XMENU: processing item of the list n.:', i+1,' su ', list.length );
 				var item = list[i];
 				//if is the first iteration.. 
 				//generate the table header with the names of the properties we will show
 				if(i==0){
+					console.log('XMENU: first iteration on table generation. create columns headers');
 					var headRow = document.createElement('tr');
 					for (prop in item){
+						console.log('XMENU: column header added:', prop);
 						var headField = document.createElement('td');
 						headField.innerHTML =prop;
 						headRow.appendChild(headField);
@@ -331,9 +354,10 @@
 			table.appendChild(tableHead);
 			table.appendChild(tableBody);
 			table.appendChild(tableFoot);
+			console.log('XMENU: table generation COMPLETED');
 			return table;
 		},
-		setPosition: function (myPoint, targetPoint, targetElement){
+		setPosition: function (myPoint, targetPoint, targetElement, modifier){
 			console.log('XMENU: my current position: ', this.getPosition(this))
 			console.log(this.impl)
 
@@ -377,6 +401,13 @@
 				case 'c':np.left+=targetDimensions.width/2;break;
 			}
 			
+			//apply the modifier if exist
+			if(modifier){
+				targetPosition.left+= modifier.left;
+				targetPosition.top+= modifier.top;
+			}
+			
+			//
 			np.left+=targetPosition.left;
 			np.top+=targetPosition.top;
 			
@@ -412,11 +443,12 @@
 				//ricavo i dati con cui riempire la finestra
 				this.getFromServer();
 			}
-			
+			/*
 			if(this.jsonList){
 				this.jsonList = $.parseJSON(this.jsonList)
 				this.jsonToTable(this.jsonList);
 			}
+			*/
 		},
 		searchstringChanged: function(){
 			console.log('XMENU: searching for >'+this.searchstring+'< into: ', this.list);
@@ -451,7 +483,16 @@
 		focus: function (){
 			//send the focus to the input field
 			this.$.searchfield.focus();
-		}
+		},
+		addModalBackground: function (){
+			this.modalBackground = document.createElement('div');
+			this.modalBackground.classList.add('modalBackgroundShadow');
+			document.body.insertBefore(this.modalBackground, this);
+		},
+		removeModalBackground: function (){
+			document.body.removeChild(this.modalBackground);
+		},
+		
 	});
 	</script>
 </polymer-element>

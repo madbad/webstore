@@ -1,8 +1,8 @@
-<polymer-element name="x-input" extends="input" attributes="val,label,descrizionecodice">
+<polymer-element name="x-input" extends="input" attributes="val,label,descrizionecodice,disabledstatus">
 	<template>
 	<label>
 		<span style="color:grey">{{label}}</span>
-		<input id="field" value="{{val}}" size="{{l}}" maxlength="{{l}}">
+		<input id="field" value="{{val}}" size="{{l}}" maxlength="{{l}}" on-focus="{{fieldfocus}}" on-blur={{fieldblur}} disabled?={{disabledstatus}}>
 		{{descrizionecodice}}
 	</label>
 	</template>
@@ -16,6 +16,33 @@
 					console.log(event.which);
 					switch (event.which){
 						case 112: this.getHelp();break; //f1
+						/*
+						case 13: //enter
+							 //document.commandDispatcher.advanceFocus();
+							 var focusables = document.querySelectorAll("x-input");
+							 console.log(focusables);
+							 break;
+						*/
+						/*
+						console.log('simulate a tab keypress');
+							//simulate a tab press
+							var keyboardEvent = document.createEvent("KeyboardEvent");
+							var initMethod = typeof keyboardEvent.initKeyboardEvent !== 'undefined' ? "initKeyboardEvent" : "initKeyEvent";
+							keyboardEvent[initMethod](
+											   "keypress", // event type : keydown, keyup, keypress
+												true, // bubbles
+												true, // cancelable
+												window, // viewArg: should be window
+												false, // ctrlKeyArg
+												false, // altKeyArg
+												false, // shiftKeyArg
+												false, // metaKeyArg
+												9, // keyCodeArg : unsigned long the virtual key code, else 0
+												0 // charCodeArgs : unsigned long the Unicode character associated with the depressed key, else 0
+							);
+							document.dispatchEvent(keyboardEvent);
+							break;
+						*/
 					}
 				});
 			},
@@ -58,7 +85,12 @@
 				//and remember his width so that it does not change during future modifcation of contents
 				//and show us
 				setTimeout(function (){
-					this.setPosition('tc','tc',document.body);
+					this.addModalBackground();
+					var modifier = {
+						top: 50,
+						left: 0,
+						}
+					this.setPosition('tc','tc',document.body, modifier);
 					console.log(this.offsetWidth);
 					this.style.width = this.offsetWidth+'px';
 					this.show();
@@ -133,6 +165,16 @@
 				//extract from the nodeName the object type removing the 'x-codice' string
 				var objType = nodeName.replace('x-codice', '');
 				return objType;
+			},
+			fieldfocus: function (event, detail, sender){
+				//call our custom focus
+				this.focus();
+				//select everithing on the field
+				var element = event.target;
+				element.select();
+			},
+			fieldblur: function (event, detail, sender){
+				this.blur();
 			}
 		});
 	</script>

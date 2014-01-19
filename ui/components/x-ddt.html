@@ -1,5 +1,16 @@
 <polymer-element name="x-ddt" attributes="rigadamodificare">
 	<template>
+		<style>
+		.displayRighe {
+			heigth:10px;
+			overflow-y: scroll;
+			height: 16.5em;
+			border:0.1em solid grey;
+			box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.333333);
+			padding:1em;
+		}
+		</style>
+
 		<x-numerodoc val="{{ddt.numero}}" label="Numero"></x-numerodoc>
 		<x-data val="{{ddt.data}}" label="Data"></x-data>
 		<br>
@@ -18,19 +29,19 @@
 		<x-note val="{{ddt.note}}" label="Note"></x-note>
 		<br>
 		Righe:
-		<div style="heigth:10px;overflow-y: scroll;height: 50px;border:0.1em solid grey;box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.333333);padding:1em;" tabindex="">
+		<div class="displayRighe" tabindex="">
 		<template repeat="{{r in ddt.righe}}">
-			<x-numeroriga val="{{r.numero}}" label="N."></x-numeroriga>
-			<x-codicearticolo val="{{r.articolo_codice}}" label="Art."></x-codicearticolo>
-			<x-codiceum val="{{r.um_codice}}" label="UM"></x-codiceum>
-			<x-prezzo val="{{r.prezzo}}" label="Prezzo"></x-prezzo>
-			<x-numerocolli val="{{r.colli}}" label="Colli"></x-numerocolli>
-			<x-codiceimballaggio val="{{r.imballaggio_codice}}" label="Tipo Imb."></x-codiceimballaggio>
-			<x-peso val="{{r.pesolordo}}" label="Lordo"></x-peso>
-			<x-peso val="{{r.tara}}" label="Tara"></x-peso>
-			<x-peso val="{{r.pesonetto}}" label="Netto"></x-peso>
-			<x-lotto val="{{r.lotto}}" label="Lotto"></x-lotto>
-			<x-codiceiva val="{{r.iva_codice}}" label="Iva"></x-codiceiva>
+			<x-numeroriga val="{{r.numero}}" label="N." disabledstatus="true"></x-numeroriga>
+			<x-codicearticolo val="{{r.articolo_codice}}" label="Art." disabledstatus="true"></x-codicearticolo>
+			<x-codiceum val="{{r.um_codice}}" label="UM" disabledstatus="true"></x-codiceum>
+			<x-prezzo val="{{r.prezzo}}" label="Prezzo" disabledstatus="true"></x-prezzo>
+			<x-numerocolli val="{{r.colli}}" label="Colli" disabledstatus="true"></x-numerocolli>
+			<x-codiceimballaggio val="{{r.imballaggio_codice}}" label="Tipo Imb." disabledstatus="true"></x-codiceimballaggio>
+			<x-peso val="{{r.pesolordo}}" label="Lordo" disabledstatus="true"></x-peso>
+			<x-peso val="{{r.tara}}" label="Tara" disabledstatus="true"></x-peso>
+			<x-peso val="{{r.pesonetto}}" label="Netto" disabledstatus="true"></x-peso>
+			<x-lotto val="{{r.lotto}}" label="Lotto" disabledstatus="true"></x-lotto>
+			<x-codiceiva val="{{r.iva_codice}}" label="Iva" disabledstatus="true"></x-codiceiva>
 			<hr>
 		</template>
 		</div>
@@ -129,9 +140,59 @@
 					}
 					//re register the watcher
 					this.rigadamodificare.watch('numero',numRigaWatcher)
-				}.bind(this)
-				this.rigadamodificare.watch('numero',numRigaWatcher)
+				}.bind(this);
+				this.rigadamodificare.watch('numero',numRigaWatcher);
 			},
+			displayMenu: function (){
+				console.log('create the menu');
+				var menu = document.createElement('x-menu');
+				var list= [
+					{label:'Testata',action:'none'},
+					{label:'Modifica riga',action:'none'},
+					{label:'Memorizza',action:'none'},
+					{label:'Stampa',action:'none'},
+					{label:'Avanti',action:'none'},
+					{label:'Indietro',action:'none'},
+					{label:'Abbandona',action:'none'}
+				];
+				menu.fulllist = list;
+				var table = menu.generateTable (list);
+
+				console.log('Appending menu to the body:', menu);
+				document.body.appendChild(menu);
+				console.log('menu added!')
+
+				console.log('the table for the menu is redy:', table);
+				menu.createMenu (table.tBodies[0].children);
+				//wait a little and then position the help window in the middle of the body
+				//and remember his width so that it does not change during future modifcation of contents
+				//and show us
+				
+				setTimeout(function (){
+					this.addModalBackground();
+					var modifier = {
+						top: 50,
+						left: 50,
+						}
+					this.setPosition('bl','bl',document.body, modifier);
+					this.show();
+					this.focus();
+				}.bind(menu), 150);
+
+			},
+			enteredView: function (){
+				//#################################################
+				//## UI LOGIC                                    ##
+				//#################################################
+				setTimeout(function (){
+					this.impl.querySelector('x-note').blur = function (){
+						console.log('SHOW A NEW MENU');
+						this.displayMenu();
+					}.bind(this);
+				}.bind(this), 100);
+				
+
+			}
 
 		});
 	</script>

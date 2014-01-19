@@ -71,8 +71,24 @@ label {
 	/*visibility:hidden;*/
 }
 input {
-color:blue;
+	color:blue;
 }
+input:disabled {
+	color: #848484;
+	background-color: #D6D6D6;
+}
+.modalBackgroundShadow {
+	top:0px;
+	left:0px;
+	position:absolute;
+	width: 100%;
+	height: 100%;
+	display: block;
+	position:absolute;
+	background-color:black;
+	z-index: 100;
+	opacity:0.5;
+		}
 
 </style>
 </head>
