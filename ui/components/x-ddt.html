@@ -2,12 +2,43 @@
 	<template>
 		<style>
 		.displayRighe {
-			heigth:10px;
-			overflow-y: scroll;
-			height: 16.5em;
+			height: 16em;
+			width: 100%;
 			border:0.1em solid grey;
 			box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.333333);
-			padding:1em;
+			padding:0.2em;
+			overflow-y: scroll;
+		}
+		.displayRighe  input{
+			display: none;
+		}
+		displayRighe tbody {
+
+		}
+		.displayRighe thead{
+
+		}
+		tbody tr {
+			background-image: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 88%,#eaeaea 100%);
+		}
+		.displayRighe table, thead, tbody, tfooter {
+			width: 100%;
+			border: 0px;
+			padding:0px;
+			margin:0px;
+			border-collapse: collapse;
+			border-spacing: 0;
+		}
+		.displayRighe label{
+			background-color: transparent;
+			color: grey;
+		}
+		.displayRighe thead td{
+			font-weight: bold;
+			background: linear-gradient(15deg, #616161 0%,#616161 4%,#7c7c7c 100%); /* W3C */
+			font-weight:bold;
+			color:white;
+			font-size: 0.8em;
 		}
 		</style>
 
@@ -29,7 +60,7 @@
 		<x-note val="{{ddt.note}}" label="Note"></x-note>
 		<br>
 		Righe:
-		<div class="displayRighe" tabindex="">
+		<!--
 		<template repeat="{{r in ddt.righe}}">
 			<x-numeroriga val="{{r.numero}}" label="N." disabledstatus="true"></x-numeroriga>
 			<x-codicearticolo val="{{r.articolo_codice}}" label="Art." disabledstatus="true"></x-codicearticolo>
@@ -44,13 +75,65 @@
 			<x-codiceiva val="{{r.iva_codice}}" label="Iva" disabledstatus="true"></x-codiceiva>
 			<hr>
 		</template>
+		-->
+		<div class="displayRighe" tabindex="">
+		<table>
+			<thead>
+			<tr>
+				<td>Numero</td>
+				<td>Articolo</td>
+				<td>UM</td>
+				<td>Prezzo</td>
+				<td>Colli</td>
+				<td>Imballaggio</td>
+				<td>Lordo</td>
+				<td>Tara</td>
+				<td>Netto</td>
+				<td>Lotto</td>
+				<td>Iva</td>
+			</tr>
+			</thead>
+			<tbody>
+		<template repeat="{{r in ddt.righe}}">
+			<tr>
+			<td><x-numeroriga val="{{r.numero}}" label=" {{r.numero}}" disabledstatus="true"></x-numeroriga></td>
+			<td><x-codicearticolo val="{{r.articolo_codice}}" label=" " disabledstatus="true"></x-codicearticolo></td>
+			<td><x-codiceum val="{{r.um_codice}}" label=" " disabledstatus="true"></x-codiceum></td>
+			<td><x-prezzo val="{{r.prezzo}}" label=" {{r.prezzo}}" disabledstatus="true"></x-prezzo></td>
+			<td><x-numerocolli val="{{r.colli}}" label=" {{r.colli}}" disabledstatus="true"></x-numerocolli></td>
+			<td><x-codiceimballaggio val="{{r.imballaggio_codice}}" label=" " disabledstatus="true"></x-codiceimballaggio></td>
+			<td><x-peso val="{{r.pesolordo}}" label=" {{r.pesolordo}}" disabledstatus="true"></x-peso></td>
+			<td><x-peso val="{{r.tara}}" label=" {{r.tara}}" disabledstatus="true"></x-peso></td>
+			<td><x-peso val="{{r.pesonetto}}" label=" {{r.pesonetto}}" disabledstatus="true"></x-peso></td>
+			<td><x-lotto val="{{r.lotto}}" label=" {{r.lotto}}" disabledstatus="true"></x-lotto></td>
+			<td><x-codiceiva val="{{r.iva_codice}}" label=" " disabledstatus="true"></x-codiceiva></td>
+			</tr>
+		</template>
+			</tbody>
+		</table>
 		</div>
 	<!-- -->
 	<br>
 	Modifica Riga
+	<BR>
+	<x-numeroriga val="{{rigadamodificare.numero}}" label="N." id="numriga"></x-numeroriga>
+	<x-codicearticolo val="{{rigadamodificare.articolo_codice}}" label="Art."></x-codicearticolo>
+	<x-codiceum val="{{rigadamodificare.um_codice}}" label="UM"></x-codiceum>
+	<x-prezzo val="{{rigadamodificare.prezzo}}" label="Prezzo"></x-prezzo>
+	<x-numerocolli val="{{rigadamodificare.colli}}" label="Colli"></x-numerocolli>
+	<x-codiceimballaggio val="{{rigadamodificare.imballaggio_codice}}" label="Tipo Imball."></x-codiceimballaggio>
+	<x-peso val="{{rigadamodificare.pesolordo}}" label="Lordo"></x-peso>
+	<x-peso val="{{rigadamodificare.tara}}" label="Tara"></x-peso>
+	<x-peso val="{{rigadamodificare.pesonetto}}" label="Netto"></x-peso>
+	<x-lotto val="{{rigadamodificare.lotto}}" label="Lotto"></x-lotto>
+	<x-codiceiva val="{{rigadamodificare.iva_codice}}" label="Iva"></x-codiceiva>
+	<!--
 	<br>
-	<template bind="{{rigadamodificare}}">
-		<x-numeroriga val="{{numero}}" label="N." id="numRigaDaModificare"></x-numeroriga>
+	<template bind="{{rigadamodificare}}" id="rigaDaModificareTemplate">
+		<script>
+		
+		</script>
+		<x-numeroriga val="{{numero}}" label="N." id="numRigaDaModificare" on-blur={{registerInputNumRiga}}></x-numeroriga>
 		<x-codicearticolo val="{{articolo_codice}}" label="Art."></x-codicearticolo>
 		<x-codiceum val="{{um_codice}}" label="UM"></x-codiceum>
 		<x-prezzo val="{{prezzo}}" label="Prezzo"></x-prezzo>
@@ -62,6 +145,7 @@
 		<x-lotto val="{{lotto}}" label="Lotto"></x-lotto>
 		<x-codiceiva val="{{iva_codice}}" label="Iva"></x-codiceiva>
 	</template>
+	-->
 	<!-- -->
 	</template>
 	<script>
@@ -104,74 +188,133 @@
 							lotto:'1/A',
 							iva_codice:'4',
 							},
-						{numero: 2, articolo: '02'},
-						{numero: 3, articolo: '02'},
-						{numero: 4, articolo: '02'},
-						{numero: 5, articolo: '02'},
+						{	numero: 0,
+							articolo_codice: '31',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
+						{	numero: 1,
+							articolo_codice: '20',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
+						{	numero: 0,
+							articolo_codice: '29',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
+						{	numero: 1,
+							articolo_codice: '08',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
+						{	numero: 0,
+							articolo_codice: '05',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
+						{	numero: 1,
+							articolo_codice: '19',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
 						]
 				   }
 				}
 				this.ddt= ajax.ddt;
-				//lavoro su una copia dell'oggetto
 				
-				this.rigadamodificare = {
-							numero: '',
-							articolo_codice: '01',
-							um_codice: '',
-							prezzo: '',
-							colli: '',
-							imballaggio_codice: '',
-							pesolordo:'',
-							tara:'',
-							pesonetto:'',
-							lotto:'',
-							iva_codice:'',
-							}//JSON.parse(JSON.stringify(this.ddt.righe[0]));
-				console.log(this.ddt);
-				
+				//inizializza i campi per una nuova riga
+				this.iniziaRiga();
+				this.reindicizzaRighe();
 				//tengo traccia di quale riga del mio ddt sto modificando
-				var numRigaWatcher = function (id, oldval, newval){
-					console.log('numero changed: ',newval);
-					if(newval!=''){
-						//una nuova riga è stata selezionate... ricerco i dati
-						this.rigadamodificare=JSON.parse(JSON.stringify(this.ddt.righe[newval]));
+				this.numRigaWatcher = function (id, oldval, newval){
+					console.log('numRiga changed. Newval: >', newval, '<')
+					this.numriga= newval;
+					if(newval !='' && newval !=null){
+						this.displayMenu();
 					}else{
-						//do nothing
+						//this.iniziaRiga();
 					}
-					//re register the watcher
-					this.rigadamodificare.watch('numero',numRigaWatcher)
 				}.bind(this);
-				this.rigadamodificare.watch('numero',numRigaWatcher);
+				this.rigadamodificare.watch('numero',this.numRigaWatcher);
 			},
 			displayMenu: function (){
 				console.log('create the menu');
 				var menu = document.createElement('x-menu');
 				var list= [
-					{label:'Testata',action:'none'},
-					{label:'Modifica riga',action:'none'},
-					{label:'Memorizza',action:'none'},
-					{label:'Stampa',action:'none'},
-					{label:'Avanti',action:'none'},
-					{label:'Indietro',action:'none'},
-					{label:'Abbandona',action:'none'}
+					{label:'Modifica riga',_action:function (){this.modificaRiga(this.numriga);}.bind(this)},
+					{label:'Cancella riga',_action:function (){this.eliminaRiga(this.numriga);}.bind(this)},
+					{label:'Memorizza riga',_action:'none'},
+					{label:'Stampa',_action:'none'},
+					{label:'Avanti',_action:'none'},
+					{label:'Indietro',_action:'none'},
+					{label:'Abbandona',_action:'none'}
 				];
+				//remember the full list that compose the menu
 				menu.fulllist = list;
-				var table = menu.generateTable (list);
+				//generate the table for the menu
+				var table = menu.generateTable (menu.fulllist);
+				console.log('the table for the menu is redy:', table);
 
 				console.log('Appending menu to the body:', menu);
 				document.body.appendChild(menu);
 				console.log('menu added!')
 
-				console.log('the table for the menu is redy:', table);
 				menu.createMenu (table.tBodies[0].children);
 				//wait a little and then position the help window in the middle of the body
 				//and remember his width so that it does not change during future modifcation of contents
 				//and show us
+				menu.onConfirm = menu.onCancel = function (){
+					console.log('do we see this????????????????????', this.$.numriga);
+					this.$.numriga.focus();
+				}.bind(this);
 				
 				setTimeout(function (){
 					this.addModalBackground();
 					var modifier = {
-						top: 50,
+						top: -50,
 						left: 50,
 						}
 					this.setPosition('bl','bl',document.body, modifier);
@@ -184,16 +327,69 @@
 				//#################################################
 				//## UI LOGIC                                    ##
 				//#################################################
+/*
+				
 				setTimeout(function (){
-					this.impl.querySelector('x-note').blur = function (){
+					console.log('modifica riga:')
+					console.log(this.$.numRigaDaModificare);
+				
+					this.$.impl.querySelector('x-numeroriga').blur = function (){
 						console.log('SHOW A NEW MENU');
 						this.displayMenu();
 					}.bind(this);
 				}.bind(this), 100);
 				
+*/
+			},
+			modificaRiga: function (numRiga){
+				console.log('XDDT: richiesto di modificare la riga:', numRiga);
+				this.rigadamodificare=JSON.parse(JSON.stringify(this.ddt.righe[numRiga]));
+				//re register the watcher
+				this.rigadamodificare.watch('numero',this.numRigaWatcher);
+			},
+			eliminaRiga: function (numRiga){
+				this.rigadamodificare.numero=null;
+				this.$.numriga.val=null;
+				//this.iniziaRiga();
+				console.log('XDDT: richiesto di cancellare la riga:', numRiga);
+				this.ddt.righe.splice(numRiga, 1);
+				this.reindicizzaRighe();
 
+				//re register the watcher
+				this.rigadamodificare.watch('numero',this.numRigaWatcher);
+			},
+			iniziaRiga: function (oRiga){
+				this.rigadamodificare = {
+							numero: null,
+							articolo_codice: null,
+							um_codice: null,
+							prezzo: null,
+							colli: null,
+							imballaggio_codice: null,
+							pesolordo:null,
+							tara:null,
+							pesonetto:null,
+							lotto:null,
+							iva_codice:null,
+							};
+			},
+			reindicizzaRighe: function (oRiga){
+				console.log('XDDT: reindicizzazzione righe in corso', this.ddt.righe.length)
+				for (var i=0; i < this.ddt.righe.length; i++){
+					var riga = this.ddt.righe[i];
+					console.log('XDDT: riga ',riga.numero,'diventa ',i)
+					riga.numero = i;
+				}
+			},
+			memorizzaRiga: function (oRiga){
+			
+			},
+			memorizzaDdt: function (){
+				
+			},
+			abbandonaDdt: function (){
+				
 			}
-
 		});
 	</script>
 </polymer-element>

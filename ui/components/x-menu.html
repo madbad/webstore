@@ -80,7 +80,6 @@
 		tbody td {
 			border-left: 1px solid #e1e1e1;
 			padding: 0.2em;
-
 		}
 
 		</style>
@@ -93,13 +92,13 @@
 	<script>
 	Polymer('x-menu',{
 		created: function (){
-			console.log('XMENU: activated')
+			//console.log('XMENU: activated')
 			
 			if(this.params!=null){
-				console.log('XMENU: Send a request to the server with params: ',this.params);
+				//console.log('XMENU: Send a request to the server with params: ',this.params);
 				this.getFromServer();
 			}else{
-				console.log('XMENU: No params set at creation time, wait for some');
+				//console.log('XMENU: No params set at creation time, wait for some');
 			}
 
 /*
@@ -120,7 +119,7 @@
 			
 			//manage keyboard events
 			$(this).keydown(function(event) {
-				console.log(event.which);
+				//console.log(event.which);
 				switch (event.which){
 					case 38: this.prev();break; //up
 					case 40: this.next();break; //down
@@ -133,14 +132,32 @@
 		},
 
 		confirm : function (){
+			//an utility function
+			function isFunction(functionToCheck) {
+				var getType = {};
+				return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+			}
+			
+			//console.log('XMENU: the selected element is:',this.getSelection());
+			
+			//fire the action assigned to the element if there is one
+			if (isFunction(this.getSelection()._action)){
+				//console.log('XMENU: selected element _action present... firing it!')
+				this.getSelection()._action();
+			}
+			//console.log('XMENU: call the onConfirm Callback');
+			//return the selected item
 			this.onConfirm(this.getSelection());
 			//if is present remove the modalbackground
 			if(this.modalBackground){
+				//console.log('XMENU: remove the modal  background')
 				this.parentNode.removeChild(this.modalBackground);
 			}
 			//remove me from the dom
+			//console.log('XMENU: remove the menu from the dom')
 			this.parentNode.removeChild(this);
-			//and return the value
+			//and quit
+			
 			return;
 		},
 		cancel : function (){
@@ -155,16 +172,18 @@
 		onConfirm: function(selectedObj){
 			//use this as a callback
 			//return an obj of the selected menu-entry
+			return;
 		},
 		onCancel: function(){
 			//use this as a callback
 		},
 		createMenu : function (list){
+			
 			this.elementsPerPage=10;
-			console.log('XMENU: Creating the menu');
-			console.log('XMENU: Assign an unique ID to each html element');
+			//console.log('XMENU: Creating the menu');
+			//console.log('XMENU: Assign an unique ID to each html element');
 			for (var i=0; i < list.length; i++){
-				console.log('XMENU: new item ID assigned:', i)
+				//console.log('XMENU: new item ID assigned:', i)
 				//assign for each item an unique id
 				list[i].id = 'element'+i;
 			}
@@ -195,13 +214,13 @@
 				this.$.items.querySelector('#element'+this.selected).focus();
 			};
 			this.prev = function (){
-				console.log('select prev');
+				//console.log('select prev');
 				if (this.selected > 0){
 					this.select ( this.selected-1);
 				}
 			};
 			this.next = function (){
-				console.log('select prev');
+				//console.log('select prev');
 				if (this.selected < (list.length-1)){
 					this.select ( this.selected+1);
 				}
@@ -220,7 +239,10 @@
 				this.select(this.getLastOfThePage(page));
 			};
 			this.getSelection = function (){
-				console.log('XMENU: you have selected: ', this.list[this.selected]);
+				//console.log('XMENU: retrieving selection: ');
+				//console.log(this.list);
+				//console.log(this.selected);
+				//console.log('XMENU: you have selected: ', this.list[this.selected]);
 				//return the current selected object
 				return this.list[this.selected];
 			};
@@ -252,16 +274,17 @@
 			this.hidePage = function (pageNum){
 				var hideFrom = ((pageNum-1) * this.elementsPerPage);
 				var hideTo = pageNum * this.elementsPerPage-1;
-				console.log('XMENU: executing requesto to hide page from', hideFrom,' to ',hideTo);
+				//console.log('XMENU: executing requesto to hide page from', hideFrom,' to ',hideTo);
 				//hide the prev page
 				for (var i=hideFrom; i <= hideTo; i++){
-						console.log('try to hide page: ' +i);
+						//console.log('try to hide page: ' +i);
 					if(i >=0 && i <list.length ){
-						console.log('ok');
-						console.log('XMENU: those are our elements:', this.$.items)
-						console.log('XMENU: hiding element:',this.$.items.querySelector('#element'+i), i,' list is long', list.length );
+						//console.log('ok');
+						//console.log('XMENU: those are our elements:', this.$.items)
+						//console.log('XMENU: hiding element:',this.$.items.querySelector('#element'+i), i,' list is long', list.length );
+						//console.log(this.$.items.impl);
 						this.$.items.querySelector('#element'+i).classList.add('hidden');
-						console.log('@@@@@@did we passed  this?');
+						//console.log('@@@@@@did we passed  this?');
 					}
 				}		
 			};
@@ -275,18 +298,18 @@
 				return parseInt(element/this.elementsPerPage)+1;
 			};
 			this.hideAllPages = function (){
-				console.log('XMENU: hide all page request received');
+				//console.log('XMENU: hide all page request received');
 				var pages = this.getPagesNumber();
-				console.log('XMENU: pages found:', pages);
+				//console.log('XMENU: pages found:', pages);
 				for (var i=1; i <= pages; i++){
-					console.log('XMENU: send requesto to hide page:', i);
+					//console.log('XMENU: send requesto to hide page:', i);
 					this.hidePage(i);
 				}
 			}
-			console.log('XMENU: On start hide all pages');
+			//console.log('XMENU: On start hide all pages');
 			//nascondo tutte le pagine
 			this.hideAllPages();
-			console.log('XMENU: Selecting the first page');
+			//console.log('XMENU: Selecting the first page');
 			//di default seleziono la prima riga todo bisognerebbe selezionare l'elemento corrente
 			this.select(0);
 		},
@@ -301,43 +324,50 @@
 						},
 				context: this,
 			}).done(function( msg ) {
-					console.log(msg);
-					console.log('Jsonize the reponse:');
+					//console.log(msg);
+					//console.log('Jsonize the reponse:');
 					var jsonList = $.parseJSON(msg);
 					//the full array of objects we will use
 					this.fulllist = jsonList;
 					//generate a copy of the array to use
-					this.list = this.fulllist.slice(0);
-					console.log(jsonList);
-					console.log('Create the table');
-					var table = this.generateTable (this.list, $.parseJSON(this.params));
-					console.log('Append the table to the shadow dom');
-					this.$.items.appendChild(table);
-					console.log('Generate the menu');
+					//this.list = this.fulllist.slice(0);
+					//console.log(jsonList);
+					//console.log('Create the table');
+					var table = this.generateTable (this.fulllist, $.parseJSON(this.params));
+					//console.log('Append the table to the shadow dom');
+					//this.$.items.appendChild(table);
+					//console.log('Our new dom for Items is now:');
+					//console.log(this.$.items.innerHTML);
+					//console.log('Generate the menu');
 					//console.log(table.tBodies)
 					this.createMenu (table.tBodies[0].children);
 			});
 		},
 		generateTable : function (list, params){
-			console.log('XMENU: generating table content from list:', list);
+			//console.log('XMENU: generating table content from list:', list);
+			//generate a backup copy of the array to use
+			this.list = list.slice(0);
+			//go on with the table creation
 			var table = document.createElement('table');
 			var tableHead = document.createElement('thead');
 			var tableBody = document.createElement('tbody');
 			var tableFoot = document.createElement('tfoot');
 			var rows =[];
 			for (var i=0; i < list.length; i++){
-				console.log('XMENU: processing item of the list n.:', i+1,' su ', list.length );
+				//console.log('XMENU: processing item of the list n.:', i+1,' su ', list.length );
 				var item = list[i];
 				//if is the first iteration.. 
 				//generate the table header with the names of the properties we will show
 				if(i==0){
-					console.log('XMENU: first iteration on table generation. create columns headers');
+					//console.log('XMENU: first iteration on table generation. create columns headers');
 					var headRow = document.createElement('tr');
 					for (prop in item){
-						console.log('XMENU: column header added:', prop);
-						var headField = document.createElement('td');
-						headField.innerHTML =prop;
-						headRow.appendChild(headField);
+						if(prop[0] !='_'){//do not show custom params that start with _
+							//console.log('XMENU: column header added:', prop);
+							var headField = document.createElement('td');
+							headField.innerHTML =prop;
+							headRow.appendChild(headField);
+						}
 					}
 					tableHead.appendChild(headRow);
 				}
@@ -345,21 +375,27 @@
 				//for each property of the current item a field with the data
 				var row = document.createElement('tr');
 				for (prop in item){
-					var field = document.createElement('td');
-					field.innerHTML =item[prop];
-					row.appendChild(field);
+					if(prop[0] !='_'){//do not show custom params that start with _
+						var field = document.createElement('td');
+						field.innerHTML =item[prop];
+						row.appendChild(field);
+					}
 				}
 				tableBody.appendChild(row);
 			}
 			table.appendChild(tableHead);
 			table.appendChild(tableBody);
 			table.appendChild(tableFoot);
-			console.log('XMENU: table generation COMPLETED');
+			//console.log('XMENU: table generation COMPLETED');
+
+			//console.log('XMENU: append the table to the shadow dom');
+			this.$.items.appendChild(table);
+
 			return table;
 		},
 		setPosition: function (myPoint, targetPoint, targetElement, modifier){
-			console.log('XMENU: my current position: ', this.getPosition(this))
-			console.log(this.impl)
+			//console.log('XMENU: my current position: ', this.getPosition(this))
+			//console.log(this.impl)
 
 			
 			var targetPosition = this.getPosition(targetElement);
@@ -411,13 +447,13 @@
 			np.left+=targetPosition.left;
 			np.top+=targetPosition.top;
 			
-			console.log('XMENU: new position:', np);
+			//console.log('XMENU: new position:', np);
 			
 			//assign the new position
 			this.style.top = np.top+'px';
 			this.style.left = np.left+'px';
 			
-			console.log('XMENU: targetPOS', targetPosition, 'targetDIM: ', targetDimensions, 'myDIM: ', myDimensions);
+			//console.log('XMENU: targetPOS', targetPosition, 'targetDIM: ', targetDimensions, 'myDIM: ', myDimensions);
 			
 		},
 		getPosition: function (element) {
@@ -451,7 +487,7 @@
 			*/
 		},
 		searchstringChanged: function(){
-			console.log('XMENU: searching for >'+this.searchstring+'< into: ', this.list);
+			//console.log('XMENU: searching for >'+this.searchstring+'< into: ', this.list);
 			var searchstring = this.searchstring.toLowerCase();
 			
 			var filteredItems = this.fulllist.filter(function(item){
@@ -459,23 +495,23 @@
 				for (prop in item){
 					var fullstring = item[prop].toLowerCase();
 					result = fullstring.search(searchstring);
-					console.log('XMENU: scanned: ', fullstring, ' for: ', searchstring, 'with result: ', result)
+					//console.log('XMENU: scanned: ', fullstring, ' for: ', searchstring, 'with result: ', result)
 					if (result > -1) return true;
 					}
 				});
 				
 			
 			this.list = filteredItems;
-			console.log('XMENU: found:', filteredItems)
+			//console.log('XMENU: found:', filteredItems)
 			//reset the prev selection;
 			this.selected = null;
 			//regenerate the menu
 			var table = this.generateTable (this.list, $.parseJSON(this.params));
-			console.log('delette the prev table')
+			//console.log('delette the prev table')
 			this.$.items.innerHTML = '';
-			console.log('Append the new table to the shadow dom');
+			//console.log('Append the new table to the shadow dom');
 			this.$.items.appendChild(table);
-			console.log('Generate the menu');
+			//console.log('Generate the menu');
 			//console.log(table.tBodies)
 			this.createMenu (table.tBodies[0].children);
 			
