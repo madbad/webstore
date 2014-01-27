@@ -60,22 +60,6 @@
 		<x-note val="{{ddt.note}}" label="Note"></x-note>
 		<br>
 		Righe:
-		<!--
-		<template repeat="{{r in ddt.righe}}">
-			<x-numeroriga val="{{r.numero}}" label="N." disabledstatus="true"></x-numeroriga>
-			<x-codicearticolo val="{{r.articolo_codice}}" label="Art." disabledstatus="true"></x-codicearticolo>
-			<x-codiceum val="{{r.um_codice}}" label="UM" disabledstatus="true"></x-codiceum>
-			<x-prezzo val="{{r.prezzo}}" label="Prezzo" disabledstatus="true"></x-prezzo>
-			<x-numerocolli val="{{r.colli}}" label="Colli" disabledstatus="true"></x-numerocolli>
-			<x-codiceimballaggio val="{{r.imballaggio_codice}}" label="Tipo Imb." disabledstatus="true"></x-codiceimballaggio>
-			<x-peso val="{{r.pesolordo}}" label="Lordo" disabledstatus="true"></x-peso>
-			<x-peso val="{{r.tara}}" label="Tara" disabledstatus="true"></x-peso>
-			<x-peso val="{{r.pesonetto}}" label="Netto" disabledstatus="true"></x-peso>
-			<x-lotto val="{{r.lotto}}" label="Lotto" disabledstatus="true"></x-lotto>
-			<x-codiceiva val="{{r.iva_codice}}" label="Iva" disabledstatus="true"></x-codiceiva>
-			<hr>
-		</template>
-		-->
 		<div class="displayRighe" tabindex="">
 		<table>
 			<thead>
@@ -113,11 +97,10 @@
 		</table>
 		</div>
 	<!-- -->
-	<br>
 	Modifica Riga
 	<BR>
-	<x-numeroriga val="{{rigadamodificare.numero}}" label="N." id="numriga"></x-numeroriga>
-	<x-codicearticolo val="{{rigadamodificare.articolo_codice}}" label="Art."></x-codicearticolo>
+	<x-numeroriga val="{{rigadamodificare.numero}}" label="N." id="numeroriga"></x-numeroriga>
+	<x-codicearticolo val="{{rigadamodificare.articolo_codice}}" id="codicearticolo" label="Art."></x-codicearticolo>
 	<x-codiceum val="{{rigadamodificare.um_codice}}" label="UM"></x-codiceum>
 	<x-prezzo val="{{rigadamodificare.prezzo}}" label="Prezzo"></x-prezzo>
 	<x-numerocolli val="{{rigadamodificare.colli}}" label="Colli"></x-numerocolli>
@@ -126,27 +109,8 @@
 	<x-peso val="{{rigadamodificare.tara}}" label="Tara"></x-peso>
 	<x-peso val="{{rigadamodificare.pesonetto}}" label="Netto"></x-peso>
 	<x-lotto val="{{rigadamodificare.lotto}}" label="Lotto"></x-lotto>
-	<x-codiceiva val="{{rigadamodificare.iva_codice}}" label="Iva"></x-codiceiva>
-	<!--
-	<br>
-	<template bind="{{rigadamodificare}}" id="rigaDaModificareTemplate">
-		<script>
-		
-		</script>
-		<x-numeroriga val="{{numero}}" label="N." id="numRigaDaModificare" on-blur={{registerInputNumRiga}}></x-numeroriga>
-		<x-codicearticolo val="{{articolo_codice}}" label="Art."></x-codicearticolo>
-		<x-codiceum val="{{um_codice}}" label="UM"></x-codiceum>
-		<x-prezzo val="{{prezzo}}" label="Prezzo"></x-prezzo>
-		<x-numerocolli val="{{colli}}" label="Colli"></x-numerocolli>
-		<x-codiceimballaggio val="{{imballaggio_codice}}" label="Tipo Imball."></x-codiceimballaggio>
-		<x-peso val="{{pesolordo}}" label="Lordo"></x-peso>
-		<x-peso val="{{tara}}" label="Tara"></x-peso>
-		<x-peso val="{{pesonetto}}" label="Netto"></x-peso>
-		<x-lotto val="{{lotto}}" label="Lotto"></x-lotto>
-		<x-codiceiva val="{{iva_codice}}" label="Iva"></x-codiceiva>
-	</template>
-	-->
-	<!-- -->
+	<x-codiceiva val="{{rigadamodificare.iva_codice}}" label="Iva" id="codiceiva"></x-codiceiva>
+
 	</template>
 	<script>
 		Polymer('x-ddt', {
@@ -268,25 +232,42 @@
 				//inizializza i campi per una nuova riga
 				this.iniziaRiga();
 				this.reindicizzaRighe();
-				//tengo traccia di quale riga del mio ddt sto modificando
-				this.numRigaWatcher = function (id, oldval, newval){
-					console.log('numRiga changed. Newval: >', newval, '<')
-					this.numriga= newval;
-					if(newval !='' && newval !=null){
-						this.displayMenu();
-					}else{
-						//this.iniziaRiga();
+
+				//check for enter keyopress on riga field
+				//and fire the menu 
+				$(this.$.numeroriga.$.field).keydown(function(event) {
+					switch (event.which){
+						case 13: 
+							if(this.$.numeroriga.val=='' || this.$.numeroriga.val==null){
+								//inizio a creare una nuova riga
+								this.$.numeroriga.val = this.ddt.righe.length;
+								this.$.codicearticolo.$.field.focus();
+								//stop here
+								break;
+							}
+							if(this.$.numeroriga.val>=0){
+								this.displayMenu();
+							}
+						break; //enter
 					}
-				}.bind(this);
-				this.rigadamodificare.watch('numero',this.numRigaWatcher);
+				}.bind(this));
+				//
+				$(this.$.codiceiva.$.field).keydown(function(event) {
+					switch (event.which){
+						case 13: 
+							this.displayMenu();
+						break; //enter
+					}
+				}.bind(this));
+			
 			},
 			displayMenu: function (){
 				console.log('create the menu');
 				var menu = document.createElement('x-menu');
 				var list= [
-					{label:'Modifica riga',_action:function (){this.modificaRiga(this.numriga);}.bind(this)},
-					{label:'Cancella riga',_action:function (){this.eliminaRiga(this.numriga);}.bind(this)},
-					{label:'Memorizza riga',_action:'none'},
+					{label:'Modifica riga',_action:function (){this.modificaRiga(this.$.numeroriga.val);}.bind(this)},
+					{label:'Cancella riga',_action:function (){this.eliminaRiga(this.$.numeroriga.val);}.bind(this)},
+					{label:'Memorizza riga',_action:function (){this.memorizzaRiga(this.rigadamodificare);}.bind(this)},
 					{label:'Stampa',_action:'none'},
 					{label:'Avanti',_action:'none'},
 					{label:'Indietro',_action:'none'},
@@ -303,14 +284,14 @@
 				console.log('menu added!')
 
 				menu.createMenu (table.tBodies[0].children);
+
+				menu.onCancel = function (){
+					this.$.numeroriga.$.field.focus();
+				}.bind(this);
+
 				//wait a little and then position the help window in the middle of the body
 				//and remember his width so that it does not change during future modifcation of contents
 				//and show us
-				menu.onConfirm = menu.onCancel = function (){
-					console.log('do we see this????????????????????', this.$.numriga);
-					this.$.numriga.focus();
-				}.bind(this);
-				
 				setTimeout(function (){
 					this.addModalBackground();
 					var modifier = {
@@ -327,36 +308,24 @@
 				//#################################################
 				//## UI LOGIC                                    ##
 				//#################################################
-/*
 				
-				setTimeout(function (){
-					console.log('modifica riga:')
-					console.log(this.$.numRigaDaModificare);
 				
-					this.$.impl.querySelector('x-numeroriga').blur = function (){
-						console.log('SHOW A NEW MENU');
-						this.displayMenu();
-					}.bind(this);
-				}.bind(this), 100);
 				
-*/
 			},
 			modificaRiga: function (numRiga){
 				console.log('XDDT: richiesto di modificare la riga:', numRiga);
 				this.rigadamodificare=JSON.parse(JSON.stringify(this.ddt.righe[numRiga]));
-				//re register the watcher
-				this.rigadamodificare.watch('numero',this.numRigaWatcher);
+				//do il focus al prossimo campo per iniziare la modifica della riga
+				this.$.codicearticolo.$.field.focus();
 			},
 			eliminaRiga: function (numRiga){
 				this.rigadamodificare.numero=null;
-				this.$.numriga.val=null;
-				//this.iniziaRiga();
+				this.$.numeroriga.val=null;
 				console.log('XDDT: richiesto di cancellare la riga:', numRiga);
 				this.ddt.righe.splice(numRiga, 1);
 				this.reindicizzaRighe();
-
-				//re register the watcher
-				this.rigadamodificare.watch('numero',this.numRigaWatcher);
+				//rido' il focus al campo di selezione della riga
+				this.$.numeroriga.$.field.focus();
 			},
 			iniziaRiga: function (oRiga){
 				this.rigadamodificare = {
@@ -382,7 +351,11 @@
 				}
 			},
 			memorizzaRiga: function (oRiga){
-			
+				console.log('XDDT: memorizzazzione riga in corso', oRiga)
+				this.ddt.righe[oRiga.numero]=JSON.parse(JSON.stringify(oRiga));
+				console.log('XDDT: resetto il numero riga')
+				this.iniziaRiga();
+				this.$.numeroriga.$.field.focus();
 			},
 			memorizzaDdt: function (){
 				
