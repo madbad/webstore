@@ -79,7 +79,7 @@
 			</thead>
 			<tbody>
 		<template repeat="{{r in ddt.righe}}">
-			<tr>
+			<tr id="r{{r.numero}}">
 			<td><x-numeroriga val="{{r.numero}}" label=" {{r.numero}}" disabledstatus="true"></x-numeroriga></td>
 			<td><x-codicearticolo val="{{r.articolo_codice}}" label=" " disabledstatus="true"></x-codicearticolo></td>
 			<td><x-codiceum val="{{r.um_codice}}" label=" " disabledstatus="true"></x-codiceum></td>
@@ -224,6 +224,114 @@
 							lotto:'1/A',
 							iva_codice:'4',
 							},
+						{	numero: 1,
+							articolo_codice: '19',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
+						{	numero: 1,
+							articolo_codice: '19',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
+						{	numero: 1,
+							articolo_codice: '19',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
+						{	numero: 1,
+							articolo_codice: '19',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
+						{	numero: 1,
+							articolo_codice: '19',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
+						{	numero: 1,
+							articolo_codice: '19',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
+						{	numero: 1,
+							articolo_codice: '19',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
+						{	numero: 1,
+							articolo_codice: '19',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
+						{	numero: 1,
+							articolo_codice: '19',
+							um_codice: 'KG',
+							prezzo: '0,001',
+							colli: '10',
+							imballaggio_codice: '01',
+							pesolordo:'1000',
+							tara:'100',
+							pesonetto:'900',
+							lotto:'1/A',
+							iva_codice:'4',
+							},
 						]
 				   }
 				}
@@ -244,9 +352,17 @@
 								this.$.codicearticolo.$.field.focus();
 								//stop here
 								break;
-							}
-							if(this.$.numeroriga.val>=0){
+							}else if(this.$.numeroriga.val>=0 && this.$.numeroriga.val < this.ddt.righe.length){
+								//position to the displayRighe div to the current row
+								location.hash='#r'+this.$.numeroriga.val;
+								//display the menu
 								this.displayMenu();
+							}else{
+								alert('Riga inesistente!');
+								setTimeout(function (){
+									this.$.numeroriga.$.field.focus();
+								}.bind(this), 10);
+								//return false;
 							}
 						break; //enter
 					}
@@ -255,7 +371,7 @@
 				$(this.$.codiceiva.$.field).keydown(function(event) {
 					switch (event.which){
 						case 13: 
-							this.displayMenu();
+							this.displayMenu().select(2);//autoselect memorizza
 						break; //enter
 					}
 				}.bind(this));
@@ -268,10 +384,9 @@
 					{label:'Modifica riga',_action:function (){this.modificaRiga(this.$.numeroriga.val);}.bind(this)},
 					{label:'Cancella riga',_action:function (){this.eliminaRiga(this.$.numeroriga.val);}.bind(this)},
 					{label:'Memorizza riga',_action:function (){this.memorizzaRiga(this.rigadamodificare);}.bind(this)},
-					{label:'Stampa',_action:'none'},
-					{label:'Avanti',_action:'none'},
-					{label:'Indietro',_action:'none'},
-					{label:'Abbandona',_action:'none'}
+					{label:'Stampa DDT',_action:'none'},
+					{label:'Memorizza DDT',_action:function (){this.memorizzaDdt();}.bind(this)},
+					{label:'Abbandona DDT',_action:'none'}
 				];
 				//remember the full list that compose the menu
 				menu.fulllist = list;
@@ -302,15 +417,34 @@
 					this.show();
 					this.focus();
 				}.bind(menu), 150);
-
+				return menu;
 			},
 			enteredView: function (){
 				//#################################################
 				//## UI LOGIC                                    ##
 				//#################################################
 				
-				
-				
+				setTimeout(function (){
+					//get a list of focusable elements
+					this.fields = this.impl.parentElement.querySelectorAll('x-ddt > [val]');
+					//give focus to the first one
+					this.fields[0].querySelector('input').focus();
+					//
+					for (var i = 0; i< this.fields.length; i++){
+						$(this.fields[i]).keydown(function(event) {
+							switch (event.which){
+								case 13:
+									//focus the next field
+									var next = 1+$.inArray(event.target.parentElement.parentElement, this.fields);
+									if(next <= this.fields.length){
+										newField = this.fields[next].querySelector('input');
+										newField.focus();
+									}
+								break; //enter
+							}
+						}.bind(this));
+					}
+				}.bind(this), 100);
 			},
 			modificaRiga: function (numRiga){
 				console.log('XDDT: richiesto di modificare la riga:', numRiga);
@@ -324,6 +458,7 @@
 				console.log('XDDT: richiesto di cancellare la riga:', numRiga);
 				this.ddt.righe.splice(numRiga, 1);
 				this.reindicizzaRighe();
+				this.iniziaRiga();
 				//rido' il focus al campo di selezione della riga
 				this.$.numeroriga.$.field.focus();
 			},
@@ -358,7 +493,18 @@
 				this.$.numeroriga.$.field.focus();
 			},
 			memorizzaDdt: function (){
-				
+				//perform an ajax request to save the ddt
+				$.ajax({
+					type: "POST",
+					url: "./../do.php",
+					data: { action: 'save',
+							params: JSON.stringify(this.ddt)
+					},
+					context: this,
+				}).done(function( msg ) {
+					alert('Ddt saved?');
+					console.log(msg)
+				});
 			},
 			abbandonaDdt: function (){
 				
