@@ -45,7 +45,21 @@ class MyClass extends DefaultClass{
 		//importo eventuali valori delle proprietà che mi sono passato come $params nell'oggetto principale
 		$this->_params=$params;
 		foreach ($params as $key => $value){
-			if($key[0]!='_'){
+			//se si tratta delle righe devo prepararle in modo particolare
+			if($key=='righe'){
+				//creo gli oggetti riga
+				$righe = $value;
+				$value= array();
+				foreach ($righe as $rkey => $rvalue ){
+					$riga = new Riga($rvalue);
+					//vallue diventa il mio array di oggetti Riga
+					$value[]= $riga;
+				}
+			print_r($value);
+			}
+			
+			
+			if($key[0]!='_' && method_exists($this->$key, 'setVal')){
 				$this->$key->setVal($value);
 			}
 		}
@@ -161,11 +175,25 @@ class MyClass extends DefaultClass{
 		//creo l'elenco di tutti i valori da memorizzare
 		$values=array();
 		foreach ($fields as $field){
-			$val=$this->$field->getVal();
-			$values[]=(string) $this->$field->getVal();
-			if($val=='' && in_array($field, $indexes)){
-				//abortisco una delle chiavi primarie è nulla: non posso salvare nel $DATAbase (e comunque non avrebbe senso farlo)
-				return;
+			if(is_array($this->$field->getVal())){
+				//this field is an array we need to treat it differently
+				$itemsId = array();
+				foreach ($this->$field->getVal() as $itemk => $itemv){
+print_r($this->$field->getVal()[$itemk]);
+					$itemv->ddt_numero->setVal($this->numero->getVal());
+					$itemv->ddt_data->setVal($this->data->getVal());
+					$itemv->saveToDb();
+					$itemsId[] = $itemv->numero->getVal(); 
+				}
+				$values[] = implode(',', $itemsId);
+			}else{//do this for all the normal fields
+				$val=$this->$field->getVal();
+				$values[]=(string) $this->$field->getVal();
+				if($val=='' && in_array($field, $indexes)){
+					//abortisco una delle chiavi primarie è nulla: non posso salvare nel $DATAbase (e comunque non avrebbe senso farlo)
+echo '<br>aborting save of '.$this->numero->getVal();
+					return;
+			}
 			}
 		}
 		//aggiungo le '' per evitare che il $TESTO venga trattato numericamente
@@ -279,6 +307,7 @@ class Ddt  extends MyClass {
 		$this->addProp('fattura_data', 'DATA');
 		$this->addProp('note');
 		
+		$this->addProp('righe', 'ARRAY');
 		//$this->righe/**/
 		//$this->righe=array();
 		
@@ -508,21 +537,21 @@ $test=new MyList(
 				if (is_array($value) && is_array($tOperator)){
 					foreach ($value as $tKey => $tVal){
 						$operator[]=$tOperator[$tKey];
-						$newVal[]=$value[$tKey];	
-						$newKey[]=$key;						
+						$newVal[]=$value[$tKey];
+						$newKey[]=$key;
 					}
 				//altrimenti si ho un array di valori ma un solo operatore allora presumo che l'operatore sia lo stesso per tutti i valori
 				}else if (is_array($value) && !is_array($tOperator)){
 					foreach ($value as $tVal){
 						$operator[]=$tOperator;
 						$newVal[]=$tVal;
-						$newKey[]=$key;								
+						$newKey[]=$key;
 					}
 				}else{
 				//se innfino ho un solo valore e un solo operatore allora è tutto semplice 
 					$operator[]=$tOperator;
 					$newVal[]=$value;
-					$newKey[]=$key;							
+					$newKey[]=$key;
 				}
 			}
 		}
