@@ -179,7 +179,7 @@ class MyClass extends DefaultClass{
 				//this field is an array we need to treat it differently
 				$itemsId = array();
 				foreach ($this->$field->getVal() as $itemk => $itemv){
-print_r($this->$field->getVal()[$itemk]);
+//print_r($this->$field->getVal()[$itemk]);
 					$itemv->ddt_numero->setVal($this->numero->getVal());
 					$itemv->ddt_data->setVal($this->data->getVal());
 					$itemv->saveToDb();
