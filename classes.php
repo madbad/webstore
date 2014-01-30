@@ -394,6 +394,10 @@ class Clientefornitore extends MyClass {
 		$this->addProp('email', 'MAIL');
 		$this->addProp('web', 'URL');
 		$this->addProp('valuta', 'TESTO');
+
+		$this->addProp('nome', 'TESTO');
+		$this->addProp('vettore', 'TESTO');
+		$this->addProp('codifica', 'TESTO');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
