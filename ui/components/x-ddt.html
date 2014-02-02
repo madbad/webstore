@@ -47,15 +47,17 @@
 		<br>
 		<x-codiceclientefornitore val="{{ddt.clientefornitore_codice}}" label="Cliente"></x-codiceclientefornitore>
 		<br>
+		Fattura -{{ddt.fattura_numero}}- del -{{ddt.fattura_data}}-
+		<!--
 		<x-numerodoc val="{{ddt.fattura_numero}}" label="N.Fatt."></x-numerodoc>
 		<x-data val="{{ddt.fattura_data}}" label="Data.Fatt."></x-data>
-
+		-->
 		<br>
 		<x-codicecausale val="{{ddt.causale_codice}}" label="Causale di spedizione"></x-codicecausale>
 		<br>
 		<x-codicemezzo val="{{ddt.mezzo_codice}}" label="Mezzo di spedizione"></x-codicemezzo>
 		<br>
-		<x-codiceclientefornitore val="{{ddt.vettore_codice}}" label="Vettore"></x-codiceclientefornitore>
+		<x-codiceclientefornitore val="{{ddt.vettore_codice}}" label="Vettore" isvettore="true"></x-codiceclientefornitore>
 		<br>
 		<x-note val="{{ddt.note}}" label="Note"></x-note>
 		<br>
@@ -371,7 +373,15 @@
 				$(this.$.codiceiva.$.field).keydown(function(event) {
 					switch (event.which){
 						case 13: 
-							this.displayMenu().select(2);//autoselect memorizza
+							this.displayMenu().select(2);//autoselect memorizza riga
+						break; //enter
+					}
+				}.bind(this));
+				//esc menu
+				$(this).keydown(function(event) {
+					switch (event.which){
+						case 27: 
+							this.displayEscMenu();//autoselect memorizza riga
 						break; //enter
 					}
 				}.bind(this));
@@ -384,9 +394,6 @@
 					{label:'Modifica riga',_action:function (){this.modificaRiga(this.$.numeroriga.val);}.bind(this)},
 					{label:'Cancella riga',_action:function (){this.eliminaRiga(this.$.numeroriga.val);}.bind(this)},
 					{label:'Memorizza riga',_action:function (){this.memorizzaRiga(this.rigadamodificare);}.bind(this)},
-					{label:'Stampa DDT',_action:'none'},
-					{label:'Memorizza DDT',_action:function (){this.memorizzaDdt();}.bind(this)},
-					{label:'Abbandona DDT',_action:'none'}
 				];
 				//remember the full list that compose the menu
 				menu.fulllist = list;
@@ -414,6 +421,43 @@
 						left: 50,
 						}
 					this.setPosition('bl','bl',document.body, modifier);
+					this.show();
+					this.focus();
+				}.bind(menu), 150);
+				return menu;
+			},
+			displayEscMenu: function (){
+				console.log('create the menu');
+				var menu = document.createElement('x-menu');
+				var list= [
+					{label:'Memorizza DDT',_action:function (){this.memorizzaDdt();}.bind(this)},
+					{label:'Stampa DDT',_action:'none'},
+					{label:'Stampa e memorizza DDT',_action:'none'},
+					{label:'Abbandona DDT',_action:'none'}
+				];
+				//remember the full list that compose the menu
+				menu.fulllist = list;
+				//generate the table for the menu
+				var table = menu.generateTable (menu.fulllist);
+				console.log('the table for the menu is redy:', table);
+
+				console.log('Appending menu to the body:', menu);
+				document.body.appendChild(menu);
+				console.log('menu added!')
+
+				menu.createMenu (table.tBodies[0].children);
+
+				menu.onCancel = function (){
+					//give the focus to the first field
+					this.fields[0].querySelector('input').focus();
+				}.bind(this);
+
+				//wait a little and then position the help window in the middle of the body
+				//and remember his width so that it does not change during future modifcation of contents
+				//and show us
+				setTimeout(function (){
+					this.addModalBackground();
+					this.setPosition('cc','cc',document.body);
 					this.show();
 					this.focus();
 				}.bind(menu), 150);

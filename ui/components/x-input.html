@@ -1,4 +1,4 @@
-<polymer-element name="x-input" extends="input" attributes="val,label,descrizionecodice,disabledstatus">
+<polymer-element name="x-input" extends="input" attributes="val,label,descrizionecodice,disabledstatus,isvettore">
 	<template>
 	<label>
 		<span style="color:grey">{{label}}</span>
@@ -52,11 +52,16 @@
 				var objType = this.getFieldType();
 				//now capitalize it: the php class has it capitalized: so we need it
 				objType = objType.charAt(0).toUpperCase() + objType.slice(1);
-					
-				var params={
-					_type: objType,
-					codice: ['!=','']
-				};
+
+				var params={};
+				params._type= objType,
+				params.codice= ['!=',''];
+
+				console.log('Cerco solo i vettori?: ', this.isvettore);
+				if(this.isvettore){
+					params.alboautotrasportatori = ['!=',''];
+				}
+				
 				console.log(params);
 				params = JSON.stringify(params);
 				console.log(params);
