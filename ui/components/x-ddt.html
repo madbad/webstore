@@ -555,6 +555,7 @@
 				this.$.numeroriga.$.field.focus();
 			},
 			memorizzaDdt: function (){
+			console.log('Saving:', this.ddt)
 				//perform an ajax request to save the ddt
 				$.ajax({
 					type: "POST",
@@ -595,7 +596,7 @@
 				}).done(function( msg ) {
 					alert('Ddt loaded?');
 					console.log(msg);
-					
+					/*
 					var newDdt = JSON.parse(msg).ddt;
 					var oldDdt = this.ddt;
 					
@@ -603,11 +604,43 @@
 						console.log('updating:', key);
 						oldDdt[key] = newDdt[key];
 					}
+					*/
+					var serverDdt = JSON.parse(msg).ddt;
 					
+					this.ddt={};
+					this.ddt.righe =  new Array(serverDdt.length);
+					for (var i=0; i<=serverDdt.length; i++){
+						this.ddt.righe[i] =  {}; 
+					};
+					console.log(serverDdt);
+					this.ddt = JSON.parse(JSON.stringify(serverDdt)); 
+					this.getRigheFromServer();
+			//console.log(this.ddt);
 					//this.ddt = msg.ddt;
 					//inizializza i campi per una nuova riga
 					this.iniziaRiga();
+				});
+			},
+			getRigheFromServer: function (){
+				$.ajax({
+					type: "POST",
+					url: "./../do.php",
+					data: {
+							action: 'getAll',
+							params:{
+								_type: 'Riga',
+								ddt_numero: this.ddt.numero,
+								ddt_data: this.ddt.data,
+							}
+					},
+					context: this,
+				}).done(function( msg ) {
+					alert('Righe loaded?');
+					console.log(msg);
+					console.log(JSON.parse(msg));
+					this.ddt.righe = JSON.parse(msg);
 					this.reindicizzaRighe();
+					console.log('####################righe reindicizzate:', this.ddt.righe);
 				});
 			},
 		});

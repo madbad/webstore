@@ -189,9 +189,12 @@ class MyClass extends DefaultClass{
 			}else{//do this for all the normal fields
 				$val=$this->$field->getVal();
 				$values[]=(string) $this->$field->getVal();
-				if($val=='' && in_array($field, $indexes)){
+				if($val==='' && in_array($field, $indexes)){ // [ $val !=='0' ] devo fare anche questo test altrimenti la prima riga con indice 0 non mi viene salvata in quanto considera [ 0=='']
 					//abortisco una delle chiavi primarie è nulla: non posso salvare nel $DATAbase (e comunque non avrebbe senso farlo)
 echo '<br>aborting save of '.$this->numero->getVal();
+echo '<br>(1)'.($val==='').' ==>'.$val;
+echo '<br>(2)'.in_array($field, $indexes);
+
 					return;
 			}
 			}
