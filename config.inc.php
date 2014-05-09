@@ -20,7 +20,7 @@ global $config;
 **    sqLite
 -------------------------------------*/
 $config->sqlite=new stdClass();
-$config->sqlite->database =realpath($_SERVER["DOCUMENT_ROOT"]).'/webstore/magazzino.sqlite3';
+$config->sqlite->database =realpath($_SERVER["DOCUMENT_ROOT"]).'/webstore/dati/lafavorita.sqlite3';
 
 
 ?>

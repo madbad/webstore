@@ -117,6 +117,7 @@
 	<script>
 		Polymer('x-ddt', {
 			ready: function() {
+				/*
 				var ajax = {
 				ddt:{
 					_type:"Ddt",
@@ -337,11 +338,28 @@
 						]
 				   }
 				}
-				this.ddt= ajax.ddt;
-				
-				//inizializza i campi per una nuova riga
-				this.iniziaRiga();
-				this.reindicizzaRighe();
+				*/
+				/*
+				console.log('parametri inviati:', this.ddt);
+				$.ajax({
+					type: "POST",
+					url: "./../do.php",
+					data: { action: 'getOne',
+							params: JSON.stringify(this.ddt)
+					},
+					context: this,
+				}).done(function( msg ) {
+					alert('Ddt loaded?');
+					console.log(msg);
+					
+					this.ddt= JSON.parse(msg);
+					
+					//inizializza i campi per una nuova riga
+					this.iniziaRiga();
+					this.reindicizzaRighe();
+				});
+				*/
+				//this.getDdtFromServer();
 
 				//check for enter keyopress on riga field
 				//and fire the menu 
@@ -552,7 +570,46 @@
 			},
 			abbandonaDdt: function (){
 				
-			}
+			},
+			getDdtFromServer: function (){
+				$.ajax({
+					type: "POST",
+					url: "./../do.php",
+					data: {
+							action: 'getOne',
+							/*
+							params:{
+								_type: 'Ddt',
+								numero: '1934',
+								data: '16/11/13',
+							}
+							*/
+							params: this.ddt
+							//_autoExtend: -2,
+					},
+/*					data: { action: 'getOne',
+							params: JSON.stringify(this.ddt)
+					},
+*/
+					context: this,
+				}).done(function( msg ) {
+					alert('Ddt loaded?');
+					console.log(msg);
+					
+					var newDdt = JSON.parse(msg).ddt;
+					var oldDdt = this.ddt;
+					
+					for (var key in newDdt) { 
+						console.log('updating:', key);
+						oldDdt[key] = newDdt[key];
+					}
+					
+					//this.ddt = msg.ddt;
+					//inizializza i campi per una nuova riga
+					this.iniziaRiga();
+					this.reindicizzaRighe();
+				});
+			},
 		});
 	</script>
 </polymer-element>
