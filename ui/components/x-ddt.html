@@ -34,14 +34,14 @@
 			color: grey;
 		}
 		.displayRighe thead td{
-			font-weight: bold;
+
 			background: linear-gradient(15deg, #616161 0%,#616161 4%,#7c7c7c 100%); /* W3C */
 			font-weight:bold;
 			color:white;
 			font-size: 0.8em;
 		}
 		</style>
-
+<x-window title="Gestione DDT">
 		<x-numerodoc val="{{ddt.numero}}" label="Numero"></x-numerodoc>
 		<x-data val="{{ddt.data}}" label="Data"></x-data>
 		<br>
@@ -112,7 +112,7 @@
 	<x-peso val="{{rigadamodificare.pesonetto}}" label="Netto"></x-peso>
 	<x-lotto val="{{rigadamodificare.lotto}}" label="Lotto"></x-lotto>
 	<x-codiceiva val="{{rigadamodificare.iva_codice}}" label="Iva" id="codiceiva"></x-codiceiva>
-
+</x-window>
 	</template>
 	<script>
 		Polymer('x-ddt', {
@@ -451,7 +451,7 @@
 					{label:'Memorizza DDT',_action:function (){this.memorizzaDdt();}.bind(this)},
 					{label:'Stampa DDT',_action:'none'},
 					{label:'Stampa e memorizza DDT',_action:'none'},
-					{label:'Abbandona DDT',_action:'none'}
+					{label:'Abbandona DDT',_action:function (){this.abbandonaDdt();}.bind(this)}
 				];
 				//remember the full list that compose the menu
 				menu.fulllist = list;
@@ -488,7 +488,10 @@
 				
 				setTimeout(function (){
 					//get a list of focusable elements
-					this.fields = this.impl.parentElement.querySelectorAll('x-ddt > [val]');
+					//this.fields = this.impl.parentElement.querySelectorAll('x-ddt > [val]');
+					this.fields = this.impl.querySelectorAll('x-window > div > div > [val]');
+
+//console.log(this.impl.querySelectorAll('x-window > div > div > [val]'));
 					//give focus to the first one
 					this.fields[0].querySelector('input').focus();
 					//
@@ -566,13 +569,17 @@
 					context: this,
 				}).done(function( msg ) {
 					alert('Ddt saved?');
-					console.log(msg)
+					console.log(msg);
+					this.abbandonaDdt();
 				});
 			},
 			abbandonaDdt: function (){
-				
+				this.parentNode.removeChild(this);				
 			},
 			getDdtFromServer: function (){
+				//impostiamo il tipo in quanto non sempre è già impostato
+				this.ddt._type='Ddt';
+				//
 				$.ajax({
 					type: "POST",
 					url: "./../do.php",

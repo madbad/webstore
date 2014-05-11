@@ -48,14 +48,23 @@ class MyClass extends DefaultClass{
 			//se si tratta delle righe devo prepararle in modo particolare
 			if($key=='righe'){
 				//creo gli oggetti riga
-				$righe = $value;
-				$value= array();
-				foreach ($righe as $rkey => $rvalue ){
-					$riga = new Riga($rvalue);
-					//vallue diventa il mio array di oggetti Riga
-					$value[]= $riga;
+				if(is_array($value)){
+					//se il campo righe è gia un array allora significa che contiene già tutti i dati che mi servono in formato json quindi lo lascio comè e lo trasformo in un oggetto riga
+					$righe = $value;	
+					$value= array();
+					
+					foreach ($righe as $rkey => $rvalue ){
+						$riga = new Riga($rvalue);
+						//value diventa il mio array di oggetti Riga
+						$value[]= $riga;
+					}
+				}else{
+					//altrimenti significa che è solo una stringa di numeri che si riferiscono alle mie righe quindi devo ricavarmi i dati dalle righe... 
+					//oppure lascio semplicmente perdere e lascio il valore così com'è
+					$value=$value;
 				}
-			print_r($value);
+
+			//print_r($value);
 			}
 			
 			
@@ -189,14 +198,15 @@ class MyClass extends DefaultClass{
 			}else{//do this for all the normal fields
 				$val=$this->$field->getVal();
 				$values[]=(string) $this->$field->getVal();
-				if($val==='' && in_array($field, $indexes)){ // [ $val !=='0' ] devo fare anche questo test altrimenti la prima riga con indice 0 non mi viene salvata in quanto considera [ 0=='']
+				if($val==='' && in_array($field, $indexes)){
+					// [ $val !=='0' ] devo fare anche questo test altrimenti la prima riga con indice 0 non mi viene salvata in quanto considera [ 0=='']
 					//abortisco una delle chiavi primarie è nulla: non posso salvare nel $DATAbase (e comunque non avrebbe senso farlo)
-echo '<br>aborting save of '.$this->numero->getVal();
-echo '<br>(1)'.($val==='').' ==>'.$val;
-echo '<br>(2)'.in_array($field, $indexes);
+					echo '<br>aborting save of '.$this->numero->getVal();
+					echo '<br>(1)'.($val==='').' ==>'.$val;
+					echo '<br>(2)'.in_array($field, $indexes);
 
 					return;
-			}
+				}
 			}
 		}
 		//aggiungo le '' per evitare che il $TESTO venga trattato numericamente
@@ -246,6 +256,31 @@ echo '<br>(2)'.in_array($field, $indexes);
 			}
 		}
 		//fine estensione oggetto
+		return;
+	}
+	public function deletteFromDb(){
+		//ricava tutti i dati presente nel $DATAbase
+		$fields=$this->getPropertiesNames();
+		$table=$this->getDbName();
+		$indexes=$this->getDbKeys();
+		
+		$sqlite=$GLOBALS['config']->sqlite;
+		
+		$where='WHERE ';
+		$separatore="'";
+		
+		foreach($indexes as $key => $property){
+			if($key>0){
+				$where.=' AND ';
+			}
+			$where.=$this->$property->nome."=".$separatore.$this->$property->getVal().$separatore;
+		}			
+		//la stringa della query
+		$query='DELETE FROM '.$table.' '.$where;
+		//echo $query;
+		//apro il $DATAbase ed eseguo la query
+		$db = new SQLite3($sqlite->database);
+		$results = $db->query($query) or die($query);
 		return;
 	}
 }

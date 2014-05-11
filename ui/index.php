@@ -85,6 +85,7 @@ document.addEventListener('WebComponentsReady', function() {
 	var list= [
 		{label:'Elenca DDT',_action:function (){
 								console.log('test');
+								elencaDdt();
 							}.bind(this)},
 		{label:'Inserisci DDT',_action:function (){
 								var ddtWindow = document.createElement('x-window');
@@ -92,23 +93,26 @@ document.addEventListener('WebComponentsReady', function() {
 								ddtWindow.appendChild(ddtApp);
 								document.body.appendChild(ddtWindow);
 							}.bind(this)},
+							/*
 		{label:'Modifica DDT',_action:function (){
 								var ddtWindow = document.createElement('x-window');
 								var ddtApp = document.createElement('x-ddt');
 								ddtApp.ddt={};
 
 								ddtApp.ddt._type='Ddt';
-								ddtApp.ddt.numero='1934';
+								ddtApp.ddt.numero='1939';
 								ddtApp.ddt.data='16/11/2013';
 								
 								ddtApp.getDdtFromServer();
 								ddtWindow.appendChild(ddtApp);
 								document.body.appendChild(ddtWindow);
 							}.bind(this)}
+	*/
 	];
 
 	//remember the full list that compose the menu
 	menu.fulllist = list;
+	menu.keepAliveOnConfirm = true;
 	//generate the table for the menu
 	var table = menu.generateTable (menu.fulllist);
 	console.log('the table for the menu is redy:', table);
@@ -136,9 +140,65 @@ document.addEventListener('WebComponentsReady', function() {
 		this.show();
 		this.focus();
 	}.bind(menu), 150);
-/*================================
-  
-=================================*/
+
+	/*================================
+	  LIST DDT
+	=================================*/
+	function elencaDdt(params){
+		console.log('create the menu');
+		var ddtList = document.createElement('x-menu');
+		/*
+		ddtList.params = {
+			_type: 'Ddt',
+			data: ['!=',''],
+			cliente_codice: ['!=','']
+		}
+		*/
+		var params =  {
+			_type: 'Ddt',
+			_select: 'numero,data',	
+			data: ['!=',''],
+			clientefornitore_codice: ['!=','']
+		};
+		
+		ddtList.params = JSON.stringify(params);
+		
+		ddtList.onConfirm = function (selection){
+			//when the selection is confirmed start editing the ddt
+			modificaDdt(selection);
+		}.bind(this);
+		ddtList.onCancel = function (selection){
+			console.log('XINPUT: HELP CANCELLED, claim focus back from the help menu');
+			//get the focus back
+			this.$.field.focus();
+		}.bind(this);
+		document.body.appendChild(ddtList);
+
+		//wait a little and then position the help window in the middle of the body
+		//and remember his width so that it does not change during future modifcation of contents
+		//and show us
+		setTimeout(function (){
+			this.addModalBackground();
+			var modifier = {
+				top: 50,
+				left: 0,
+				}
+			this.setPosition('tc','tc',document.body, modifier);
+			console.log(this.offsetWidth);
+			this.style.width = this.offsetWidth+'px';
+			this.show();
+			this.focus();
+		}.bind(ddtList), 150);
+	}
+	/*================================
+	  EDIT DDT
+	=================================*/
+	function modificaDdt(ddt){
+	var ddtApp = document.createElement('x-ddt');
+		ddtApp.ddt=ddt;
+		ddtApp.getDdtFromServer();
+		document.body.appendChild(ddtApp);
+	}
 });
 
 

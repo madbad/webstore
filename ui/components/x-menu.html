@@ -93,6 +93,7 @@
 	Polymer('x-menu',{
 		created: function (){
 			//console.log('XMENU: activated')
+			this.keepAliveOnConfirm=false;
 			
 			if(this.params!=null){
 				//console.log('XMENU: Send a request to the server with params: ',this.params);
@@ -155,7 +156,9 @@
 			}
 			//remove me from the dom
 			//console.log('XMENU: remove the menu from the dom')
-			this.parentNode.removeChild(this);
+			if(!this.keepAliveOnConfirm){
+				this.parentNode.removeChild(this);
+			}
 			//and quit
 			
 			return;

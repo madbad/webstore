@@ -15,6 +15,10 @@ $mytest= new Mezzo(array(codice=>'01'));
 $mytest->getFromDb();
 echo '<br>'.$mytest->toJson();
 */
+
+
+
+
 switch ($_POST["action"]){
 	case "getOne":
 		$myObj = new $_POST["params"]["_type"]($_POST["params"]);
@@ -44,6 +48,32 @@ switch ($_POST["action"]){
 		$myObj = new $params["_type"]($params);
 		//echo "\n!!!!!!!!!!!!!!saving object!!!!!!!!!!!!!!!!";
 		$myObj->saveToDb();
+		break;
+	case "saveAll":
+		break;
+	case "deletteDdt":
+		$myddt= new Ddt(array('numero'=>'1936','data'=>'16/11/2013'));
+		$myddt->getFromDb();
+		$myddtBACKUP = $myddt->toJson();
+
+		$myddtrighe = new MyList(array( '_type'=>'Riga',
+										'ddt_numero'=>$myddt->numero->getVal(),
+										'ddt_data'=>$myddt->data->getVal()));
+
+		$myddtRigheBACKUP = array();								
+		$myddtrighe->iterate(function($riga){
+			global $myddtRigheBACKUP;
+			$myddtRigheBACKUP[] = $riga->toJson();
+			$riga->deletteFromDb();
+		});
+		$myddt->deletteFromDb();
+
+		echo '<br>BackupDDT:<br>';
+		echo $myddtBACKUP;
+
+		echo '<br>BackupRigheDDT:<br>';
+		break;
+	case "deletteAll":
 		break;
 
 	default:
