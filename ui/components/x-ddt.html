@@ -574,7 +574,24 @@
 				});
 			},
 			abbandonaDdt: function (){
-				this.parentNode.removeChild(this);				
+				this.onQuit();
+				this.parentNode.removeChild(this);			
+			},
+			cancellaDdt: function (){
+			console.log('Deletting:', this.ddt)
+				//perform an ajax request to save the ddt
+				$.ajax({
+					type: "POST",
+					url: "./../do.php",
+					data: { action: 'delette',
+							params: JSON.stringify(this.ddt)
+					},
+					context: this,
+				}).done(function( msg ) {
+					alert('Ddt deletted?');
+					console.log(msg);
+					this.abbandonaDdt();
+				});	
 			},
 			getDdtFromServer: function (){
 				//impostiamo il tipo in quanto non sempre è già impostato
@@ -601,7 +618,7 @@
 */
 					context: this,
 				}).done(function( msg ) {
-					alert('Ddt loaded?');
+					console.log('Ddt loaded??');
 					console.log(msg);
 					/*
 					var newDdt = JSON.parse(msg).ddt;
@@ -642,7 +659,7 @@
 					},
 					context: this,
 				}).done(function( msg ) {
-					alert('Righe loaded?');
+					console.log('Righe loaded??');
 					console.log(msg);
 					console.log(JSON.parse(msg));
 					this.ddt.righe = JSON.parse(msg);
@@ -650,6 +667,10 @@
 					console.log('####################righe reindicizzate:', this.ddt.righe);
 				});
 			},
+		onQuit: function(){
+			//use this as a callback
+			//for when the aplication is closed/quitted
+		},
 		});
 	</script>
 </polymer-element>

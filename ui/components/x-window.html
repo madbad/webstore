@@ -49,19 +49,13 @@
 		position: absolute;
 		}
 		</style>
-		<script>
-		function startDrag(event){
-			console.log('drag started');
-		}
-		
-		</script>
-		<div class="window" draggable="true" ondragstart="console.log(event)" ondragend="console.log(event)">
+		<div class="window" draggable="true">
 			<div class="title"> &rang; {{title}}
 			<span class="buttonscontainer">
-				<a href="#" on-focus="{{minimize}}" class="button" hidden?="{{minimizebutton}}"> _ </a>
-				<a href="#" on-focus="{{maximize}}" class="button" hidden?="{{maximizebutton}}"> &square;</a>
-				<a href="#" on-focus="{{demaximize}}" class="button" hidden?="{{demaximizebutton}}"> &square; </a>
-				<a href="#" on-focus="{{close}}" class="button" hidden?="{{closebutton}}"> &times; </a>
+				<a href="#" on-click="{{minimize}}" class="button" hidden?="{{minimizebutton}}"> _ </a>
+				<a href="#" on-click="{{maximize}}" class="button" hidden?="{{maximizebutton}}"> &square;</a>
+				<a href="#" on-click="{{demaximize}}" class="button" hidden?="{{demaximizebutton}}"> &square; </a>
+				<a href="#" on-click="{{close}}" class="button" hidden?="{{closebutton}}"> &times; </a>
 			<span>
 			</div>
 			<div class="content"><content></content></div>
@@ -73,12 +67,17 @@
 
 			this.async(function() {
 				this.focus();
+				Drag.init(
+					this.webkitShadowRoot.querySelector('.title'),//l'elemento da cliccare per spostare
+					this.webkitShadowRoot.querySelector('.window')//l'elemento che verrà spostato
+				);
 			}, null, 100);
-			this.iconizebutton = !true ;//&EmptySmallSquare;
-			this.maximizebutton = !true ;//&EmptySmallSquare;
 			this.minimizebutton = !true ;//&rang;
+			this.maximizebutton = !true ;//&EmptySmallSquare;
+			this.demaximizebutton = !true ;//&EmptySmallSquare;
 			this.closebutton = !true;
 		},
+		/*
 		setPosition: function (htmlElement, htmlElementPoint, myPoint){
 
 			target = htmlElement;
@@ -91,23 +90,31 @@
 				this.webkitShadowRoot.querySelector('.window').style.top=position.top+'px';
 			}.bind(this));
 		},
-		close: function (){
+		*/
+		close: function (event){
+			event.preventDefault();
 			//remove me from the dom
 			this.parentNode.removeChild(this);
+			return false;
 		},
-		maximize: function (){
+		maximize: function (event){
+			event.preventDefault();
 			//remove me from the dom
 			this.parentNode.removeChild(this);
+			return false;
 		},
-		demaximizeclose: function (){
+		demaximizeclose: function (event){
+			event.preventDefault();
 			//remove me from the dom
 			this.parentNode.removeChild(this);
+			return false;
 		},
-		close: function (){
+		close: function (event){
+			event.preventDefault();
 			//remove me from the dom
 			this.parentNode.removeChild(this);
+			return false;
 		},
-		
 	});
 	</script>
 </polymer-element>

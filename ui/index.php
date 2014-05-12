@@ -4,6 +4,8 @@
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/polymer/0.1.1/platform.js"></script>
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/polymer/0.1.1/polymer.js"></script>
 	<script src="./jquery.min.js"></script>
+	<script src="./drag.js"></script>
+	
 <style>
 input {
 	color:black;
@@ -197,6 +199,9 @@ document.addEventListener('WebComponentsReady', function() {
 	var ddtApp = document.createElement('x-ddt');
 		ddtApp.ddt=ddt;
 		ddtApp.getDdtFromServer();
+		ddtApp.onQuit = function (){
+			menu.focus();
+		}
 		document.body.appendChild(ddtApp);
 	}
 });
