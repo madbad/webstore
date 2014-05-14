@@ -85,6 +85,8 @@
 					this.$.field.focus();
 				}.bind(this);
 				document.body.appendChild(helpWindow);
+				helpWindow.searchstring = this.val;
+				//helpWindow.searchstringChanged();
 
 				//wait a little and then position the help window in the middle of the body
 				//and remember his width so that it does not change during future modifcation of contents

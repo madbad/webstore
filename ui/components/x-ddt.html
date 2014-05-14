@@ -103,16 +103,19 @@
 	<BR>
 	<x-numeroriga val="{{rigadamodificare.numero}}" label="N." id="numeroriga"></x-numeroriga>
 	<x-codicearticolo val="{{rigadamodificare.articolo_codice}}" id="codicearticolo" label="Art."></x-codicearticolo>
-	<x-codiceum val="{{rigadamodificare.um_codice}}" label="UM"></x-codiceum>
-	<x-prezzo val="{{rigadamodificare.prezzo}}" label="Prezzo"></x-prezzo>
+	<x-lotto val="{{rigadamodificare.lotto}}" label="Lotto"></x-lotto>
+	<br>
 	<x-numerocolli val="{{rigadamodificare.colli}}" label="Colli"></x-numerocolli>
 	<x-codiceimballaggio val="{{rigadamodificare.imballaggio_codice}}" label="Tipo Imball."></x-codiceimballaggio>
+	<br>
+	<x-codiceum val="{{rigadamodificare.um_codice}}" label="UM"></x-codiceum>
 	<x-peso val="{{rigadamodificare.pesolordo}}" label="Lordo"></x-peso>
 	<x-peso val="{{rigadamodificare.tara}}" label="Tara"></x-peso>
 	<x-peso val="{{rigadamodificare.pesonetto}}" label="Netto"></x-peso>
-	<x-lotto val="{{rigadamodificare.lotto}}" label="Lotto"></x-lotto>
+	<br>
+	<x-prezzo val="{{rigadamodificare.prezzo}}" label="Prezzo"></x-prezzo>
 	<x-codiceiva val="{{rigadamodificare.iva_codice}}" label="Iva" id="codiceiva"></x-codiceiva>
-</x-window>
+	</x-window>
 	</template>
 	<script>
 		Polymer('x-ddt', {
