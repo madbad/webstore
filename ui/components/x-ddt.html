@@ -45,7 +45,7 @@
 		<x-numerodoc val="{{ddt.numero}}" label="Numero"></x-numerodoc>
 		<x-data val="{{ddt.data}}" label="Data"></x-data>
 		<br>
-		<x-codiceclientefornitore val="{{ddt.clientefornitore_codice}}" label="Cliente"></x-codiceclientefornitore>
+		<x-codiceclientefornitore val="{{ddt.clientefornitore_codice}}" label="Cliente" id="codiceclientefornitore"></x-codiceclientefornitore>
 		<br>
 		Fattura -{{ddt.fattura_numero}}- del -{{ddt.fattura_data}}-
 		<!--
@@ -55,9 +55,9 @@
 		<br>
 		<x-codicecausale val="{{ddt.causale_codice}}" label="Causale di spedizione"></x-codicecausale>
 		<br>
-		<x-codicemezzo val="{{ddt.mezzo_codice}}" label="Mezzo di spedizione"></x-codicemezzo>
+		<x-codicemezzo val="{{ddt.mezzo_codice}}" label="Mezzo di spedizione" id="codicemezzo"></x-codicemezzo>
 		<br>
-		<x-codiceclientefornitore val="{{ddt.vettore_codice}}" label="Vettore" isvettore="true"></x-codiceclientefornitore>
+		<x-codiceclientefornitore val="{{ddt.vettore_codice}}" label="Vettore" isvettore="true" id="codicevettore"></x-codiceclientefornitore>
 		<br>
 		<x-note val="{{ddt.note}}" label="Note"></x-note>
 		<br>
@@ -108,10 +108,10 @@
 	<x-numerocolli val="{{rigadamodificare.colli}}" label="Colli"></x-numerocolli>
 	<x-codiceimballaggio val="{{rigadamodificare.imballaggio_codice}}" label="Tipo Imball."></x-codiceimballaggio>
 	<br>
-	<x-codiceum val="{{rigadamodificare.um_codice}}" label="UM"></x-codiceum>
-	<x-peso val="{{rigadamodificare.pesolordo}}" label="Lordo"></x-peso>
-	<x-peso val="{{rigadamodificare.tara}}" label="Tara"></x-peso>
-	<x-peso val="{{rigadamodificare.pesonetto}}" label="Netto"></x-peso>
+	<x-codiceum val="{{rigadamodificare.um_codice}}" label="UM" id="codiceum"></x-codiceum>
+	<x-peso val="{{rigadamodificare.pesolordo}}" label="Lordo" id="pesolordo"></x-peso>
+	<x-peso val="{{rigadamodificare.tara}}" label="Tara" id="tara"></x-peso>
+	<x-peso val="{{rigadamodificare.pesonetto}}" label="Netto" id="pesonetto"></x-peso>
 	<br>
 	<x-prezzo val="{{rigadamodificare.prezzo}}" label="Prezzo"></x-prezzo>
 	<x-codiceiva val="{{rigadamodificare.iva_codice}}" label="Iva" id="codiceiva"></x-codiceiva>
@@ -674,6 +674,49 @@
 			//use this as a callback
 			//for when the aplication is closed/quitted
 		},
+		
+		//automatismi
+		observe: {
+			'rigadamodificare.articolo_codice': 'modificatoArticolo',
+			'rigadamodificare.pesolordo': 'modificatoPeso',
+			'rigadamodificare.tara': 'modificatoPeso',
+			//'rigadamodificare.pesonetto': 'modificatoPeso',
+			'ddt.clientefornitore_codice': 'modificatoCliente',
+		},
+		modificatoArticolo: function(oldValue, newValue) {
+			//wait for data to fullObj to be updated/propagated
+			this.$.codicearticolo.onDataReady = function(){
+				var fullObj = JSON.parse(this.$.codicearticolo.fullObj).articolo;
+				this.$.codiceum.$.field.value = fullObj.um_codice;
+				this.$.codiceiva.$.field.value = fullObj.iva_codice;
+				//self delette
+				this.$.codicearticolo.onDataReady= function(){};
+			}.bind(this);
+		},
+		modificatoPeso: function(oldValue, newValue) {
+			this.$.pesonetto.$.field.value = this.$.pesolordo.$.field.value - this.$.tara.$.field.value;
+		},
+		modificatoCliente: function(oldValue, newValue) {
+			//wait for data to fullObj to be updated/propagated
+			this.$.codiceclientefornitore.onDataReady = function(){
+			console.log('Il cliente è cambiato');
+			console.log(this.$.codicemezzo.$.field.value);
+			console.log(this.$.codicevettore.$.field.value);
+			
+				var fullObj = JSON.parse(this.$.codiceclientefornitore.fullObj).clientefornitore;
+				if(this.$.codicemezzo.$.field.value==""){
+					//this.$.codicemezzo.$.field.value = fullObj.mezzo_codice;		
+					this.$.codicemezzo.val = fullObj.mezzo_codice;		
+
+				}
+				if(this.$.codicevettore.$.field.value==""){
+					//this.$.codicevettore.$.field.value = fullObj.vettore_codice;				
+					this.$.codicevettore.val = fullObj.vettore_codice;				
+				}
+				//self delette
+				this.$.codicearticolo.onDataReady= function(){};
+			}.bind(this);
+		}
 		});
 	</script>
 </polymer-element>

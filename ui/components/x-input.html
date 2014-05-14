@@ -67,6 +67,7 @@
 				console.log(params);
 				console.log('create the menu');
 				var helpWindow = document.createElement('x-menu');
+				helpWindow.title='Seleziona '+this.label;
 				console.log('modify params');
 				helpWindow.params = params;
 				console.log(helpWindow);
@@ -86,11 +87,11 @@
 				}.bind(this);
 				document.body.appendChild(helpWindow);
 				helpWindow.searchstring = this.val;
-				//helpWindow.searchstringChanged();
 
 				//wait a little and then position the help window in the middle of the body
 				//and remember his width so that it does not change during future modifcation of contents
 				//and show us
+				/*
 				setTimeout(function (){
 					this.addModalBackground();
 					var modifier = {
@@ -103,6 +104,23 @@
 					this.show();
 					this.focus();
 				}.bind(helpWindow), 150);
+				*/
+				helpWindow.addModalBackground();
+				helpWindow.show();
+				helpWindow.focus();
+				
+				helpWindow.onReady = function (){
+					this.hideColumn();
+					var modifier = {
+						top: 50,
+						left: 0,
+						};
+					this.setPosition('tc','tc',document.body, modifier);
+					console.log(this.offsetWidth);
+					this.style.width = this.offsetWidth+'px';
+					//auto remove once we have run one time
+					this.onReady = function(){};					
+				}.bind(helpWindow);
 
 			},
 			getProperties: function (){
@@ -147,7 +165,8 @@
 					}).done(function( msg ) {
 						console.log(msg)
 						var myFullObj = $.parseJSON(msg);
-						
+						//remember the full obj retrieved from the server
+						this.fullObj = msg;
 						//extract from the nodeName the object type removing the 'x-codice' string
 						var objType = this.getFieldType();
 						if(myFullObj[objType].descrizione){ 
@@ -159,7 +178,7 @@
 						}else{
 							this.descrizionecodice = '';
 						}
-
+						this.onDataReady();
 					});
 				}
 			},
@@ -182,6 +201,9 @@
 			},
 			fieldblur: function (event, detail, sender){
 				this.blur();
+			},
+			onDataReady: function (){
+				//use this as a callback;
 			}
 		});
 	</script>

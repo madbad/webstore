@@ -1,4 +1,4 @@
-<polymer-element name="x-menu" extends="div" tabindex="0" attributes="items params searchstring">
+<polymer-element name="x-menu" extends="div" tabindex="0" title="Menu" attributes="items params searchstring">
 	<template>
 		<style>
 		:host {
@@ -16,7 +16,8 @@
 			margin-left:50%
 			margin-rigth:50%;
 			visibility: hidden;/*by default we are hidden*/
-			
+			position:fixed;
+border-collapse:separate;
 		}
 		.selected {
 			background-image: none;
@@ -39,6 +40,7 @@
 			font-size:0.8em;
 			color: #757575;
 			text-align: center;
+/*						position:fixed;*/
 		}
 		.title span {
 			position:absolute;
@@ -59,7 +61,7 @@
 			border: 0px;
 			padding:0px;
 			margin:0px;
-			border-collapse: collapse;
+			/*border-collapse: collapse;*/
 			border-spacing: 0;
 		}
 		table{
@@ -81,16 +83,27 @@
 			border-left: 1px solid #e1e1e1;
 			padding: 0.2em;
 		}
+		.hiddenColumn		#foo.hide2 tr *:nth-child(2) {
+    display: none;
+}
 
 		</style>
 		<div class="title">
-			Menu <span>pag.{{page}}/{{pages}}</span>
-			<input id="searchfield" type="text" tabindex="0" value="{{searchstring}}">
-			</div>
+			<div class="dragger">{{title}} <span>pag.{{page}}/{{pages}}</span></div>
+			<input id="searchfield"  placeholder="Digita qui per cercare..." type="text" tabindex="0" value="{{searchstring}}">
+		</div>
 		<div id="items"></div>
 		</template>
 	<script>
 	Polymer('x-menu',{
+		ready: function (){
+			Drag.init(
+				//this.webkitShadowRoot.querySelector('.title'),//l'elemento da cliccare per spostare
+				//this.webkitShadowRoot.querySelector('.items')//l'elemento che verrà spostato
+				this.webkitShadowRoot.querySelector('.dragger'),
+				this
+			);
+		},
 		created: function (){
 			//console.log('XMENU: activated')
 			this.keepAliveOnConfirm=false;
@@ -115,7 +128,7 @@
 
 			//set the focus on us //we need to delay it a bit to be sure it works
 			setTimeout(function (){
-					this.focus();
+				this.focus();
 			}.bind(this), 20);
 			
 			//manage keyboard events
@@ -344,6 +357,8 @@
 					//console.log('Generate the menu');
 					//console.log(table.tBodies)
 					this.createMenu (table.tBodies[0].children);
+					this.searchstringChanged();
+					this.onReady();
 			});
 		},
 		generateTable : function (list, params){
@@ -370,6 +385,9 @@
 							var headField = document.createElement('td');
 							headField.innerHTML =prop;
 							headRow.appendChild(headField);
+							var column =  document.createElement('col');
+							column.id = prop;
+							table.appendChild(column);
 						}
 					}
 					tableHead.appendChild(headRow);
@@ -393,14 +411,26 @@
 
 			//console.log('XMENU: append the table to the shadow dom');
 			this.$.items.appendChild(table);
+			//try to hide some columns
+/*
+			var columnsToHide[] = this.webkitShadowRoot.querySelector("#numero");
+			columnsToHide[] = this.webkitShadowRoot.querySelector("#via");
+			columnsToHide[] = this.webkitShadowRoot.querySelector("#cap");
+			columnsToHide[] = this.webkitShadowRoot.querySelector("#albotraportatori");
 
+			for (var i=0; i <= columnsToHide.length; i++){
+				var column = columnsToHide[i];
+				if(column){
+					column.style.visibility='collapse';
+				}
+			}
+*/
 			return table;
 		},
 		setPosition: function (myPoint, targetPoint, targetElement, modifier){
 			//console.log('XMENU: my current position: ', this.getPosition(this))
 			//console.log(this.impl)
 
-			
 			var targetPosition = this.getPosition(targetElement);
 			var targetDimensions = {
 				width : targetElement.offsetWidth,
@@ -531,7 +561,38 @@
 		removeModalBackground: function (){
 			document.body.removeChild(this.modalBackground);
 		},
-		
+		onReady : function(){
+			//callback for whe we istantiate from the server and are ready to show us
+		},
+		hideColumn: function (){
+			//try to hide some columns
+
+			var columnsToHide = [
+				this.webkitShadowRoot.querySelector("#numero"),
+				this.webkitShadowRoot.querySelector("#via"),
+				this.webkitShadowRoot.querySelector("#cap"),
+				this.webkitShadowRoot.querySelector("#alboautotrasportatori"),
+				this.webkitShadowRoot.querySelector("#mezzo_codice"),
+				this.webkitShadowRoot.querySelector("#vettore_codice"),
+				this.webkitShadowRoot.querySelector("#iva_codice"),
+				this.webkitShadowRoot.querySelector("#web"),
+				this.webkitShadowRoot.querySelector("#valuta"),
+				this.webkitShadowRoot.querySelector("#telefono"),
+				this.webkitShadowRoot.querySelector("#cellulare"),
+				this.webkitShadowRoot.querySelector("#fax"),
+				this.webkitShadowRoot.querySelector("#email"),
+				this.webkitShadowRoot.querySelector("#nome"),
+			];
+
+			console.log(columnsToHide);
+			for (var i=0; i <= columnsToHide.length; i++){
+				var column = columnsToHide[i];
+				if(column){
+					console.log('Column hidden', column);
+					column.style.visibility='collapse';
+				}
+			}
+		}
 	});
 	</script>
 </polymer-element>

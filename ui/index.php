@@ -90,10 +90,8 @@ document.addEventListener('WebComponentsReady', function() {
 								elencaDdt();
 							}.bind(this)},
 		{label:'Inserisci DDT',_action:function (){
-								var ddtWindow = document.createElement('x-window');
 								var ddtApp = document.createElement('x-ddt');
-								ddtWindow.appendChild(ddtApp);
-								document.body.appendChild(ddtWindow);
+								document.body.appendChild(ddtApp);
 							}.bind(this)},
 							/*
 		{label:'Modifica DDT',_action:function (){
