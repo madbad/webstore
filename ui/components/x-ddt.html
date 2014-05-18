@@ -120,6 +120,20 @@
 	<script>
 		Polymer('x-ddt', {
 			ready: function() {
+				this.ddt = {
+					_type:"Ddt",
+					numero:"",
+					data:"",
+					clientefornitore_codice:"",
+					causale_codice:"",
+					mezzo_codice:"",
+					vettore_codice:"",
+					fattura_numero:"",
+					fattura_data:"",
+					note:"",
+					righe: [],
+				   };
+				this.iniziaRiga()
 				/*
 				var ajax = {
 				ddt:{
@@ -411,6 +425,7 @@
 			displayMenu: function (){
 				console.log('create the menu');
 				var menu = document.createElement('x-menu');
+				menu.title="Gestione riga"
 				var list= [
 					{label:'Modifica riga',_action:function (){this.modificaRiga(this.$.numeroriga.val);}.bind(this)},
 					{label:'Cancella riga',_action:function (){this.eliminaRiga(this.$.numeroriga.val);}.bind(this)},
@@ -450,6 +465,7 @@
 			displayEscMenu: function (){
 				console.log('create the menu');
 				var menu = document.createElement('x-menu');
+				menu.title="Gestione DDT"
 				var list= [
 					{label:'Memorizza DDT',_action:function (){this.memorizzaDdt();}.bind(this)},
 					{label:'Stampa DDT',_action:'none'},
@@ -687,14 +703,14 @@
 			//wait for data to fullObj to be updated/propagated
 			this.$.codicearticolo.onDataReady = function(){
 				var fullObj = JSON.parse(this.$.codicearticolo.fullObj).articolo;
-				this.$.codiceum.$.field.value = fullObj.um_codice;
-				this.$.codiceiva.$.field.value = fullObj.iva_codice;
+				this.$.codiceum.val = fullObj.um_codice;
+				this.$.codiceiva.val = fullObj.iva_codice;
 				//self delette
 				this.$.codicearticolo.onDataReady= function(){};
 			}.bind(this);
 		},
 		modificatoPeso: function(oldValue, newValue) {
-			this.$.pesonetto.$.field.value = this.$.pesolordo.$.field.value - this.$.tara.$.field.value;
+			this.$.pesonetto.val = this.$.pesolordo.$.field.value - this.$.tara.$.field.value;
 		},
 		modificatoCliente: function(oldValue, newValue) {
 			//wait for data to fullObj to be updated/propagated

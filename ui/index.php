@@ -147,6 +147,7 @@ document.addEventListener('WebComponentsReady', function() {
 	function elencaDdt(params){
 		console.log('create the menu');
 		var ddtList = document.createElement('x-menu');
+		ddtList.title="Seleziona DDT";
 		/*
 		ddtList.params = {
 			_type: 'Ddt',
