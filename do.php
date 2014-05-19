@@ -1,23 +1,5 @@
 <?php
 include ('./config.inc.php');
-/*
-$myClasses=array('Ddt','Riga','Articolo','Imballaggio','ClienteFornitore','Iva','Causale','Mezzo','Um'); 
-
-foreach ($myClasses as $myClass) {
-	$test = new $myClass();
-	$test->createDb();
-
-}
-*/
-//echo "\n!!!!!!!!!!!!!!test!!!!!!!!!!!!!!!!";
-/*
-$mytest= new Mezzo(array(codice=>'01'));
-$mytest->getFromDb();
-echo '<br>'.$mytest->toJson();
-*/
-
-
-
 
 switch ($_POST["action"]){
 	case "getOne":
@@ -39,21 +21,26 @@ switch ($_POST["action"]){
 		$out=substr($out, 0, -1);
 		$out.= "]";
 		echo $out;
-		
 		break;
 	case "save":
-		//echo "\n!!!!!!!!!!!!!!decoding!!!!!!!!!!!!!!!!";
 		$params = json_decode($_POST["params"], true);
-		//echo "\n!!!!!!!!!!!!!!creatin object!!!!!!!!!!!!!!!!";
 		$myObj = new $params["_type"]($params);
-		//echo "\n!!!!!!!!!!!!!!saving object!!!!!!!!!!!!!!!!";
 		$myObj->saveToDb();
 		break;
-	case "saveAll":
+	case "saveAll": /*untested*/
+		$objList =  json_decode($_POST["params"], true);
+		foreach ($objList as  $obj){
+			$myObj = new $obj["_type"]($obj);
+			$myObj->saveToDb();
+		}
 		break;
-	case "deletteDdt":
-		$myddt= new Ddt(array('numero'=>'1936','data'=>'16/11/2013'));
-		$myddt->getFromDb();
+
+	case "delette":
+		$params = json_decode($_POST["params"], true);
+		$myObj = new $params["_type"]($params);
+		$myObj->deletteFromDb();
+
+		/*
 		$myddtBACKUP = $myddt->toJson();
 
 		$myddtrighe = new MyList(array( '_type'=>'Riga',
@@ -72,10 +59,8 @@ switch ($_POST["action"]){
 		echo $myddtBACKUP;
 
 		echo '<br>BackupRigheDDT:<br>';
+		*/
 		break;
-	case "deletteAll":
-		break;
-
 	default:
 		break;
 }

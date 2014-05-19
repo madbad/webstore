@@ -45,7 +45,7 @@
 		<x-numerodoc val="{{ddt.numero}}" label="Numero"></x-numerodoc>
 		<x-data val="{{ddt.data}}" label="Data"></x-data>
 		<br>
-		<x-codiceclientefornitore val="{{ddt.clientefornitore_codice}}" label="Cliente" id="codiceclientefornitore"></x-codiceclientefornitore>
+		<x-codiceclientefornitore val="{{ddt.clientefornitore_codice}}" label="Fornitore o Cliente" id="codiceclientefornitore"></x-codiceclientefornitore>
 		<br>
 		Fattura -{{ddt.fattura_numero}}- del -{{ddt.fattura_data}}-
 		<!--
@@ -58,6 +58,8 @@
 		<x-codicemezzo val="{{ddt.mezzo_codice}}" label="Mezzo di spedizione" id="codicemezzo"></x-codicemezzo>
 		<br>
 		<x-codiceclientefornitore val="{{ddt.vettore_codice}}" label="Vettore" isvettore="true" id="codicevettore"></x-codiceclientefornitore>
+		<br>
+		<x-codiceclientefornitore val="{{ddt.destinatario_codice}}" label="Destinatario" id="codicedestinatario"></x-codiceclientefornitore>
 		<br>
 		<x-note val="{{ddt.note}}" label="Note"></x-note>
 		<br>
@@ -125,6 +127,7 @@
 					numero:"",
 					data:"",
 					clientefornitore_codice:"",
+					destinatario_codice:"",					
 					causale_codice:"",
 					mezzo_codice:"",
 					vettore_codice:"",
@@ -470,7 +473,8 @@
 					{label:'Memorizza DDT',_action:function (){this.memorizzaDdt();}.bind(this)},
 					{label:'Stampa DDT',_action:'none'},
 					{label:'Stampa e memorizza DDT',_action:'none'},
-					{label:'Abbandona DDT',_action:function (){this.abbandonaDdt();}.bind(this)}
+					{label:'Abbandona DDT',_action:function (){this.abbandonaDdt();}.bind(this)},
+					{label:'Cancella DDT',_action:function (){this.cancellaDdt();}.bind(this)}					
 				];
 				//remember the full list that compose the menu
 				menu.fulllist = list;
@@ -710,7 +714,9 @@
 			}.bind(this);
 		},
 		modificatoPeso: function(oldValue, newValue) {
-			this.$.pesonetto.val = this.$.pesolordo.$.field.value - this.$.tara.$.field.value;
+			if(this.$.pesolordo.val>0){
+				this.$.pesonetto.val = this.$.pesolordo.val - this.$.tara.val;
+			}
 		},
 		modificatoCliente: function(oldValue, newValue) {
 			//wait for data to fullObj to be updated/propagated

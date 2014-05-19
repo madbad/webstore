@@ -341,6 +341,7 @@ class Ddt  extends MyClass {
 		$this->addProp('causale_codice', 'CODICE');
 		$this->addProp('mezzo_codice', 'CODICE');
 		$this->addProp('vettore_codice', 'CODICE');
+		$this->addProp('destinatario_codice', 'CODICE');
 		$this->addProp('fattura_numero', 'NUMERATORE');
 		$this->addProp('fattura_data', 'DATA');
 		$this->addProp('note');
@@ -354,6 +355,19 @@ class Ddt  extends MyClass {
 	}
 	function getDbKeys(){
 		return array('numero','data');
+	}
+	//ovverride the default "deletteFromDb" function since we need to delette "rows" too
+	function deletteFromDb(){
+		$myddtrighe = new MyList(array( '_type'=>'Riga',
+										'ddt_numero'=>$this->numero->getVal(),
+										'ddt_data'=>$this->data->getVal()));
+
+		$myddtrighe->iterate(function($riga){
+			global $myddtRigheBACKUP;
+			$myddtRigheBACKUP[] = $riga->toJson();
+			$riga->deletteFromDb();
+		});
+		parent::deletteFromDb();
 	}
 }
 
