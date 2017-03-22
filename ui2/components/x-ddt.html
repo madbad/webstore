@@ -1,0 +1,48 @@
+<link rel="import"  href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/polymer-element.html">
+
+<dom-module id='x-ddt'>
+	<template>
+		<h1>Heading!</h1>
+		<p>We are elements in custom-element's local DOM.</p>
+	</template>
+	<script>
+		// Define the class for a new element called custom-element
+		class xDdt extends Polymer.Element {
+			static get is() { return "x-ddt"; }
+			constructor() {
+				super();
+			}
+			static get properties() {
+				return {
+					value: {
+						type: String,
+						reflectToAttribute: true
+					},
+					label: {
+						type: String,
+						reflectToAttribute: true
+					},
+
+					descrizionecodice: {
+						type: String,
+						reflectToAttribute: true
+					},					
+					isdisabled: Boolean,
+					count: {
+						type: Number,
+						readOnly: true,
+						notify: true
+					},
+					isvettore: Boolean,
+					count: {
+						type: Number,
+						readOnly: true,
+						notify: true
+					},
+				}
+			}
+		}
+		// Register the new element with the browser
+		customElements.define(xDdt.is, xDdt);
+	</script>
+</dom-module>

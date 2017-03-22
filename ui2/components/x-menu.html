@@ -1,0 +1,657 @@
+<link rel="import"  href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/polymer-element.html">
+
+<dom-module id='x-menu'>
+    <script src="./../libs/drag.js"></script>
+	<template>
+		<style>
+		:host {
+			/*box-shadow: 3px 3px 5px 1px #ccc;*/
+			border: 1px solid #a1a1a1;
+			color: #000000;
+			display: inline-block;
+			min-width:15em;
+			max-width:90%;
+			position:relative;
+			background-color:white;
+			border-radius: 0.8em;
+			overflow:hidden;
+			z-index: 100;
+			margin-left:50%
+			margin-rigth:50%;
+			visibility: hidden;/*by default we are hidden*/
+			position:fixed;
+			border-collapse:separate;
+		}
+		.selected {
+			background-image: none;
+			border-color:orange;
+			outline: none;
+			box-shadow: 0 0 10px orange;
+			background-color: orange;
+		}
+		.hidden {
+			width: 0px;
+			height: 0px;
+			visibility:hidden;
+			display:none;
+			overflow:hidden;
+		}
+		.title {
+			background: linear-gradient(to bottom, #cdd2d8 8%,#989a9b 100%); /* W3C */
+			text-shadow:#CECECE 0px 1px 0, #000 0 -1px 0;
+			font-weight:bold;
+			font-size:0.8em;
+			color: #757575;
+			text-align: center;
+/*						position:fixed;*/
+		}
+		.title span {
+			position:absolute;
+			top:0px;
+			right:1em; 
+		}
+		.title input {
+			padding:0.4em;
+			border-radius: 0.4em;
+			color: grey;
+			font-size:1.2em;
+			width:90%;
+			margin:0.8em;
+			margin-top:0px;
+		}
+		table, thead, tbody, tfooter {
+			width: 100%;
+			border: 0px;
+			padding:0px;
+			margin:0px;
+			/*border-collapse: collapse;*/
+			border-spacing: 0;
+		}
+		table{
+
+		}
+		thead {
+			font-weight:bold;
+			color:white;
+			font-size: 0.8em;
+		}
+		thead td{
+			background: linear-gradient(15deg, #616161 0%,#616161 4%,#7c7c7c 100%); /* W3C */
+			padding: 0.2em;
+		}
+		tbody tr {
+			background-image: linear-gradient(to bottom, #ffffff 0%,#ffffff 88%,#eaeaea 100%);
+		}
+		tbody td {
+			border-left: 1px solid #e1e1e1;
+			padding: 0.2em;
+		}
+		.hiddenColumn #foo.hide2 tr *:nth-child(2) {
+    display: none;
+}
+
+		</style>
+		<div class="title">
+			<div id="dragger" class="dragger">{{title}} <span>pag.{{page}}/{{pages}}</span></div>
+			<input id="searchfield" placeholder="Digita qui per cercare..." type="text" tabindex="0" value="{{searchstring:change}}">
+		</div>
+		<div id="items"></div>
+		
+	</template>
+	<script>
+		// Define the class for a new element called custom-element
+		class xMenu extends Polymer.Element {
+			static get is() { return "x-menu"; }
+			constructor() {
+				super();
+			}
+			static get properties() {
+				return {
+					title: {
+						type: String,
+						reflectToAttribute: true,
+						value:'Default Title',
+					},
+					page: {
+						type: Number,
+						reflectToAttribute: true,
+						value:1,
+					},
+					pages: {
+						type: Number,
+						reflectToAttribute: true,
+						value:1,
+					},
+					searchstring: {
+						type: String,
+						reflectToAttribute: true,
+						value:'',
+					},
+				}
+			}
+/*
+events methods
+*/
+			onfocus(event, detail, sender){
+				console.log("x-menu: got focus");
+			}
+			onblur(event, detail, sender){
+				console.log("x-menu: lost focus");
+			}
+			onkeydown(event, detail, sender){
+				console.log("x-menu: keydown");
+				switch (event.which){
+					//F1
+					case 112: this.getHelp();
+					break;
+				}
+			}
+/*
+custom methods
+*/
+		ready(){
+			console.log("xmenu: called ready();")
+			super.ready();
+			Drag.init(
+				this.$.dragger,
+				this
+			);
+			this.created();
+		}
+		created(){
+			console.log("xmenu: called created();")
+
+			//console.log('XMENU: activated')
+			this.keepAliveOnConfirm=false;
+			
+			if(this.params!=null){
+				//console.log('XMENU: Send a request to the server with params: ',this.params);
+				this.getFromServer();
+			}else{
+				console.log('XMENU: No params set at creation time, wait for some');
+			}
+
+/*
+			//if we passed something inside <x-menu></x-menu>
+			//we use it to generate the actual menu into the shadowDOM
+			if(this.innerHTML!=''){
+				setTimeout(function (){
+					this.$.items.innerHTML = this.innerHTML;
+					this.createMenu (this.$.items.children);
+				}.bind(this), 10);
+			}
+*/
+
+			//set the focus on us //we need to delay it a bit to be sure it works
+			setTimeout(function (){
+				this.focus();
+			}.bind(this), 20);
+			
+			//manage keyboard events
+			this.addEventListener("onkeydown", function(event) {
+				console.log("xmenu: keydown");
+				switch (event.which){
+					case 38: this.prev();break; //up
+					case 40: this.next();break; //down
+					case 33: this.selectFirstOfThePage();break; //pgup
+					case 34: this.selectLastOfThePage();break; //pgdown
+					case 13: this.confirm(); break; //enter
+					case 27: this.cancel(); break; //esc
+				}
+			},false);
+		}
+
+		confirm(){
+			//an utility function
+			function isFunction(functionToCheck) {
+				var getType = {};
+				return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+			}
+			
+			//console.log('XMENU: the selected element is:',this.getSelection());
+			
+			//fire the action assigned to the element if there is one
+			if (isFunction(this.getSelection()._action)){
+				//console.log('XMENU: selected element _action present... firing it!')
+				this.getSelection()._action();
+			}
+			//console.log('XMENU: call the onConfirm Callback');
+			//return the selected item
+			this.onConfirm(this.getSelection());
+			//if is present remove the modalbackground
+			if(this.modalBackground){
+				//console.log('XMENU: remove the modal  background')
+				this.parentNode.removeChild(this.modalBackground);
+			}
+			//remove me from the dom
+			//console.log('XMENU: remove the menu from the dom')
+			if(!this.keepAliveOnConfirm){
+				this.parentNode.removeChild(this);
+			}
+			//and quit
+			
+			return;
+		}
+		cancel(){
+			this.onCancel();
+			//if is present remove the modalbackground
+			if(this.modalBackground){
+				this.parentNode.removeChild(this.modalBackground);
+			}
+			//remove me from the dom without returning any value
+			this.parentNode.removeChild(this);
+		}
+		onConfirm(selectedObj){
+			//use this as a callback
+			//return an obj of the selected menu-entry
+			return;
+		}
+		onCancel(){
+			//use this as a callback
+		}
+		createMenu(list){
+			
+			this.elementsPerPage=10;
+			//console.log('XMENU: Creating the menu');
+			//console.log('XMENU: Assign an unique ID to each html element');
+			for (var i=0; i < list.length; i++){
+				//console.log('XMENU: new item ID assigned:', i)
+				//assign for each item an unique id
+				list[i].id = 'element'+i;
+			}
+
+			//seleziona una riga della tabella
+			this.select = function (id){
+				//deseleziona vecchio elemento
+				if (this.selected != null){
+					this.$.items.querySelector('#element'+this.selected).classList.toggle('selected');
+				}
+			
+				//nascondo la vecchia pagina
+				this.hidePage(this.getCurPage());
+
+				//mostro la nuova
+				this.page = this.getPageOfTheElement(id);
+				this.pages = this.getPagesNumber();
+				this.showPage(this.page);
+				
+
+				//seleziona il nuovo elemento
+				this.$.items.querySelector('#element'+id).classList.toggle('selected');
+				
+				//ricordo la selezione
+				this.selected = id;
+				
+				//give the new element the focus
+				this.$.items.querySelector('#element'+this.selected).focus();
+			};
+			this.prev = function (){
+				//console.log('select prev');
+				if (this.selected > 0){
+					this.select ( this.selected-1);
+				}
+			};
+			this.next = function (){
+				//console.log('select prev');
+				if (this.selected < (list.length-1)){
+					this.select ( this.selected+1);
+				}
+			};
+			this.first = function (){
+				this.select(0);
+			};
+			this.last = function (){
+				this.select(list.length);
+			};
+			this.selectFirstOfThePage = function (page){
+				this.select(this.getFirstOfThePage(page));
+			};
+			this.selectLastOfThePage = function (page){
+				//console.log('selecting: '+element);
+				this.select(this.getLastOfThePage(page));
+			};
+			this.getSelection = function (){
+				//console.log('XMENU: retrieving selection: ');
+				//console.log(this.list);
+				//console.log(this.selected);
+				//console.log('XMENU: you have selected: ', this.list[this.selected]);
+				//return the current selected object
+				return this.list[this.selected];
+			};
+			this.getLastOfThePage = function (page){
+				if(!page){page=this.getCurPage()-1}else{page=page-1;}
+				if((this.elementsPerPage-1) > list.length){pageElement=list.length-1}else{pageElement=this.elementsPerPage-1 }
+				var element = (page * this.elementsPerPage) + pageElement;
+				return element;
+			}
+
+			this.getFirstOfThePage = function (page){
+				if(!page){page=this.getCurPage()-1}else{page=page-1;}
+				var element = (page * this.elementsPerPage);
+				return element;
+			}
+
+			this.showPage = function (pageNum){
+				var showFrom = ((pageNum-1) * this.elementsPerPage);
+				var showTo = pageNum * this.elementsPerPage-1;
+				//hide the prev page
+				for (var i=showFrom; i <= showTo; i++){
+						//console.log('try to show: ' +i);
+					if(i >=0 && i <list.length ){
+						//console.log('ok');
+						this.$.items.querySelector('#element'+i).classList.remove('hidden');
+					}
+				}
+			};
+			this.hidePage = function (pageNum){
+				var hideFrom = ((pageNum-1) * this.elementsPerPage);
+				var hideTo = pageNum * this.elementsPerPage-1;
+				//console.log('XMENU: executing requesto to hide page from', hideFrom,' to ',hideTo);
+				//hide the prev page
+				for (var i=hideFrom; i <= hideTo; i++){
+						//console.log('try to hide page: ' +i);
+					if(i >=0 && i <list.length ){
+						//console.log('ok');
+						//console.log('XMENU: those are our elements:', this.$.items)
+						//console.log('XMENU: hiding element:',this.$.items.querySelector('#element'+i), i,' list is long', list.length );
+						//console.log(this.$.items.impl);
+						this.$.items.querySelector('#element'+i).classList.add('hidden');
+						//console.log('@@@@@@did we passed  this?');
+					}
+				}		
+			};
+			this.getCurPage = function (){
+				return parseInt((this.selected | 1)/this.elementsPerPage)+1;
+			};
+			this.getPagesNumber = function (){
+				return parseInt(list.length/this.elementsPerPage)+1;
+			};
+			this.getPageOfTheElement = function (element){
+				return parseInt(element/this.elementsPerPage)+1;
+			};
+			this.hideAllPages = function (){
+				//console.log('XMENU: hide all page request received');
+				var pages = this.getPagesNumber();
+				//console.log('XMENU: pages found:', pages);
+				for (var i=1; i <= pages; i++){
+					//console.log('XMENU: send requesto to hide page:', i);
+					this.hidePage(i);
+				}
+			}
+			//console.log('XMENU: On start hide all pages');
+			//nascondo tutte le pagine
+			this.hideAllPages();
+			//console.log('XMENU: Selecting the first page');
+			//di default seleziono la prima riga todo bisognerebbe selezionare l'elemento corrente
+			this.select(0);
+		}
+		getFromServer(){
+			//perform an ajax request to get the list to display
+			$.ajax({
+				type: "POST",
+				url: "./../do.php",
+				data: {
+						action: 'getAll',
+						params: $.parseJSON(this.params)
+						},
+				context: this,
+			}).done(function( msg ) {
+					console.log(msg);
+					//console.log('Jsonize the reponse:');
+					var jsonList = $.parseJSON(msg);
+					//the full array of objects we will use
+					this.fulllist = jsonList;
+					//generate a copy of the array to use
+					//this.list = this.fulllist.slice(0);
+					//console.log(jsonList);
+					//console.log('Create the table');
+					var table = this.generateTable (this.fulllist, $.parseJSON(this.params));
+					//console.log('Append the table to the shadow dom');
+					//this.$.items.appendChild(table);
+					//console.log('Our new dom for Items is now:');
+					//console.log(this.$.items.innerHTML);
+					//console.log('Generate the menu');
+					//console.log(table.tBodies)
+					this.createMenu (table.tBodies[0].children);
+					this.searchstringChanged();
+					this.onReady();
+			});
+		}
+		generateTable(list, params){
+			//console.log('XMENU: generating table content from list:', list);
+			//generate a backup copy of the array to use
+			this.list = list.slice(0);
+			//go on with the table creation
+			var table = document.createElement('table');
+			var tableHead = document.createElement('thead');
+			var tableBody = document.createElement('tbody');
+			var tableFoot = document.createElement('tfoot');
+			var rows =[];
+			for (var i=0; i < list.length; i++){
+				//console.log('XMENU: processing item of the list n.:', i+1,' su ', list.length );
+				var item = list[i];
+				//if is the first iteration.. 
+				//generate the table header with the names of the properties we will show
+				if(i==0){
+					//console.log('XMENU: first iteration on table generation. create columns headers');
+					var headRow = document.createElement('tr');
+					for (prop in item){
+						if(prop[0] !='_'){//do not show custom params that start with _
+							//console.log('XMENU: column header added:', prop);
+							var headField = document.createElement('td');
+							headField.innerHTML =prop;
+							headRow.appendChild(headField);
+							var column =  document.createElement('col');
+							column.id = prop;
+							table.appendChild(column);
+						}
+					}
+					tableHead.appendChild(headRow);
+				}
+				
+				//for each property of the current item a field with the data
+				var row = document.createElement('tr');
+				for (prop in item){
+					if(prop[0] !='_'){//do not show custom params that start with _
+						var field = document.createElement('td');
+						field.innerHTML =item[prop];
+						row.appendChild(field);
+					}
+				}
+				tableBody.appendChild(row);
+			}
+			table.appendChild(tableHead);
+			table.appendChild(tableBody);
+			table.appendChild(tableFoot);
+			//console.log('XMENU: table generation COMPLETED');
+
+			//console.log('XMENU: append the table to the shadow dom');
+			this.$.items.appendChild(table);
+			//try to hide some columns
+/*
+			var columnsToHide[] = this.webkitShadowRoot.querySelector("#numero");
+			columnsToHide[] = this.webkitShadowRoot.querySelector("#via");
+			columnsToHide[] = this.webkitShadowRoot.querySelector("#cap");
+			columnsToHide[] = this.webkitShadowRoot.querySelector("#albotraportatori");
+
+			for (var i=0; i <= columnsToHide.length; i++){
+				var column = columnsToHide[i];
+				if(column){
+					column.style.visibility='collapse';
+				}
+			}
+*/
+			return table;
+		}
+		setPosition(myPoint, targetPoint, targetElement, modifier){
+			//console.log('XMENU: my current position: ', this.getPosition(this))
+			//console.log(this.impl)
+
+			var targetPosition = this.getPosition(targetElement);
+			var targetDimensions = {
+				width : targetElement.offsetWidth,
+				height:  targetElement.offsetHeight,
+			};
+			var myDimensions = {
+				width : this.offsetWidth,
+				height:  this.offsetHeight,
+			};
+			
+			var np ={
+				top:0,
+				left:0,
+			}
+			
+			switch(myPoint[0]){
+				case 't':np.top+=0;break;
+				case 'b':np.top-=myDimensions.height;break;
+				case 'c':np.top-=myDimensions.height/2;break;
+			}
+
+			switch(targetPoint[0]){
+				case 't':np.top+=0;break;
+				case 'b':np.top+=targetDimensions.height;break;
+				case 'c':np.top+=targetDimensions.height/2;break;
+			}
+			
+			switch(myPoint[1]){
+				case 'l':np.left+=0;break;
+				case 'r':np.left-=myDimensions.width;break;
+				case 'c':np.left-=myDimensions.width/2;break;
+			}
+
+			switch(targetPoint[1]){
+				case 'l':np.left+=0;break;
+				case 'r':np.left+=targetDimensions.width;break;
+				case 'c':np.left+=targetDimensions.width/2;break;
+			}
+			
+			//apply the modifier if exist
+			if(modifier){
+				targetPosition.left+= modifier.left;
+				targetPosition.top+= modifier.top;
+			}
+			
+			//
+			np.left+=targetPosition.left;
+			np.top+=targetPosition.top;
+			
+			//console.log('XMENU: new position:', np);
+			
+			//assign the new position
+			this.style.top = np.top+'px';
+			this.style.left = np.left+'px';
+			
+			//console.log('XMENU: targetPOS', targetPosition, 'targetDIM: ', targetDimensions, 'myDIM: ', myDimensions);
+			
+		}
+		getPosition(element) {
+			var xPosition = 0;
+			var yPosition = 0;
+			while(element) {
+				xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+				yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
+				element = element.offsetParent;
+			}
+			return { left: xPosition, top: yPosition };
+		}
+		show(){
+			this.style.visibility='visible';
+		}
+		hide(){
+			this.style.visibility='hidden';
+		}
+		paramsChanged(){
+			//creo i parametri della query da una stringa json
+			if(this.params){
+				this.params = this.params.replace("'/g", '"');
+				//ricavo i dati con cui riempire la finestra
+				this.getFromServer();
+			}
+			/*
+			if(this.jsonList){
+				this.jsonList = $.parseJSON(this.jsonList)
+				this.jsonToTable(this.jsonList);
+			}
+			*/
+		}
+		searchstringChanged(){
+			//console.log('XMENU: searching for >'+this.searchstring+'< into: ', this.list);
+			var searchstring = this.searchstring.toLowerCase();
+			
+			var filteredItems = this.fulllist.filter(function(item){
+				var result = false;
+				for (prop in item){
+					var fullstring = item[prop].toLowerCase();
+					result = fullstring.search(searchstring);
+					//console.log('XMENU: scanned: ', fullstring, ' for: ', searchstring, 'with result: ', result)
+					if (result > -1) return true;
+					}
+				});
+				
+			
+			this.list = filteredItems;
+			//console.log('XMENU: found:', filteredItems)
+			//reset the prev selection;
+			this.selected = null;
+			//regenerate the menu
+			var table = this.generateTable (this.list, $.parseJSON(this.params));
+			//console.log('delette the prev table')
+			this.$.items.innerHTML = '';
+			//console.log('Append the new table to the shadow dom');
+			this.$.items.appendChild(table);
+			//console.log('Generate the menu');
+			//console.log(table.tBodies)
+			this.createMenu (table.tBodies[0].children);
+			
+		}
+		focus(){
+			//send the focus to the input field
+			this.$.searchfield.focus();
+		}
+		addModalBackground(){
+			this.modalBackground = document.createElement('div');
+			this.modalBackground.classList.add('modalBackgroundShadow');
+			document.body.insertBefore(this.modalBackground, this);
+		}
+		removeModalBackground(){
+			document.body.removeChild(this.modalBackground);
+		}
+		onReady(){
+			//callback for whe we istantiate from the server and are ready to show us
+		}
+		hideColumn(){
+			//try to hide some columns
+
+			var columnsToHide = [
+				this.webkitShadowRoot.querySelector("#numero"),
+				this.webkitShadowRoot.querySelector("#via"),
+				this.webkitShadowRoot.querySelector("#cap"),
+				this.webkitShadowRoot.querySelector("#alboautotrasportatori"),
+				this.webkitShadowRoot.querySelector("#mezzo_codice"),
+				this.webkitShadowRoot.querySelector("#vettore_codice"),
+				this.webkitShadowRoot.querySelector("#iva_codice"),
+				this.webkitShadowRoot.querySelector("#web"),
+				this.webkitShadowRoot.querySelector("#valuta"),
+				this.webkitShadowRoot.querySelector("#telefono"),
+				this.webkitShadowRoot.querySelector("#cellulare"),
+				this.webkitShadowRoot.querySelector("#fax"),
+				this.webkitShadowRoot.querySelector("#email"),
+				this.webkitShadowRoot.querySelector("#nome"),
+			];
+
+			console.log(columnsToHide);
+			for (var i=0; i <= columnsToHide.length; i++){
+				var column = columnsToHide[i];
+				if(column){
+					console.log('Column hidden', column);
+					column.style.visibility='collapse';
+				}
+			}
+		}
+	}
+		
+		// Register the new element with the browser
+		customElements.define(xMenu.is, xMenu);
+	</script>
+</dom-module>

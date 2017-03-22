@@ -1,0 +1,218 @@
+<link rel="import"  href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/polymer-element.html">
+
+<dom-module id='x-input'>
+	<template>
+		<label>
+			<span style="color:grey">[[label]]</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		// Define the class for a new element called custom-element
+		class xInput extends Polymer.Element {
+			static get is() { return "x-input"; }
+			constructor() {
+				super();
+//				this.textContent = "I'm a custom-element.";
+			}
+			static get properties() {
+				return {
+					value: {
+						type: String,
+						reflectToAttribute: true,
+						value:'test text',
+					},
+					label: {
+						type: String,
+						reflectToAttribute: true
+					},
+					descrizionecodice: {
+						type: String,
+						reflectToAttribute: true
+					},					
+					disabled: {
+						type: Boolean,
+						reflectToAttribute: true
+					},
+					lenght: {
+						type: Number,
+						reflectToAttribute: true,
+						value:10,
+					},
+					/*
+					lenght: {
+						type: Number,
+						readOnly: true,
+						notify: true
+					},
+					*/
+				}
+			}
+/*
+events methods
+*/
+
+			onfocus(event, detail, sender){
+				
+				console.log("x-input: got focus");
+				/*
+				//call our custom focus
+				//this.focus();
+				//select everithing on the field
+				var element = event.target;
+				element.select();
+				*/
+			}
+			onblur(event, detail, sender){
+				console.log("x-input: lost focus");
+				//this.blur();
+			}
+			onkeydown(event, detail, sender){
+				console.log("x-input: keydown");
+				switch (event.which){
+					//F1
+					case 112: this.getHelp();
+					break;
+				}
+			}
+/*
+custom methods
+*/
+			getHelp(){
+				
+				//extract from the nodeName the object type removing the 'x-codice' string
+				var objType = this.getFieldType();
+				//now capitalize it: the php class has it capitalized: so we need it
+				objType = objType.charAt(0).toUpperCase() + objType.slice(1);
+
+				var params={};
+				params._type= objType,
+				params.codice= ['!=',''];
+
+				console.log('Cerco solo i vettori?: ', this.isvettore);
+				if(this.isvettore){
+					params.alboautotrasportatori = ['!=',''];
+				}
+				
+				console.log(params);
+				params = JSON.stringify(params);
+				console.log(params);
+				console.log('create the menu');
+				var helpWindow = document.createElement('x-menu');
+				helpWindow.title='Seleziona '+this.label;
+				console.log('modify params');
+				helpWindow.params = params;
+				console.log(helpWindow);
+				console.log('append menu');
+				helpWindow.onconfirm = function (selection){
+					console.log('XINPUT: HELP CONFIRMED, retrieving data');
+					//retrieve the data
+					this.val=selection.codice;
+					console.log('XINPUT: HELP CONFIRMED, claim focus back from the help menu');
+					//get the focus back
+					this.$.field.focus();
+				}.bind(this);
+				helpWindow.oncancel = function (selection){
+					console.log('XINPUT: HELP CANCELLED, claim focus back from the help menu');
+					//get the focus back
+					this.$.field.focus();
+				}.bind(this);
+				document.body.appendChild(helpWindow);
+				helpWindow.searchstring = this.val;
+
+				//wait a little and then position the help window in the middle of the body
+				//and remember his width so that it does not change during future modifcation of contents
+				//and show us
+				/*
+				setTimeout(function (){
+					this.addModalBackground();
+					var modifier = {
+						top: 50,
+						left: 0,
+						}
+					this.setPosition('tc','tc',document.body, modifier);
+					console.log(this.offsetWidth);
+					this.style.width = this.offsetWidth+'px';
+					this.show();
+					this.focus();
+				}.bind(helpWindow), 150);
+				*/
+				helpWindow.addModalBackground();
+				helpWindow.show();
+				helpWindow.focus();
+				
+				helpWindow.onReady = function (){
+					this.hideColumn();
+					var modifier = {
+						top: 50,
+						left: 0,
+						};
+					this.setPosition('tc','tc',document.body, modifier);
+					console.log(this.offsetWidth);
+					this.style.width = this.offsetWidth+'px';
+					//auto remove once we have run one time
+					this.onReady = function(){};
+				}.bind(helpWindow);
+
+			}
+			aggiornaDescrizioneCodice(){
+				if(this.impl.nodeName.search('CODICE')>0){
+					//extract from the nodeName the object type removing the 'x-codice' string
+					var objType = this.getFieldType();
+					//now capitalize it: the php class has it capitalized: so we need it
+					objType = objType.charAt(0).toUpperCase() + objType.slice(1);
+
+					//perform an ajax request to get the data from the server
+					$.ajax({
+						type: "POST",
+						url: "./../do.php",
+						data: { action: 'getOne',
+								params: {
+											_type: objType,
+											codice: this.val
+											//_autoExtend: -2,
+								},
+						},
+						context: this,
+					}).done(function( msg ) {
+						console.log(msg)
+						var myFullObj = $.parseJSON(msg);
+						//remember the full obj retrieved from the server
+						this.fullObj = msg;
+						//extract from the nodeName the object type removing the 'x-codice' string
+						var objType = this.getFieldType();
+						if(myFullObj[objType].descrizione){ 
+							//se l'oggetto ha una proprietà descrizine mostro quella
+							this.descrizionecodice = myFullObj[objType].descrizione;
+						}else if(myFullObj[objType].ragionesociale){ 
+							//se invece ha una proprietà ragione sociale mostro quella
+							this.descrizionecodice = myFullObj[objType].ragionesociale;
+						}else{
+							this.descrizionecodice = '';
+						}
+						this.onDataReady();
+					});
+				}
+			}
+			getFieldType(){
+				//make sure it is lowercase
+				var nodeName = this.nodeName.toLowerCase();
+				//extract from the nodeName the object type removing the 'x-codice' string
+				var objType = nodeName.replace('x-codice', '');
+				return objType;
+			}
+		}
+		// Register the new element with the browser
+		customElements.define(xInput.is, xInput);
+	</script>
+</dom-module>
