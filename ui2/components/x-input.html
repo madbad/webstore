@@ -3,7 +3,7 @@
 <dom-module id='x-input'>
 	<template>
 		<label>
-			<span style="color:grey">[[label]]</span>
+			<span style="color:grey">{{label}}</span>
 			<input 
 				id="field"
 				value="{{value::change}}"
@@ -30,11 +30,10 @@
 					value: {
 						type: String,
 						reflectToAttribute: true,
-						value:'test text',
 					},
 					label: {
 						type: String,
-						reflectToAttribute: true
+						reflectToAttribute: true,
 					},
 					descrizionecodice: {
 						type: String,
@@ -81,8 +80,8 @@ events methods
 				console.log("x-input: keydown");
 				switch (event.which){
 					//F1
-					case 112: this.getHelp();
-					break;
+					//case 112: this.getHelp();
+					//break;
 				}
 			}
 /*

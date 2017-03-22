@@ -1,4 +1,6 @@
 <link rel="import"  href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/polymer-element.html">
+<link rel="import" href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/lib/elements/dom-repeat.html">
+
 
 <dom-module id='x-menu'>
     <script src="./../libs/drag.js"></script>
@@ -18,7 +20,7 @@
 			z-index: 100;
 			margin-left:50%
 			margin-rigth:50%;
-			visibility: hidden;/*by default we are hidden*/
+			visibility: hidden;
 			position:fixed;
 			border-collapse:separate;
 		}
@@ -27,6 +29,9 @@
 			border-color:orange;
 			outline: none;
 			box-shadow: 0 0 10px orange;
+			background-color: orange;
+		}
+		.selected td{
 			background-color: orange;
 		}
 		.hidden {
@@ -43,7 +48,7 @@
 			font-size:0.8em;
 			color: #757575;
 			text-align: center;
-/*						position:fixed;*/
+/*			position:fixed;*/
 		}
 		.title span {
 			position:absolute;
@@ -66,9 +71,6 @@
 			margin:0px;
 			/*border-collapse: collapse;*/
 			border-spacing: 0;
-		}
-		table{
-
 		}
 		thead {
 			font-weight:bold;
@@ -93,9 +95,32 @@
 		</style>
 		<div class="title">
 			<div id="dragger" class="dragger">{{title}} <span>pag.{{page}}/{{pages}}</span></div>
-			<input id="searchfield" placeholder="Digita qui per cercare..." type="text" tabindex="0" value="{{searchstring:change}}">
+			<input 
+				id="searchfield"
+				placeholder="Digita qui per cercare..."
+				type="text"
+				tabindex="0"
+				value="{{searchstring:change}}"
+				on-focus="onInputFocus"
+				on-blur="onInputBlur"
+				on-keydown="onInputKeydown"
+			>
 		</div>
-		<div id="items"></div>
+		<div id="items">
+			<table id="table">
+				<thead id="tableHead"></thead>
+				<tbody id="tableBody">
+					<template is="dom-repeat" items="{{items}}">
+					<tr>
+					<td>
+						{{item.label}}
+					</td>
+					</tr>
+					</template> 
+				</tbody>
+				<tfoot id="tableFooter"></tfoot>
+			</table>
+		</div>
 		
 	</template>
 	<script>
@@ -115,53 +140,61 @@
 					page: {
 						type: Number,
 						reflectToAttribute: true,
-						value:1,
 					},
 					pages: {
 						type: Number,
 						reflectToAttribute: true,
-						value:1,
 					},
 					searchstring: {
 						type: String,
 						reflectToAttribute: true,
-						value:'',
+					},
+					items: {
+						type: Array,
+						reflectToAttribute: true,
+					},
+					selectedId:{
+						type: Number,
+						reflectToAttribute: true,
+						value:0,
 					},
 				}
 			}
 /*
 events methods
 */
-			onfocus(event, detail, sender){
+			onInputFocus(event, detail, sender){
 				console.log("x-menu: got focus");
 			}
-			onblur(event, detail, sender){
+			onInputBlur(event, detail, sender){
 				console.log("x-menu: lost focus");
 			}
-			onkeydown(event, detail, sender){
+			onInputKeydown(event, detail, sender){
 				console.log("x-menu: keydown");
 				switch (event.which){
-					//F1
-					case 112: this.getHelp();
-					break;
+					case 38: console.log("up");this.selectPrev();console.log("up:done");break; //up
+					case 40: this.selectNext();break; //down
+					case 33: this.selectFirstOfThePage();break; //pgup
+					case 34: this.selectLastOfThePage();break; //pgdown
+					case 13: this.confirm(); break; //enter
+					case 27: this.cancel(); break; //esc
 				}
 			}
 /*
 custom methods
 */
 		ready(){
-			console.log("xmenu: called ready();")
 			super.ready();
+			
+			//make our element focusable
+			this.tabIndex = 0
+			
+			//and draggable
 			Drag.init(
 				this.$.dragger,
 				this
 			);
-			this.created();
-		}
-		created(){
-			console.log("xmenu: called created();")
-
-			//console.log('XMENU: activated')
+			
 			this.keepAliveOnConfirm=false;
 			
 			if(this.params!=null){
@@ -170,37 +203,56 @@ custom methods
 			}else{
 				console.log('XMENU: No params set at creation time, wait for some');
 			}
-
-/*
-			//if we passed something inside <x-menu></x-menu>
-			//we use it to generate the actual menu into the shadowDOM
-			if(this.innerHTML!=''){
-				setTimeout(function (){
-					this.$.items.innerHTML = this.innerHTML;
-					this.createMenu (this.$.items.children);
-				}.bind(this), 10);
-			}
-*/
-
-			//set the focus on us //we need to delay it a bit to be sure it works
-			setTimeout(function (){
-				this.focus();
-			}.bind(this), 20);
+			this.focus();
 			
 			//manage keyboard events
 			this.addEventListener("onkeydown", function(event) {
-				console.log("xmenu: keydown");
 				switch (event.which){
-					case 38: this.prev();break; //up
-					case 40: this.next();break; //down
+					case 38: this.selectPrev();break; //up
+					case 40: this.selectNext();break; //down
 					case 33: this.selectFirstOfThePage();break; //pgup
 					case 34: this.selectLastOfThePage();break; //pgdown
 					case 13: this.confirm(); break; //enter
 					case 27: this.cancel(); break; //esc
 				}
 			},false);
-		}
+			
+			//manage keyboard events
+			this.addEventListener("focus", function(event) {
+				console.log("give focus to the input");
+				this.$.searchfield.focus()
+			}.bind(this),false);
+			
+			//manage propchange events
+			this.addEventListener("items-changed", function(event) {
+				console.log("items changed!!!!");
+				//select the first element
+				if(this.items.length > 0){
+					this.selectedId=0;
+					this.selectItemById(this.selectedId);
+				}
 
+			}.bind(this),false);
+
+		}
+		selectItemById(id){
+			//remove selected class from current element
+			this.$.table.rows[this.selectedId].classList.remove("selected");
+			//select the new element
+			this.selectedId = id;
+			//apply the selected class to the new element
+			this.$.table.rows[id].classList.add("selected");
+		}
+		selectNext(){
+			console.log("select next");
+			this.selectItemById(this.selectedId+1);
+		}
+		selectPrev(id){
+			this.selectItemById(this.selectedId-1);
+		}
+		getSelected(){
+			return this.items[this.selectedId];
+		}
 		confirm(){
 			//an utility function
 			function isFunction(functionToCheck) {
@@ -208,16 +260,14 @@ custom methods
 				return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
 			}
 			
-			//console.log('XMENU: the selected element is:',this.getSelection());
-			
 			//fire the action assigned to the element if there is one
-			if (isFunction(this.getSelection()._action)){
-				//console.log('XMENU: selected element _action present... firing it!')
-				this.getSelection()._action();
+			if (isFunction(this.getSelected()._action)){
+				this.getSelected()._action();
 			}
-			//console.log('XMENU: call the onConfirm Callback');
-			//return the selected item
-			this.onConfirm(this.getSelection());
+			
+			//call the onConfirma callback
+			this.onConfirm(this.getSelected());
+
 			//if is present remove the modalbackground
 			if(this.modalBackground){
 				//console.log('XMENU: remove the modal  background')
@@ -249,142 +299,7 @@ custom methods
 		onCancel(){
 			//use this as a callback
 		}
-		createMenu(list){
-			
-			this.elementsPerPage=10;
-			//console.log('XMENU: Creating the menu');
-			//console.log('XMENU: Assign an unique ID to each html element');
-			for (var i=0; i < list.length; i++){
-				//console.log('XMENU: new item ID assigned:', i)
-				//assign for each item an unique id
-				list[i].id = 'element'+i;
-			}
 
-			//seleziona una riga della tabella
-			this.select = function (id){
-				//deseleziona vecchio elemento
-				if (this.selected != null){
-					this.$.items.querySelector('#element'+this.selected).classList.toggle('selected');
-				}
-			
-				//nascondo la vecchia pagina
-				this.hidePage(this.getCurPage());
-
-				//mostro la nuova
-				this.page = this.getPageOfTheElement(id);
-				this.pages = this.getPagesNumber();
-				this.showPage(this.page);
-				
-
-				//seleziona il nuovo elemento
-				this.$.items.querySelector('#element'+id).classList.toggle('selected');
-				
-				//ricordo la selezione
-				this.selected = id;
-				
-				//give the new element the focus
-				this.$.items.querySelector('#element'+this.selected).focus();
-			};
-			this.prev = function (){
-				//console.log('select prev');
-				if (this.selected > 0){
-					this.select ( this.selected-1);
-				}
-			};
-			this.next = function (){
-				//console.log('select prev');
-				if (this.selected < (list.length-1)){
-					this.select ( this.selected+1);
-				}
-			};
-			this.first = function (){
-				this.select(0);
-			};
-			this.last = function (){
-				this.select(list.length);
-			};
-			this.selectFirstOfThePage = function (page){
-				this.select(this.getFirstOfThePage(page));
-			};
-			this.selectLastOfThePage = function (page){
-				//console.log('selecting: '+element);
-				this.select(this.getLastOfThePage(page));
-			};
-			this.getSelection = function (){
-				//console.log('XMENU: retrieving selection: ');
-				//console.log(this.list);
-				//console.log(this.selected);
-				//console.log('XMENU: you have selected: ', this.list[this.selected]);
-				//return the current selected object
-				return this.list[this.selected];
-			};
-			this.getLastOfThePage = function (page){
-				if(!page){page=this.getCurPage()-1}else{page=page-1;}
-				if((this.elementsPerPage-1) > list.length){pageElement=list.length-1}else{pageElement=this.elementsPerPage-1 }
-				var element = (page * this.elementsPerPage) + pageElement;
-				return element;
-			}
-
-			this.getFirstOfThePage = function (page){
-				if(!page){page=this.getCurPage()-1}else{page=page-1;}
-				var element = (page * this.elementsPerPage);
-				return element;
-			}
-
-			this.showPage = function (pageNum){
-				var showFrom = ((pageNum-1) * this.elementsPerPage);
-				var showTo = pageNum * this.elementsPerPage-1;
-				//hide the prev page
-				for (var i=showFrom; i <= showTo; i++){
-						//console.log('try to show: ' +i);
-					if(i >=0 && i <list.length ){
-						//console.log('ok');
-						this.$.items.querySelector('#element'+i).classList.remove('hidden');
-					}
-				}
-			};
-			this.hidePage = function (pageNum){
-				var hideFrom = ((pageNum-1) * this.elementsPerPage);
-				var hideTo = pageNum * this.elementsPerPage-1;
-				//console.log('XMENU: executing requesto to hide page from', hideFrom,' to ',hideTo);
-				//hide the prev page
-				for (var i=hideFrom; i <= hideTo; i++){
-						//console.log('try to hide page: ' +i);
-					if(i >=0 && i <list.length ){
-						//console.log('ok');
-						//console.log('XMENU: those are our elements:', this.$.items)
-						//console.log('XMENU: hiding element:',this.$.items.querySelector('#element'+i), i,' list is long', list.length );
-						//console.log(this.$.items.impl);
-						this.$.items.querySelector('#element'+i).classList.add('hidden');
-						//console.log('@@@@@@did we passed  this?');
-					}
-				}		
-			};
-			this.getCurPage = function (){
-				return parseInt((this.selected | 1)/this.elementsPerPage)+1;
-			};
-			this.getPagesNumber = function (){
-				return parseInt(list.length/this.elementsPerPage)+1;
-			};
-			this.getPageOfTheElement = function (element){
-				return parseInt(element/this.elementsPerPage)+1;
-			};
-			this.hideAllPages = function (){
-				//console.log('XMENU: hide all page request received');
-				var pages = this.getPagesNumber();
-				//console.log('XMENU: pages found:', pages);
-				for (var i=1; i <= pages; i++){
-					//console.log('XMENU: send requesto to hide page:', i);
-					this.hidePage(i);
-				}
-			}
-			//console.log('XMENU: On start hide all pages');
-			//nascondo tutte le pagine
-			this.hideAllPages();
-			//console.log('XMENU: Selecting the first page');
-			//di default seleziono la prima riga todo bisognerebbe selezionare l'elemento corrente
-			this.select(0);
-		}
 		getFromServer(){
 			//perform an ajax request to get the list to display
 			$.ajax({
@@ -417,72 +332,7 @@ custom methods
 					this.onReady();
 			});
 		}
-		generateTable(list, params){
-			//console.log('XMENU: generating table content from list:', list);
-			//generate a backup copy of the array to use
-			this.list = list.slice(0);
-			//go on with the table creation
-			var table = document.createElement('table');
-			var tableHead = document.createElement('thead');
-			var tableBody = document.createElement('tbody');
-			var tableFoot = document.createElement('tfoot');
-			var rows =[];
-			for (var i=0; i < list.length; i++){
-				//console.log('XMENU: processing item of the list n.:', i+1,' su ', list.length );
-				var item = list[i];
-				//if is the first iteration.. 
-				//generate the table header with the names of the properties we will show
-				if(i==0){
-					//console.log('XMENU: first iteration on table generation. create columns headers');
-					var headRow = document.createElement('tr');
-					for (prop in item){
-						if(prop[0] !='_'){//do not show custom params that start with _
-							//console.log('XMENU: column header added:', prop);
-							var headField = document.createElement('td');
-							headField.innerHTML =prop;
-							headRow.appendChild(headField);
-							var column =  document.createElement('col');
-							column.id = prop;
-							table.appendChild(column);
-						}
-					}
-					tableHead.appendChild(headRow);
-				}
-				
-				//for each property of the current item a field with the data
-				var row = document.createElement('tr');
-				for (prop in item){
-					if(prop[0] !='_'){//do not show custom params that start with _
-						var field = document.createElement('td');
-						field.innerHTML =item[prop];
-						row.appendChild(field);
-					}
-				}
-				tableBody.appendChild(row);
-			}
-			table.appendChild(tableHead);
-			table.appendChild(tableBody);
-			table.appendChild(tableFoot);
-			//console.log('XMENU: table generation COMPLETED');
 
-			//console.log('XMENU: append the table to the shadow dom');
-			this.$.items.appendChild(table);
-			//try to hide some columns
-/*
-			var columnsToHide[] = this.webkitShadowRoot.querySelector("#numero");
-			columnsToHide[] = this.webkitShadowRoot.querySelector("#via");
-			columnsToHide[] = this.webkitShadowRoot.querySelector("#cap");
-			columnsToHide[] = this.webkitShadowRoot.querySelector("#albotraportatori");
-
-			for (var i=0; i <= columnsToHide.length; i++){
-				var column = columnsToHide[i];
-				if(column){
-					column.style.visibility='collapse';
-				}
-			}
-*/
-			return table;
-		}
 		setPosition(myPoint, targetPoint, targetElement, modifier){
 			//console.log('XMENU: my current position: ', this.getPosition(this))
 			//console.log(this.impl)
@@ -605,10 +455,13 @@ custom methods
 			this.createMenu (table.tBodies[0].children);
 			
 		}
-		focus(){
+		/*
+		onfocus(){
 			//send the focus to the input field
-			this.$.searchfield.focus();
+			//this.$.searchfield.focus();
 		}
+		*/
+		
 		addModalBackground(){
 			this.modalBackground = document.createElement('div');
 			this.modalBackground.classList.add('modalBackgroundShadow');
