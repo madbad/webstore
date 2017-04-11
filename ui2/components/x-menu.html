@@ -110,7 +110,7 @@
 			<table id="table">
 				<thead id="tableHead"></thead>
 				<tbody id="tableBody">
-					<template is="dom-repeat" items="{{items}}">
+					<template is="dom-repeat" items="{{visibleitems}}">
 					<tr>
 					<td>
 						{{item.label}}
@@ -152,6 +152,12 @@
 					items: {
 						type: Array,
 						reflectToAttribute: true,
+						notify: true,
+					},
+					visibleitems: {
+						type: Array,
+						reflectToAttribute: true,
+						notify: true,
 					},
 					selectedId:{
 						type: Number,
@@ -225,29 +231,64 @@ custom methods
 			
 			//manage propchange events
 			this.addEventListener("items-changed", function(event) {
-				console.log("items changed!!!!");
+				console.log("Menu data",this, " changed with event", event);
+				//update the visible menu-items
+				this.set('visibleitems', this.items);
+				
+				console.log("Menu data - Elements:",this.items.length);
+				console.log(this.$.table);
+				console.log(this.$.table.rows);
+				
+				/*
 				//select the first element
 				if(this.items.length > 0){
 					this.selectedId=0;
 					this.selectItemById(this.selectedId);
 				}
-
+				*/
+				
+				// workaround: se non uso settimeout il css non mostra la voce come selezionata
+				setTimeout(function(){
+					console.log("Timeout selection");
+					if(this.items.length > 0){
+						this.selectedId=0;
+						this.selectItemById(this.selectedId);
+					}
+				}.bind(this), 0);
+				
 			}.bind(this),false);
-
+			
+			//manage propchange events
+			this.addEventListener("visibleitems-changed", function(event) {
+				console.log("Menu visible data",this, " changed with event", event);
+				//select the first element
+				if(this.items.length > 0){
+					this.selectedId=0;
+					this.selectItemById(this.selectedId);
+				}
+			}.bind(this),false);
+			
 		}
 		selectItemById(id){
 			//remove selected class from current element
-			this.$.table.rows[this.selectedId].classList.remove("selected");
-			//select the new element
-			this.selectedId = id;
-			//apply the selected class to the new element
-			this.$.table.rows[id].classList.add("selected");
+			console.log(this.$.table);
+			console.log(this.$.table.rows);
+			/*todo: check id is in range*/
+			if(this.$.table.rows.length > 0){
+				this.$.table.rows[this.selectedId].classList.remove("selected");
+
+				//select the new element
+				this.selectedId = id;
+				//apply the selected class to the new element
+				this.$.table.rows[id].classList.add("selected");
+			}
 		}
 		selectNext(){
 			console.log("select next");
 			this.selectItemById(this.selectedId+1);
 		}
 		selectPrev(id){
+			console.log("select prev");
 			this.selectItemById(this.selectedId-1);
 		}
 		getSelected(){
@@ -302,6 +343,7 @@ custom methods
 
 		getFromServer(){
 			//perform an ajax request to get the list to display
+			/*
 			$.ajax({
 				type: "POST",
 				url: "./../do.php",
@@ -331,6 +373,36 @@ custom methods
 					this.searchstringChanged();
 					this.onReady();
 			});
+			*/
+			var ajaxRequest = new XMLHttpRequest();
+			ajaxRequest.onload = function (e) {
+				console.log(e);
+				console.log(e.target.response.message);
+				console.log(this.responseText);
+			};
+			var requestData ={
+						action: 'getAll',
+						params: JSON.parse(this.params)
+						};
+			console.log("++++++++");
+			console.log(this.params);
+			console.log(JSON.parse(this.params));
+			console.log("++++++++");
+			console.log(requestData.params);
+			console.log(JSON.stringify(requestData.params));
+			
+			
+			var obj=JSON.parse(this.params);
+			var arr = Object.keys(obj).map(function(k) { return obj[k] });
+			
+			console.log(arr);
+			
+			ajaxRequest.open('POST', "./../do.php", true);
+			ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			ajaxRequest.responseType = 'text';
+			ajaxRequest.send("action="+requestData.action+"&params="+JSON.stringify(requestData.params));
+
+
 		}
 
 		setPosition(myPoint, targetPoint, targetElement, modifier){

@@ -111,13 +111,24 @@ window.addEventListener('WebComponentsReady', function() {
 	*/
 	];
 
-	//add the items to our menu
-	menu.set('items', list);
 
 	menu.keepAliveOnConfirm = true;
 
 	console.log("MAIN DOCUMENT: appending x-menu to the page body");
 	document.body.appendChild(menu);
+
+	menu.set('items', list);
+	
+	//add the items to our menu
+	/*
+	setTimeout(function (){
+		console.log(this.items);
+		console.log("Timeout 1500");
+		this.set('items', list);
+		console.log(this.items);
+	}.bind(menu), 1500);
+	*/
+	
 	menu.onCancel = function (){
 		//this.$.numeroriga.$.field.focus();
 	}.bind(this);
@@ -126,7 +137,7 @@ window.addEventListener('WebComponentsReady', function() {
 	//and remember his width so that it does not change during future modifcation of contents
 	//and show us
 	setTimeout(function (){
-		menu.set('items', list);
+		//menu.set('items', list);
 		//this.addModalBackground();
 		var modifier = {
 			top: 50,
