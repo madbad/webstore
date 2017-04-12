@@ -114,6 +114,10 @@
 					<tr>
 					<td>
 						{{item.label}}
+						{{item.data}}
+						<template is="dom-repeat" items="{{itemsProperties}}">
+							
+						</template> 
 					</td>
 					</tr>
 					</template> 
@@ -150,6 +154,11 @@
 						reflectToAttribute: true,
 					},
 					items: {
+						type: Array,
+						reflectToAttribute: true,
+						notify: true,
+					},
+					itemsProperties: {
 						type: Array,
 						reflectToAttribute: true,
 						notify: true,
@@ -378,8 +387,29 @@ custom methods
 			ajaxRequest.onload = function (e) {
 				console.log(e);
 				console.log(e.target.response.message);
-				console.log(this.responseText);
-			};
+				console.log(e.target.responseText);
+
+				var jsonList = JSON.parse(e.target.responseText);
+				console.log(jsonList);
+				//the full array of objects we will use
+				this.fulllist = jsonList;
+				//generate a copy of the array to use
+				//this.list = this.fulllist.slice(0);
+				//console.log(jsonList);
+				//console.log('Create the table');
+			//	var table = this.generateTable (this.fulllist, $.parseJSON(this.params));
+				//console.log('Append the table to the shadow dom');
+				//this.$.items.appendChild(table);
+				//console.log('Our new dom for Items is now:');
+				//console.log(this.$.items.innerHTML);
+				//console.log('Generate the menu');
+				//console.log(table.tBodies)
+			//	this.createMenu (table.tBodies[0].children);
+				this.set('items', jsonList);
+				this.searchstringChanged();
+				this.onReady();
+				
+			}.bind(this);
 			var requestData ={
 						action: 'getAll',
 						params: JSON.parse(this.params)

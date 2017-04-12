@@ -1,5 +1,7 @@
 <?php
 include ('./config.inc.php');
+//print_r($_POST);
+//print_r($_GET);
 
 switch ($_POST["action"]){
 	case "getOne":
@@ -9,7 +11,9 @@ switch ($_POST["action"]){
 		break;
 	case "getAll":
 		$out="[";
-		$myObjList = new MyList($_POST["params"]);
+		$myparams = json_decode($_POST["params"], true);
+		//print_r($myparams);
+		$myObjList = new MyList($myparams);
 		//echo $myObjList->toJson();
 		
 		$myObjList->iterate(function ($myObj){

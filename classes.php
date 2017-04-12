@@ -518,8 +518,8 @@ example usage
 $test=new MyList(
 	array(
 		'_type'=>'Ddt',
-		'_select'=>'numero,data',		
-		'data'=>array('=','17/02/12'),		
+		'_select'=>'numero,data',
+		'data'=>array('=','17/02/12'),
 		'data'=>array('>','28/03/09'),
 		'data'=>array('<','17/02/12'),
 		'data'=>array('<>','01/01/09','01/01/11'),
@@ -591,14 +591,20 @@ $test=new MyList(
 				}
 				//se ho un array di valori e un arrai di operatori (caso del '<>' compreso tra)
 				if (is_array($value) && is_array($tOperator)){
-					foreach ($value as $tKey => $tVal){
+					//foreach ($value as $tKey => $tVal){
+					foreach ($params[$key] as $tKey => $tVal){
 						$operator[]=$tOperator[$tKey];
 						$newVal[]=$value[$tKey];
 						$newKey[]=$key;
 					}
 				//altrimenti si ho un array di valori ma un solo operatore allora presumo che l'operatore sia lo stesso per tutti i valori
 				}else if (is_array($value) && !is_array($tOperator)){
-					foreach ($value as $tVal){
+					//echo "\n --$key-- ".'sono qui!: ';
+					//print_r($value);
+					//print_r($params[$key]); 
+					//foreach ($value as $tVal){
+					foreach ($params[$key] as $tVal){
+						//echo $tVal."\n";
 						$operator[]=$tOperator;
 						$newVal[]=$tVal;
 						$newKey[]=$key;
@@ -606,7 +612,8 @@ $test=new MyList(
 				}else{
 				//se innfino ho un solo valore e un solo operatore allora è tutto semplice 
 					$operator[]=$tOperator;
-					$newVal[]=$value;
+					//$newVal[]=$value;
+					$newVal[]=$params[$key];
 					$newKey[]=$key;
 				}
 			}
@@ -614,10 +621,17 @@ $test=new MyList(
 
 		//trasferisco il tutto dentro l'array conditions
 		for ($h=0; $h<count($operator); $h++){
-				$val=$fakeObj->$newKey[$h]->setVal($newVal[$h]);
+			/*
+			echo 'index   :'.$h."##\n";
+			echo 'operator:'.$operator[$h]."##\n";
+			echo 'keY     :'.$newKey[$h]."##\n";
+			echo 'value   :'.$newVal[$h]."##\n";
+			echo 'value   :'.$newVal[$h]."##\n-----------\n";
+			*/
+				$val=$fakeObj->{$newKey[$h]}->setVal($newVal[$h]);
 				//echo $operator;
 				$condition[$newKey[$h]][$operator[$h]][]=$val;
-		}			
+		}
 
 
 		$where='WHERE ';
