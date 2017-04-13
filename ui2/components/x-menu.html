@@ -1,6 +1,6 @@
 <link rel="import"  href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/polymer-element.html">
 <link rel="import" href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/lib/elements/dom-repeat.html">
-
+<link rel="import" href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/lib/elements/dom-if.html">
 
 <dom-module id='x-menu'>
     <script src="./../libs/drag.js"></script>
@@ -108,17 +108,27 @@
 		</div>
 		<div id="items">
 			<table id="table">
-				<thead id="tableHead"></thead>
+				<thead id="tableHead">
+					<template is="dom-repeat" items="{{visibleitems}}">
+						<template is="dom-if" if="{{_isFirst(index)}}">
+						<tr>
+							<template is="dom-repeat" items="{{_itemToArray(item)}}">
+								<td>
+									{{item.key}}
+								</td>
+							</template> 
+						</tr>
+						</template>
+					</template>
+				</thead>
 				<tbody id="tableBody">
 					<template is="dom-repeat" items="{{visibleitems}}">
 					<tr>
-					<td>
-						{{item.label}}
-						{{item.data}}
-						<template is="dom-repeat" items="{{itemsProperties}}">
-							
+						<template is="dom-repeat" items="{{_itemToArray(item)}}">
+							<td>
+								{{item.value}}
+							</td>
 						</template> 
-					</td>
 					</tr>
 					</template> 
 				</tbody>
@@ -245,8 +255,8 @@ custom methods
 				this.set('visibleitems', this.items);
 				
 				console.log("Menu data - Elements:",this.items.length);
-				console.log(this.$.table);
-				console.log(this.$.table.rows);
+				console.log(this.$.table.tBodies[0]);
+				console.log(this.$.table.tBodies[0].rows);
 				
 				/*
 				//select the first element
@@ -280,16 +290,16 @@ custom methods
 		}
 		selectItemById(id){
 			//remove selected class from current element
-			console.log(this.$.table);
-			console.log(this.$.table.rows);
+			console.log(this.$.table.tBodies[0]);
+			console.log(this.$.table.tBodies[0].rows);
 			/*todo: check id is in range*/
-			if(this.$.table.rows.length > 0){
-				this.$.table.rows[this.selectedId].classList.remove("selected");
+			if(this.$.table.tBodies[0].rows.length > 0){
+				this.$.table.tBodies[0].rows[this.selectedId].classList.remove("selected");
 
 				//select the new element
 				this.selectedId = id;
 				//apply the selected class to the new element
-				this.$.table.rows[id].classList.add("selected");
+				this.$.table.tBodies[0].rows[id].classList.add("selected");
 			}
 		}
 		selectNext(){
@@ -431,8 +441,6 @@ custom methods
 			ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 			ajaxRequest.responseType = 'text';
 			ajaxRequest.send("action="+requestData.action+"&params="+JSON.stringify(requestData.params));
-
-
 		}
 
 		setPosition(myPoint, targetPoint, targetElement, modifier){
@@ -602,6 +610,32 @@ custom methods
 					console.log('Column hidden', column);
 					column.style.visibility='collapse';
 				}
+			}
+		}
+		_itemToArray(obj){
+			console.log("Converting to array...")
+			console.log(obj);
+			var toArray = new Array();
+			for(var prop in obj){
+				if (obj.hasOwnProperty(prop)) {
+					if(prop[0]!='_'){ // hide internal properties (the ones that start with a "_"
+						toArray.push({
+							key:prop,
+							value:obj[prop] 
+							});
+					}
+				}
+			}
+			console.log(toArray);
+			return toArray;
+			
+		}
+		_isFirst(index){
+			if (index ==0){
+			return true;
+			}else{
+			return false;
+
 			}
 		}
 	}
