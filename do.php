@@ -5,7 +5,8 @@ include ('./config.inc.php');
 
 switch ($_POST["action"]){
 	case "getOne":
-		$myObj = new $_POST["params"]["_type"]($_POST["params"]);
+		$myparams = json_decode($_POST["params"], true);
+		$myObj = new $myparams["_type"]($myparams);
 		$myObj->getFromDb();
 		echo $myObj->toJson();
 		break;
