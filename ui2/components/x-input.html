@@ -34,11 +34,12 @@
 					label: {
 						type: String,
 						reflectToAttribute: true,
+						notify: true
 					},
 					descrizionecodice: {
 						type: String,
 						reflectToAttribute: true
-					},					
+					},
 					disabled: {
 						type: Boolean,
 						reflectToAttribute: true
@@ -213,5 +214,615 @@ custom methods
 		}
 		// Register the new element with the browser
 		customElements.define(xInput.is, xInput);
+	</script>
+</dom-module>
+
+
+
+<dom-module id='x-numerodoc'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xNumerodoc extends xInput {
+			static get is() { return "x-numerodoc"; }
+			constructor() {
+				super();
+				this.tipo='numeri';
+				this.lenght=6;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xNumerodoc.is, xNumerodoc);
+	</script>
+</dom-module>
+
+
+
+<dom-module id='x-numeroriga'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xNumeroriga extends xInput {
+			static get is() { return "x-numeroriga"; }
+			constructor() {
+				super();
+				this.tipo='numeri';
+				this.lenght=4;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xNumeroriga.is, xNumeroriga);
+	</script>
+</dom-module>
+
+
+
+<dom-module id='x-numerocolli'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xNumerocolli extends xInput {
+			static get is() { return "x-numerocolli"; }
+			constructor() {
+				super();
+				this.tipo='numeri';
+				this.lenght=5;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xNumerocolli.is, xNumerocolli);
+	</script>
+</dom-module>
+
+
+
+
+
+<dom-module id='x-peso'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xPeso extends xInput {
+			static get is() { return "x-peso"; }
+			constructor() {
+				super();
+				this.tipo='numeri';
+				this.lenght=5;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xPeso.is, xPeso);
+	</script>
+</dom-module>
+
+
+
+
+
+<dom-module id='x-prezzo'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xPrezzo extends xInput {
+			static get is() { return "x-prezzo"; }
+			constructor() {
+				super();
+				this.tipo='prezzo';
+				this.lenght=10;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xPrezzo.is, xPrezzo);
+	</script>
+</dom-module>
+
+
+
+
+
+<dom-module id='x-data'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xData extends xInput {
+			static get is() { return "x-data"; }
+			constructor() {
+				super();
+				this.tipo='data';
+				this.lenght=10;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xData.is, xData);
+	</script>
+</dom-module>
+
+
+
+
+<dom-module id='x-codiceclientefornitore'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodiceclientefornitore extends xInput {
+			static get is() { return "x-codiceclientefornitore"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.lenght=6;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xCodiceclientefornitore.is, xCodiceclientefornitore);
+	</script>
+</dom-module>
+
+
+
+<dom-module id='x-codicecausale'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodicecausale extends xInput {
+			static get is() { return "x-codicecausale"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.lenght=2;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xCodicecausale.is, xCodicecausale);
+	</script>
+</dom-module>
+
+
+
+<dom-module id='x-codicemezzo'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodicemezzo extends xInput {
+			static get is() { return "x-codicemezzo"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.lenght=2;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xCodicemezzo.is, xCodicemezzo);
+	</script>
+</dom-module>
+
+
+
+
+<dom-module id='x-codicearticolo'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodicearticolo extends xInput {
+			static get is() { return "x-codicearticolo"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.lenght=6;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xCodicearticolo.is, xCodicearticolo);
+	</script>
+</dom-module>
+
+
+
+<dom-module id='x-codiceum'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodiceum extends xInput {
+			static get is() { return "x-codiceum"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.lenght=2;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xCodiceum.is, xCodiceum);
+	</script>
+</dom-module>
+
+
+
+
+
+<dom-module id='x-codiceimballagio'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodiceimballagio extends xInput {
+			static get is() { return "x-codiceimballagio"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.lenght=5;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xCodiceimballagio.is, xCodiceimballagio);
+	</script>
+</dom-module>
+
+
+
+
+<dom-module id='x-codiceiva'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodiceiva extends xInput {
+			static get is() { return "x-codiceiva"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.lenght=3;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xCodiceiva.is, xCodiceiva);
+	</script>
+</dom-module>
+
+
+<dom-module id='x-lotto'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xLotto extends xInput {
+			static get is() { return "x-lotto"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.lenght=15;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xLotto.is, xLotto);
+	</script>
+</dom-module>
+
+
+
+<dom-module id='x-note'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{lenght}}"
+				maxlength="{{lenght}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xNote extends xInput {
+			static get is() { return "x-note"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.lenght=100;
+				console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				this.label = this.attributes.label.nodeValue;
+			}
+		}
+		customElements.define(xNote.is, xNote);
 	</script>
 </dom-module>
