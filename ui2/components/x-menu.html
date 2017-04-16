@@ -162,6 +162,7 @@
 					searchstring: {
 						type: String,
 						reflectToAttribute: true,
+						notify: true,
 					},
 					items: {
 						type: Array,
@@ -203,6 +204,16 @@ events methods
 					case 34: this.selectLastOfThePage();break; //pgdown
 					case 13: this.confirm(); break; //enter
 					case 27: this.cancel(); break; //esc
+					default:
+						//every time a key is pressed we schedule a future search on the visible items list
+						//if another key is pressed before the search actually happen 
+						//we cancel the previous search and re schedule a new one
+						console.log("Deffered search");
+						clearTimeout(this.deferredsearch); 
+						this.deferredsearch = setTimeout(function(){ 
+							console.log("search activated");
+							this.searchstringChanged();
+						}.bind(this), 250);
 				}
 			}
 /*
@@ -258,14 +269,6 @@ custom methods
 				console.log(this.$.table.tBodies[0]);
 				console.log(this.$.table.tBodies[0].rows);
 				
-				/*
-				//select the first element
-				if(this.items.length > 0){
-					this.selectedId=0;
-					this.selectItemById(this.selectedId);
-				}
-				*/
-				
 				// workaround: se non uso settimeout il css non mostra la voce come selezionata
 				setTimeout(function(){
 					console.log("Timeout selection");
@@ -304,14 +307,42 @@ custom methods
 		}
 		selectNext(){
 			console.log("select next");
-			this.selectItemById(this.selectedId+1);
+			console.log("items: ", this.visibleitems.length);
+			console.log("current: ", this.selectedId);
+			if(this.visibleitems.length - 1 > this.selectedId){
+				console.log("selecting: ", this.selectedId+1);
+				this.selectItemById(this.selectedId+1);
+			}else{
+				console.log("selec next aborted: out of range");
+			}
+			console.log(this.selectedId);
 		}
 		selectPrev(id){
 			console.log("select prev");
-			this.selectItemById(this.selectedId-1);
+			console.log("items: ", this.visibleitems.length);
+			console.log("current: ", this.selectedId);
+			if(this.selectedId > 0 && this.visibleitems.length > 0){
+				console.log("selecting: ", this.selectedId-1);
+				this.selectItemById(this.selectedId-1);
+			}else{
+				console.log("selec prev aborted: out of range");
+			}
+		}
+		selectFirstOfThePage(){
+			console.log("select first");
+			if(this.visibleitems.length > 0){
+				this.selectItemById(0);
+			}
+		}
+		selectLastOfThePage(){
+			console.log("select last");
+			if(this.visibleitems.length > 0){
+				this.selectItemById(this.visibleitems.length-1);
+			}
 		}
 		getSelected(){
-			return this.items[this.selectedId];
+			console.log("You have selected: ",this.visibleitems[this.selectedId]);
+			return this.visibleitems[this.selectedId];
 		}
 		confirm(){
 			//an utility function
@@ -354,45 +385,13 @@ custom methods
 		onConfirm(selectedObj){
 			//use this as a callback
 			//return an obj of the selected menu-entry
-			return;
+			return selectedObj;
 		}
 		onCancel(){
 			//use this as a callback
 		}
 
 		getFromServer(){
-			//perform an ajax request to get the list to display
-			/*
-			$.ajax({
-				type: "POST",
-				url: "./../do.php",
-				data: {
-						action: 'getAll',
-						params: $.parseJSON(this.params)
-						},
-				context: this,
-			}).done(function( msg ) {
-					console.log(msg);
-					//console.log('Jsonize the reponse:');
-					var jsonList = $.parseJSON(msg);
-					//the full array of objects we will use
-					this.fulllist = jsonList;
-					//generate a copy of the array to use
-					//this.list = this.fulllist.slice(0);
-					//console.log(jsonList);
-					//console.log('Create the table');
-					var table = this.generateTable (this.fulllist, $.parseJSON(this.params));
-					//console.log('Append the table to the shadow dom');
-					//this.$.items.appendChild(table);
-					//console.log('Our new dom for Items is now:');
-					//console.log(this.$.items.innerHTML);
-					//console.log('Generate the menu');
-					//console.log(table.tBodies)
-					this.createMenu (table.tBodies[0].children);
-					this.searchstringChanged();
-					this.onReady();
-			});
-			*/
 			var ajaxRequest = new XMLHttpRequest();
 			ajaxRequest.onload = function (e) {
 				console.log(e);
@@ -403,18 +402,6 @@ custom methods
 				console.log(jsonList);
 				//the full array of objects we will use
 				this.fulllist = jsonList;
-				//generate a copy of the array to use
-				//this.list = this.fulllist.slice(0);
-				//console.log(jsonList);
-				//console.log('Create the table');
-			//	var table = this.generateTable (this.fulllist, $.parseJSON(this.params));
-				//console.log('Append the table to the shadow dom');
-				//this.$.items.appendChild(table);
-				//console.log('Our new dom for Items is now:');
-				//console.log(this.$.items.innerHTML);
-				//console.log('Generate the menu');
-				//console.log(table.tBodies)
-			//	this.createMenu (table.tBodies[0].children);
 				this.set('items', jsonList);
 				this.searchstringChanged();
 				this.onReady();
@@ -528,42 +515,28 @@ custom methods
 				//ricavo i dati con cui riempire la finestra
 				this.getFromServer();
 			}
-			/*
-			if(this.jsonList){
-				this.jsonList = $.parseJSON(this.jsonList)
-				this.jsonToTable(this.jsonList);
-			}
-			*/
 		}
 		searchstringChanged(){
 			//console.log('XMENU: searching for >'+this.searchstring+'< into: ', this.list);
+			console.log("search string is: ", this.$.searchfield.value);
+			this.searchstring = this.$.searchfield.value;
 			var searchstring = this.searchstring.toLowerCase();
 			
-			var filteredItems = this.fulllist.filter(function(item){
+			var filteredItems = this.items.filter(function(item){
+				console.log(item);
 				var result = false;
-				for (prop in item){
-					var fullstring = item[prop].toLowerCase();
-					result = fullstring.search(searchstring);
-					//console.log('XMENU: scanned: ', fullstring, ' for: ', searchstring, 'with result: ', result)
-					if (result > -1) return true;
+				for (var prop in item){
+					if(prop[0] != '_'){
+						console.log(prop);
+						var fullstring = item[prop].toLowerCase();
+						result = fullstring.search(searchstring);
+						//console.log('XMENU: scanned: ', fullstring, ' for: ', searchstring, 'with result: ', result)
+						if (result > -1) return true;
+					}
 					}
 				});
-				
-			
-			this.list = filteredItems;
-			//console.log('XMENU: found:', filteredItems)
-			//reset the prev selection;
-			this.selected = null;
-			//regenerate the menu
-			var table = this.generateTable (this.list, $.parseJSON(this.params));
-			//console.log('delette the prev table')
-			this.$.items.innerHTML = '';
-			//console.log('Append the new table to the shadow dom');
-			this.$.items.appendChild(table);
-			//console.log('Generate the menu');
-			//console.log(table.tBodies)
-			this.createMenu (table.tBodies[0].children);
-			
+			this.visibleitems = filteredItems;
+			this.selectFirstOfThePage();
 		}
 		/*
 		onfocus(){

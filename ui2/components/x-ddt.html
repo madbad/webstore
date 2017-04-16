@@ -130,29 +130,9 @@
 			}
 			static get properties() {
 				return {
-					value: {
-						type: String,
-						reflectToAttribute: true
-					},
-					label: {
-						type: String,
-						reflectToAttribute: true
-					},
-
-					descrizionecodice: {
-						type: String,
-						reflectToAttribute: true
-					},					
-					isdisabled: Boolean,
-					count: {
-						type: Number,
-						readOnly: true,
-						notify: true
-					},
-					isvettore: Boolean,
-					count: {
-						type: Number,
-						readOnly: true,
+					ddt: {
+						type: Object,
+						reflectToAttribute: true,
 						notify: true
 					},
 				}
@@ -369,7 +349,8 @@
 							this.ddt.righe[i] =  {}; 
 						};
 						console.log(serverDdt);
-						this.ddt = JSON.parse(JSON.stringify(serverDdt)); 
+						//this.ddt = JSON.parse(JSON.stringify(serverDdt));
+						this.set('ddt',JSON.parse(JSON.stringify(serverDdt)));
 						this.getRigheFromServer();
 
 						//inizializza i campi per una nuova riga

@@ -119,16 +119,6 @@ window.addEventListener('WebComponentsReady', function() {
 
 	menu.set('items', list);
 	
-	//add the items to our menu
-	/*
-	setTimeout(function (){
-		console.log(this.items);
-		console.log("Timeout 1500");
-		this.set('items', list);
-		console.log(this.items);
-	}.bind(menu), 1500);
-	*/
-	
 	menu.onCancel = function (){
 		//this.$.numeroriga.$.field.focus();
 	}.bind(this);
@@ -173,6 +163,8 @@ window.addEventListener('WebComponentsReady', function() {
 		
 		ddtList.onConfirm = function (selection){
 			//when the selection is confirmed start editing the ddt
+			console.log("selecionato il ddt", selection);
+			console.log("Procedo alla modifica...");
 			modificaDdt(selection);
 		}.bind(this);
 		ddtList.onCancel = function (selection){
@@ -203,7 +195,7 @@ window.addEventListener('WebComponentsReady', function() {
 	=================================*/
 	function modificaDdt(ddt){
 	var ddtApp = document.createElement('x-ddt');
-		ddtApp.ddt=ddt;
+		ddtApp.set('ddt',ddt);
 		ddtApp.getDdtFromServer();
 		ddtApp.onQuit = function (){
 			menu.focus();
