@@ -6,13 +6,14 @@
 			<span style="color:grey">{{label}}</span>
 			<input 
 				id="field"
-				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				value="{{value::input}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+				hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -23,13 +24,14 @@
 			static get is() { return "x-input"; }
 			constructor() {
 				super();
-//				this.textContent = "I'm a custom-element.";
 			}
 			static get properties() {
 				return {
 					value: {
 						type: String,
 						reflectToAttribute: true,
+						notify: true,
+						observer: '_valueChanged'
 					},
 					label: {
 						type: String,
@@ -42,20 +44,19 @@
 					},
 					disabled: {
 						type: Boolean,
-						reflectToAttribute: true
+						reflectToAttribute: true,
+						notify: true
 					},
-					lenght: {
+					length: {
 						type: Number,
 						reflectToAttribute: true,
 						value:10,
 					},
-					/*
-					lenght: {
-						type: Number,
-						readOnly: true,
+					hiddeninput: {
+						type: Boolean,
+						reflectToAttribute: true,
 						notify: true
 					},
-					*/
 				}
 			}
 /*
@@ -166,29 +167,21 @@ custom methods
 
 			}
 			aggiornaDescrizioneCodice(){
-				if(this.impl.nodeName.search('CODICE')>0){
+				if(this.nodeName.search('CODICE')>0){
 					//extract from the nodeName the object type removing the 'x-codice' string
 					var objType = this.getFieldType();
 					//now capitalize it: the php class has it capitalized: so we need it
 					objType = objType.charAt(0).toUpperCase() + objType.slice(1);
-
-					//perform an ajax request to get the data from the server
-					$.ajax({
-						type: "POST",
-						url: "./../do.php",
-						data: { action: 'getOne',
-								params: {
-											_type: objType,
-											codice: this.val
-											//_autoExtend: -2,
-								},
-						},
-						context: this,
-					}).done(function( msg ) {
-						console.log(msg)
-						var myFullObj = $.parseJSON(msg);
+					
+					// prepare an ajax request
+					var ajaxRequest = new XMLHttpRequest();
+					
+					//callback for managing results
+					ajaxRequest.onload = function (e) {
+						console.log(e.target.responseText);
+						var myFullObj = JSON.parse(e.target.responseText);
 						//remember the full obj retrieved from the server
-						this.fullObj = msg;
+						this.fullObj = e.target.responseText;
 						//extract from the nodeName the object type removing the 'x-codice' string
 						var objType = this.getFieldType();
 						if(myFullObj[objType].descrizione){ 
@@ -201,7 +194,27 @@ custom methods
 							this.descrizionecodice = '';
 						}
 						this.onDataReady();
-					});
+						
+					}.bind(this);
+				
+					//request setup
+					var requestData ={
+						action: 'getOne',
+						params: {
+							_type: objType,
+							codice: this.value
+							//_autoExtend: -2,
+						},
+					};
+					console.log(requestData.params);
+					var obj=requestData.params;
+					var arr = Object.keys(obj).map(function(k) { return obj[k] });
+					
+					ajaxRequest.open('POST', "./../do.php", true);
+					ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+					ajaxRequest.responseType = 'text';
+					ajaxRequest.send("action="+requestData.action+"&params="+JSON.stringify(requestData.params));
+					
 				}
 			}
 			getFieldType(){
@@ -210,6 +223,20 @@ custom methods
 				//extract from the nodeName the object type removing the 'x-codice' string
 				var objType = nodeName.replace('x-codice', '');
 				return objType;
+			}
+			_valueChanged(newValue, oldValue){
+				console.log("value changed");
+				this.aggiornaDescrizioneCodice();
+				/*
+				if(this.hiddeninput){
+					this.$.field.hiddenInput.add("hiddenInput");
+				}else{
+					this.$.field.hiddenInput.remove("hiddenInput");
+				}
+				*/
+			}
+			onDataReady(){
+				//use this as a callback;
 			}
 		}
 		// Register the new element with the browser
@@ -226,12 +253,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -242,7 +270,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='numeri';
-				this.lenght=6;
+				this.length=6;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -250,7 +278,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xNumerodoc.is, xNumerodoc);
@@ -266,12 +296,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -282,7 +313,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='numeri';
-				this.lenght=4;
+				this.length=4;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -290,7 +321,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xNumeroriga.is, xNumeroriga);
@@ -306,12 +339,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -322,7 +356,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='numeri';
-				this.lenght=5;
+				this.length=5;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -330,7 +364,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xNumerocolli.is, xNumerocolli);
@@ -348,12 +384,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -364,7 +401,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='numeri';
-				this.lenght=5;
+				this.length=5;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -372,7 +409,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xPeso.is, xPeso);
@@ -390,12 +429,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -406,7 +446,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='prezzo';
-				this.lenght=10;
+				this.length=10;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -414,7 +454,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xPrezzo.is, xPrezzo);
@@ -432,12 +474,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -448,7 +491,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='data';
-				this.lenght=10;
+				this.length=10;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -456,7 +499,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xData.is, xData);
@@ -473,12 +518,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -489,7 +535,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='testo';
-				this.lenght=6;
+				this.length=6;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -497,7 +543,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xCodiceclientefornitore.is, xCodiceclientefornitore);
@@ -513,12 +561,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -529,7 +578,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='testo';
-				this.lenght=2;
+				this.length=2;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -537,7 +586,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xCodicecausale.is, xCodicecausale);
@@ -553,12 +604,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -569,7 +621,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='testo';
-				this.lenght=2;
+				this.length=2;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -577,7 +629,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xCodicemezzo.is, xCodicemezzo);
@@ -594,12 +648,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -610,7 +665,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='testo';
-				this.lenght=6;
+				this.length=6;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -618,7 +673,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xCodicearticolo.is, xCodicearticolo);
@@ -634,12 +691,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -650,7 +708,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='testo';
-				this.lenght=2;
+				this.length=2;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -658,7 +716,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xCodiceum.is, xCodiceum);
@@ -676,12 +736,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -692,7 +753,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='testo';
-				this.lenght=5;
+				this.length=5;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -700,7 +761,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xCodiceimballagio.is, xCodiceimballagio);
@@ -717,12 +780,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -733,7 +797,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='testo';
-				this.lenght=3;
+				this.length=3;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -741,7 +805,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xCodiceiva.is, xCodiceiva);
@@ -756,12 +822,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -772,7 +839,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='testo';
-				this.lenght=15;
+				this.length=15;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -780,7 +847,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xLotto.is, xLotto);
@@ -796,12 +865,13 @@ custom methods
 			<input 
 				id="field"
 				value="{{value::change}}"
-				size$="{{lenght}}"
-				maxlength="{{lenght}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
 				on-focus="onfocus"
 				on-blur="onblur"
 				on-keydown="onkeydown"
 				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
 			>
 			[[descrizionecodice]]
 		</label>
@@ -812,7 +882,7 @@ custom methods
 			constructor() {
 				super();
 				this.tipo='testo';
-				this.lenght=100;
+				this.length=100;
 				console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
@@ -820,7 +890,9 @@ custom methods
 				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
 				devo copiarlo io manualmente...
 				... perchè polymer non lo fa da solo?*/
-				this.label = this.attributes.label.nodeValue;
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
 			}
 		}
 		customElements.define(xNote.is, xNote);

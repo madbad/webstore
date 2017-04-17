@@ -44,10 +44,9 @@ body{
 label {
 	color:black;
 	font-size:1em;
-	background-color: #F2F2F2;
-	PADDING:0.5em;
+	background-color: #F2F2F2;/*if I uncomment this all the label get this color...even if I style them properly*/
+	padding:0.5em;
 	width:0px;
-	/*visibility:hidden;*/
 }
 input {
 	color:blue;
@@ -67,7 +66,7 @@ input:disabled {
 	background-color:black;
 	z-index: 100;
 	opacity:0.5;
-		}
+}
 
 </style>
 </head>
