@@ -1,5 +1,6 @@
 <polymer-element name="x-menu" extends="div" tabindex="0" title="Menu" attributes="items params searchstring">
 	<template>
+    <script src="./../libs/drag.js"></script>
 		<style>
 		:host {
 			/*box-shadow: 3px 3px 5px 1px #ccc;*/
@@ -17,7 +18,7 @@
 			margin-rigth:50%;
 			visibility: hidden;/*by default we are hidden*/
 			position:fixed;
-border-collapse:separate;
+			border-collapse:separate;
 		}
 		.selected {
 			background-image: none;

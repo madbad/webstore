@@ -32,10 +32,12 @@ class MyClass extends DefaultClass{
 	}
 	public function getPropertiesNames(){
 		$props = get_object_vars($this);
-		$out='';
+		$out=array();
 		foreach ($props as $prop){
+			//print_r($prop);
 			if(@$prop->nome!=''){
 				$out[]= $prop->nome;
+				//array_push($out, $prop->nome);
 			}
 		}
 		//print_r($out);

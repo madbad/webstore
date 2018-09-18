@@ -2,7 +2,16 @@
 	<template>
 	<label>
 		<span style="color:grey">{{label}}</span>
-		<input id="field" value="{{val}}" size="{{l}}" maxlength="{{l}}" on-focus="{{fieldfocus}}" on-blur={{fieldblur}} disabled?={{disabledstatus}}>
+		<input 
+			id="field"
+			value="{{val}}"
+			size="{{l}}"
+			maxlength="{{l}}"
+			on-focus="{{fieldfocus}}"
+			on-blur={{fieldblur}}
+			on-keydown={{onkeydown}}
+			 disabled?={{disabledstatus}}
+		>
 		{{descrizionecodice}}
 	</label>
 	</template>

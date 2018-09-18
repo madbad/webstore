@@ -65,7 +65,7 @@ events methods
 
 			onfocus(event, detail, sender){
 				
-				console.log("x-input: got focus");
+				console.log("x-input: got focus", this);
 				/*
 				//call our custom focus
 				//this.focus();
@@ -75,7 +75,7 @@ events methods
 				*/
 			}
 			onblur(event, detail, sender){
-				console.log("x-input: lost focus");
+				console.log("x-input: lost focus", this);
 				//this.blur();
 			}
 			onkeydown(event, detail, sender){

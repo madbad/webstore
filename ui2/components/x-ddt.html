@@ -126,6 +126,7 @@
 			constructor() {
 				super();
 				window.myxddt=this;
+				this.enteredView();
 			}
 			static get properties() {
 				return {
@@ -188,7 +189,7 @@
 					{label:'Stampa DDT',_action:'none'},
 					{label:'Stampa e memorizza DDT',_action:'none'},
 					{label:'Abbandona DDT',_action:function (){this.abbandonaDdt();}.bind(this)},
-					{label:'Cancella DDT',_action:function (){this.cancellaDdt();}.bind(this)}					
+					{label:'Cancella DDT',_action:function (){this.cancellaDdt();}.bind(this)}
 				];
 				//remember the full list that compose the menu
 				menu.fulllist = list;
@@ -219,6 +220,7 @@
 				return menu;
 			}
 			enteredView(){
+				alert('test');
 				//#################################################
 				//## UI LOGIC                                    ##
 				//#################################################
@@ -226,14 +228,20 @@
 				setTimeout(function (){
 					//get a list of focusable elements
 					//this.fields = this.impl.parentElement.querySelectorAll('x-ddt > [val]');
+					console.log('#########################################################################################');
+console.log(this);
 					this.fields = this.impl.querySelectorAll('x-window > div > div > [val]');
 
+					console.log('focusable fields', this.fields);
+					console.log('#########################################################################################');
 					//console.log(this.impl.querySelectorAll('x-window > div > div > [val]'));
 					//give focus to the first one
 					this.fields[0].querySelector('input').focus();
+
 					//
 					for (var i = 0; i< this.fields.length; i++){
 						$(this.fields[i]).keydown(function(event) {
+						//$(this.fields[i]).onkeydown(function(event) {
 							switch (event.which){
 								case 13:
 									//focus the next field
