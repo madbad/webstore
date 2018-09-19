@@ -2,7 +2,7 @@
 <link rel="import" href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/lib/elements/dom-repeat.html">
 
 <dom-module id='x-ddt'>
-		<template>
+	<template>
 		<style>
 		.displayRighe {
 			height: 16em;
@@ -41,7 +41,7 @@
 			font-size: 0.8em;
 		}
 		</style>
-<x-window title="Gestione DDT">
+	<x-window title="Gestione DDT">
 		<x-numerodoc value="{{ddt.numero}}" label="Numero"></x-numerodoc>
 		<x-data value="{{ddt.data}}" label="Data"></x-data>
 		<br>
@@ -100,23 +100,23 @@
 			</tbody>
 		</table>
 		</div>
-	<!-- -->
-	Modifica Riga
-	<BR>
-	<x-numeroriga value="{{rigadamodificare.numero}}" label="N." id="numeroriga"></x-numeroriga>
-	<x-codicearticolo value="{{rigadamodificare.articolo_codice}}" id="codicearticolo" label="Art."></x-codicearticolo>
-	<x-lotto value="{{rigadamodificare.lotto}}" label="Lotto"></x-lotto>
-	<br>
-	<x-numerocolli value="{{rigadamodificare.colli}}" label="Colli"></x-numerocolli>
-	<x-codiceimballaggio value="{{rigadamodificare.imballaggio_codice}}" label="Tipo Imball."></x-codiceimballaggio>
-	<br>
-	<x-codiceum value="{{rigadamodificare.um_codice}}" label="UM" id="codiceum"></x-codiceum>
-	<x-peso value="{{rigadamodificare.pesolordo}}" label="Lordo" id="pesolordo"></x-peso>
-	<x-peso value="{{rigadamodificare.tara}}" label="Tara" id="tara"></x-peso>
-	<x-peso value="{{rigadamodificare.pesonetto}}" label="Netto" id="pesonetto"></x-peso>
-	<br>
-	<x-prezzo value="{{rigadamodificare.prezzo}}" label="Prezzo"></x-prezzo>
-	<x-codiceiva value="{{rigadamodificare.iva_codice}}" label="Iva" id="codiceiva"></x-codiceiva>
+		<!-- -->
+		Modifica Riga
+		<BR>
+		<x-numeroriga value="{{rigadamodificare.numero}}" label="N." id="numeroriga"></x-numeroriga>
+		<x-codicearticolo value="{{rigadamodificare.articolo_codice}}" id="codicearticolo" label="Art."></x-codicearticolo>
+		<x-lotto value="{{rigadamodificare.lotto}}" label="Lotto"></x-lotto>
+		<br>
+		<x-numerocolli value="{{rigadamodificare.colli}}" label="Colli"></x-numerocolli>
+		<x-codiceimballaggio value="{{rigadamodificare.imballaggio_codice}}" label="Tipo Imball."></x-codiceimballaggio>
+		<br>
+		<x-codiceum value="{{rigadamodificare.um_codice}}" label="UM" id="codiceum"></x-codiceum>
+		<x-peso value="{{rigadamodificare.pesolordo}}" label="Lordo" id="pesolordo"></x-peso>
+		<x-peso value="{{rigadamodificare.tara}}" label="Tara" id="tara"></x-peso>
+		<x-peso value="{{rigadamodificare.pesonetto}}" label="Netto" id="pesonetto"></x-peso>
+		<br>
+		<x-prezzo value="{{rigadamodificare.prezzo}}" label="Prezzo"></x-prezzo>
+		<x-codiceiva value="{{rigadamodificare.iva_codice}}" label="Iva" id="codiceiva"></x-codiceiva>
 	</x-window>
 	</template>
 	<script>
@@ -227,34 +227,38 @@
 				
 				setTimeout(function (){
 					//get a list of focusable elements
-					//this.fields = this.impl.parentElement.querySelectorAll('x-ddt > [val]');
-					console.log('#########################################################################################');
-console.log(this);
-					this.fields = this.impl.querySelectorAll('x-window > div > div > [val]');
+					//this.fields = this.shadowRoot.querySelectorAll(':scope [value]');
+					this.fields = this.shadowRoot.querySelectorAll('[value]:not([type="hidden"]):not([disabled])');
+					//this.fields = this.shadowRoot.querySelectorAll('[value]:not([hiddeninput=""])');
+					//this.fields = this.shadowRoot.querySelectorAll('xwindow:scope [value]');
 
-					console.log('focusable fields', this.fields);
+					console.log('focusable fields: ', this.fields);
 					console.log('#########################################################################################');
-					//console.log(this.impl.querySelectorAll('x-window > div > div > [val]'));
+					console.log('will get focus: ', this.fields[0]);
+
 					//give focus to the first one
-					this.fields[0].querySelector('input').focus();
+					this.fields[0].shadowRoot.querySelector('input').focus();
 
 					//
-					for (var i = 0; i< this.fields.length; i++){
-						$(this.fields[i]).keydown(function(event) {
-						//$(this.fields[i]).onkeydown(function(event) {
+					for (var i = 0; i < this.fields.length; i++){
+						this.fields[i].addEventListener('keydown', function(event){
+							console.log('main click??');
 							switch (event.which){
 								case 13:
 									//focus the next field
-									var next = 1+$.inArray(event.target.parentElement.parentElement, this.fields);
-									if(next <= this.fields.length){
-										newField = this.fields[next].querySelector('input');
+									console.log('target:',event.target);
+									var next = 1+this.fields.indexOf(event.target);
+									if(next < this.fields.length){
+										console.log(this.fields.length, next);
+										var newField = this.fields[next].shadowRoot.querySelector('input');
+										console.log('tryping to give focus to',this.fields[next], newField);
 										newField.focus();
 									}
 								break; //enter
 							}
 						}.bind(this));
 					}
-				}.bind(this), 100);
+				}.bind(this), 1000);
 			}
 			modificaRiga(numRiga){
 				console.log('XDDT: richiesto di modificare la riga:', numRiga);
