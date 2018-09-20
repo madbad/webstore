@@ -1,0 +1,141 @@
+<link rel="import"  href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/polymer-element.html">
+<link rel="import" href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/lib/elements/dom-repeat.html">
+
+<dom-module id='x-window'>
+	<template>
+		<style>
+		.window {
+			box-shadow: 3px 3px 5px 1px #ccc;
+			border: 1px solid #a1a1a1;
+			position:fixed;
+			background-color:white;
+			min-width:30%;
+			min-heigth:30%;
+			max-width:90%;
+			max-heigth:90%;
+			z-index: 100;
+		}
+		.title {
+		/*font-family:arial;*/
+			font-weight: bolder;
+			background-color: #e1e1e1;
+			border-bottom: 1px solid #a1a1a1; 
+			padding: 0.3em;
+			color:black;
+		}
+		.content{
+  			padding:1em;
+			/*color: #dbdbdb;*/
+		}
+		.button {
+			font-size:1.3em;
+			background: linear-gradient(to bottom, #ffffff 0%,#f1f1f1 50%,#e1e1e1 51%,#f6f6f6 100%); /* W3C */
+			border: 1px solid grey;
+			border-radius:4px;
+			padding:5px;
+			margin:0px;
+			color:grey;
+			text-decoration:none;
+			line-height: 0.8em;
+			width:0.8em;
+			display:inline-block;
+			text-align: center;
+		}
+		.button:hover{
+			font-weigth:bold;
+			color:dark-grey;
+			background: linear-gradient(to bottom, #f1e767 0%,#feb645 100%);
+			box-shadow: 0px 0px 8px 0px rgba(255, 180, 0, 0.75);
+		}
+		.buttonscontainer{
+		right: 1em;
+		position: absolute;
+		}
+		</style>
+		<div class="window" draggable="true">
+			<div class="title"> &rang; {{title}}
+			<span class="buttonscontainer">
+				<a href="#" on-click="{{minimize}}" class="button" hidden?="{{minimizebutton}}"> _ </a>
+				<a href="#" on-click="{{maximize}}" class="button" hidden?="{{maximizebutton}}"> &square;</a>
+				<a href="#" on-click="{{demaximize}}" class="button" hidden?="{{demaximizebutton}}"> &square; </a>
+				<a href="#" on-click="{{close}}" class="button" hidden?="{{closebutton}}"> &times; </a>
+			<span>
+			</div>
+			<div class="content"><slot></slot></div>
+		</div>
+	</template>
+	<script>
+		class xWindow extends Polymer.Element {
+			static get is() { return "x-window"; }
+			constructor() {
+				super();
+				//this.selfinitialize();
+			}
+			static get properties() {
+				return {
+					title: {
+						type: String,
+						reflectToAttribute: true,
+						notify: true,
+						value:'Default Title',
+					},
+				}
+			}
+
+		selfinitialize(){
+
+			//this.async(function() {
+				this.focus();
+				Drag.init(
+					this.webkitShadowRoot.querySelector('.title'),//l'elemento da cliccare per spostare
+					this.webkitShadowRoot.querySelector('.window')//l'elemento che verrà spostato
+				);
+			}, null, 100);
+			this.minimizebutton = !true ;//&rang;
+			this.maximizebutton = !true ;//&EmptySmallSquare;
+			this.demaximizebutton = !true ;//&EmptySmallSquare;
+			this.closebutton = !true;
+		//}
+		/*
+		setPosition: function (htmlElement, htmlElementPoint, myPoint){
+
+			target = htmlElement;
+
+			this.webkitShadowRoot.querySelector('.window').style.left='110px';
+			this.webkitShadowRoot.querySelector('.window').style.top='110px';
+			
+			setTimeout(getOffset, 0, target, function (position){
+				this.webkitShadowRoot.querySelector('.window').style.left=position.left+'px';
+				this.webkitShadowRoot.querySelector('.window').style.top=position.top+'px';
+			}.bind(this));
+		},
+		*/
+		close (event){
+			event.preventDefault();
+			//remove me from the dom
+			this.parentNode.removeChild(this);
+			return false;
+		}
+		maximize (event){
+			event.preventDefault();
+			//remove me from the dom
+			this.parentNode.removeChild(this);
+			return false;
+		}
+		demaximizeclose (event){
+			event.preventDefault();
+			//remove me from the dom
+			this.parentNode.removeChild(this);
+			return false;
+		}
+		close (event){
+			event.preventDefault();
+			//remove me from the dom
+			this.parentNode.removeChild(this);
+			return false;
+		}
+	}
+	// Register the new element with the browser
+	customElements.define(xWindow.is, xWindow);
+	</script>
+</dom-module>
