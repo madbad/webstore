@@ -103,20 +103,24 @@
 		<!-- -->
 		Modifica Riga
 		<BR>
+		<span id="inserimentoRiga">
 		<x-numeroriga value="{{rigadamodificare.numero}}" label="N." id="numeroriga"></x-numeroriga>
 		<x-codicearticolo value="{{rigadamodificare.articolo_codice}}" id="codicearticolo" label="Art."></x-codicearticolo>
-		<x-lotto value="{{rigadamodificare.lotto}}" label="Lotto"></x-lotto>
+		<x-lotto value="{{rigadamodificare.lotto}}" id="lotto" label="Lotto"></x-lotto>
 		<br>
-		<x-numerocolli value="{{rigadamodificare.colli}}" label="Colli"></x-numerocolli>
-		<x-codiceimballaggio value="{{rigadamodificare.imballaggio_codice}}" label="Tipo Imball."></x-codiceimballaggio>
+		<x-numerocolli value="{{rigadamodificare.colli}}" id="colli" label="Colli"></x-numerocolli>
+		<!--
+		<x-codiceimballaggio value="{{rigadamodificare.imballaggio_codice}}" id="imballaggio" label="Tipo Imball."></x-codiceimballaggio>
+		-->
 		<br>
 		<x-codiceum value="{{rigadamodificare.um_codice}}" label="UM" id="codiceum"></x-codiceum>
 		<x-peso value="{{rigadamodificare.pesolordo}}" label="Lordo" id="pesolordo"></x-peso>
 		<x-peso value="{{rigadamodificare.tara}}" label="Tara" id="tara"></x-peso>
 		<x-peso value="{{rigadamodificare.pesonetto}}" label="Netto" id="pesonetto"></x-peso>
 		<br>
-		<x-prezzo value="{{rigadamodificare.prezzo}}" label="Prezzo"></x-prezzo>
+		<x-prezzo value="{{rigadamodificare.prezzo}}" id="prezzo" label="Prezzo"></x-prezzo>
 		<x-codiceiva value="{{rigadamodificare.iva_codice}}" label="Iva" id="codiceiva"></x-codiceiva>
+		</span>
 	</x-window>
 	</template>
 	<script>
@@ -150,16 +154,20 @@
 					{label:'Memorizza riga',_action:function (){this.memorizzaRiga(this.rigadamodificare);}.bind(this)},
 				];
 				//remember the full list that compose the menu
-				menu.fulllist = list;
+				//menu.fulllist = list;
 				//generate the table for the menu
-				var table = menu.generateTable (menu.fulllist);
-				console.log('the table for the menu is redy:', table);
+				//var table = menu.generateTable (menu.fulllist);
+				//console.log('the table for the menu is ready:', table);
+				menu.set('items', list);
+				menu.set('visibleitems', menu.items);
+				menu.selectFirstOfThePage();
+
 
 				console.log('Appending menu to the body:', menu);
 				document.body.appendChild(menu);
 				console.log('menu added!')
 
-				menu.createMenu (table.tBodies[0].children);
+				//menu.createMenu (table.tBodies[0].children);
 
 				menu.onCancel = function (){
 					this.$.numeroriga.$.field.focus();
@@ -220,26 +228,25 @@
 				return menu;
 			}
 			enteredView(){
-				alert('test');
 				//#################################################
 				//## UI LOGIC                                    ##
 				//#################################################
 				
 				setTimeout(function (){
 					//get a list of focusable elements
-					//this.fields = this.shadowRoot.querySelectorAll(':scope [value]');
-					this.fields = this.shadowRoot.querySelectorAll('[value]:not([type="hidden"]):not([disabled])');
-					//this.fields = this.shadowRoot.querySelectorAll('[value]:not([hiddeninput=""])');
-					//this.fields = this.shadowRoot.querySelectorAll('xwindow:scope [value]');
+					this.fields = this.getFocusableElements();
 
+					/*
 					console.log('focusable fields: ', this.fields);
 					console.log('#########################################################################################');
 					console.log('will get focus: ', this.fields[0]);
+					*/
+
 
 					//give focus to the first one
 					this.fields[0].shadowRoot.querySelector('input').focus();
 
-					//
+					// manage focus advancement on enter key
 					for (var i = 0; i < this.fields.length; i++){
 						this.fields[i].addEventListener('keydown', function(event){
 							console.log('main click??');
@@ -258,6 +265,57 @@
 							}
 						}.bind(this));
 					}
+					
+					
+					
+				//check for enter keyopress on riga field
+				//and fire the menu 
+				this.$.numeroriga.$.field.addEventListener('keydown', function(event) {
+					console.log('numerorigakeypress!!');
+					switch (event.which){
+						case 13: 
+							if(this.$.numeroriga.value=='' || this.$.numeroriga.value==null){
+								//inizio a creare una nuova riga
+								this.$.numeroriga.value = this.ddt.righe.length;
+								this.$.codicearticolo.$.field.focus();
+								//stop here
+								break;
+							}else if(this.$.numeroriga.value>=0 && this.$.numeroriga.value < this.ddt.righe.length){
+								//position to the displayRighe div to the current row
+								location.hash='#r'+this.$.numeroriga.value;
+								//display the menu
+								this.displayMenu();
+							}else{
+								console.log('Riga inesistente!', this.$.numeroriga.value, this.ddt.righe.length);
+								setTimeout(function (){
+									this.$.numeroriga.$.field.focus();
+								}.bind(this), 10);
+								//return false;
+							}
+						break; //enter
+					}
+				}.bind(this));
+				//
+				this.$.codiceiva.$.field.addEventListener('keydown',function(event) {
+					switch (event.which){
+						case 13: 
+							this.displayMenu().select(2);//autoselect memorizza riga
+						break; //enter
+					}
+				}.bind(this));
+				//esc menu
+				this.addEventListener('keydown', function(event) {
+					switch (event.which){
+						case 27: 
+							this.displayEscMenu();//display esc menu
+						break; //enter
+					}
+				}.bind(this));
+
+
+
+
+					
 				}.bind(this), 1000);
 			}
 			modificaRiga(numRiga){
@@ -467,6 +525,13 @@
 			}
 			ddtChanged(){
 				console.log("DDT CHANGED!!!");
+			}
+			getFocusableElements(){
+				var focusables = Array();
+				Array.prototype.push.apply(focusables, this.shadowRoot.querySelectorAll('x-window > [value]'));
+				Array.prototype.push.apply(focusables, this.shadowRoot.querySelector('#inserimentoRiga').querySelectorAll('[id]'));
+				console.log('myfocusables', focusables);
+				return focusables;
 			}
 
 		}
