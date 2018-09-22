@@ -70,8 +70,8 @@ events methods
 
 			onfocus(event, detail, sender){
 				
-				console.log("x-input: got focus", this);
-				console.log('real target was: ', event.target);
+				//console.log("x-input: got focus", this);
+				//console.log('real target was: ', event.target);
 				//call our custom focus
 				//this.focus();
 				//select everithing on the field
@@ -80,11 +80,11 @@ events methods
 				
 			}
 			onblur(event, detail, sender){
-				console.log("x-input: lost focus", this);
+				//console.log("x-input: lost focus", this);
 				//this.blur();
 			}
 			onkeydown(event, detail, sender){
-				console.log("x-input: keydown");
+				//console.log("x-input: keydown");
 				switch (event.which){
 					//F1
 					case 112: this.getHelp();
@@ -105,32 +105,32 @@ custom methods
 				params._type= objType,
 				params.codice= ['!=',''];
 
-				console.log('Cerco solo i vettori?: ', this.isvettore);
+				//console.log('Cerco solo i vettori?: ', this.isvettore);
 				if(this.isvettore){
 					params.alboautotrasportatori = ['!=',''];
 				}
 				
-				console.log(params);
+				//console.log(params);
 				params = JSON.stringify(params);
-				console.log(params);
-				console.log('create the menu');
+				//console.log(params);
+				//console.log('create the menu');
 				var helpWindow = document.createElement('x-menu');
 				helpWindow.title='Seleziona '+this.label;
-				console.log('modify params');
+				//console.log('modify params');
 				helpWindow.params = params;
-				console.log(helpWindow);
-				console.log('append menu');
+				//console.log(helpWindow);
+				//console.log('append menu');
 				helpWindow.onconfirm = function (selection){
-					console.log('XINPUT: HELP CONFIRMED, retrieving data');
+					//console.log('XINPUT: HELP CONFIRMED, retrieving data');
 					//retrieve the data
 					this.value=selection.codice;
 					//this.$.field.value = selection.codice;
-					console.log('XINPUT: HELP CONFIRMED, claim focus back from the help menu');
+					//console.log('XINPUT: HELP CONFIRMED, claim focus back from the help menu');
 					//get the focus back
 					this.$.field.focus();
 				}.bind(this);
 				helpWindow.oncancel = function (selection){
-					console.log('XINPUT: HELP CANCELLED, claim focus back from the help menu');
+					//console.log('XINPUT: HELP CANCELLED, claim focus back from the help menu');
 					//get the focus back
 					this.$.field.focus();
 				}.bind(this);
@@ -148,7 +148,7 @@ custom methods
 						left: 0,
 						}
 					this.setPosition('tc','tc',document.body, modifier);
-					console.log(this.offsetWidth);
+					//console.log(this.offsetWidth);
 					this.style.width = this.offsetWidth+'px';
 					this.show();
 					this.focus();
@@ -165,7 +165,7 @@ custom methods
 						left: 0,
 						};
 					this.setPosition('tc','tc',document.body, modifier);
-					console.log(this.offsetWidth);
+					//console.log(this.offsetWidth);
 					this.style.width = this.offsetWidth+'px';
 					//auto remove once we have run one time
 					this.onReady = function(){};
@@ -184,7 +184,7 @@ custom methods
 					
 					//callback for managing results
 					ajaxRequest.onload = function (e) {
-						console.log(e.target.responseText);
+						//console.log(e.target.responseText);
 						var myFullObj = JSON.parse(e.target.responseText);
 						//remember the full obj retrieved from the server
 						this.fullObj = e.target.responseText;
@@ -212,7 +212,7 @@ custom methods
 							//_autoExtend: -2,
 						},
 					};
-					console.log(requestData.params);
+					//console.log(requestData.params);
 					var obj=requestData.params;
 					var arr = Object.keys(obj).map(function(k) { return obj[k] });
 					
@@ -231,7 +231,7 @@ custom methods
 				return objType;
 			}
 			_valueChanged(newValue, oldValue){
-				console.log("value changed");
+				//console.log("value changed");
 				this.aggiornaDescrizioneCodice();
 				/*
 				if(this.hiddeninput){
@@ -277,7 +277,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='numeri';
 				this.length=6;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 
@@ -320,7 +320,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='numeri';
 				this.length=4;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 
@@ -363,7 +363,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='numeri';
 				this.length=5;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 
@@ -408,7 +408,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='numeri';
 				this.length=5;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 
@@ -453,7 +453,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='prezzo';
 				this.length=10;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 
@@ -498,7 +498,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='data';
 				this.length=10;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 
@@ -542,7 +542,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=6;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 
@@ -585,7 +585,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=2;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 
@@ -628,7 +628,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=2;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 
@@ -672,7 +672,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=6;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 
@@ -715,7 +715,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=2;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 
@@ -760,7 +760,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=5;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 
@@ -804,7 +804,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=3;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 
@@ -846,7 +846,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=15;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 
@@ -889,7 +889,7 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=100;
-				console.log(this.attributes);
+				//console.log(this.attributes);
 				/*todo: questo è un hack... 
 				in pratica per far passare un valore che imposto come
 				attributo (quando scrivo l'html) 

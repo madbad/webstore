@@ -190,15 +190,15 @@
 events methods
 */
 			onInputFocus(event, detail, sender){
-				console.log("x-menu: got focus");
+				//console.log("x-menu: got focus");
 			}
 			onInputBlur(event, detail, sender){
-				console.log("x-menu: lost focus");
+				//console.log("x-menu: lost focus");
 			}
 			onInputKeydown(event, detail, sender){
-				console.log("x-menu: keydown");
+				//console.log("x-menu: keydown");
 				switch (event.which){
-					case 38: console.log("up");this.selectPrev();console.log("up:done");break; //up
+					case 38: /*console.log("up");*/this.selectPrev();/*console.log("up:done");*/break; //up
 					case 40: this.selectNext();break; //down
 					case 33: this.selectFirstOfThePage();break; //pgup
 					case 34: this.selectLastOfThePage();break; //pgdown
@@ -208,10 +208,10 @@ events methods
 						//every time a key is pressed we schedule a future search on the visible items list
 						//if another key is pressed before the search actually happen 
 						//we cancel the previous search and re schedule a new one
-						console.log("Deffered search");
+						//console.log("Deffered search");
 						clearTimeout(this.deferredsearch); 
 						this.deferredsearch = setTimeout(function(){ 
-							console.log("search activated");
+							//console.log("search activated");
 							this.searchstringChanged();
 						}.bind(this), 250);
 				}
@@ -237,7 +237,7 @@ custom methods
 				//console.log('XMENU: Send a request to the server with params: ',this.params);
 				this.getFromServer();
 			}else{
-				console.log('XMENU: No params set at creation time, wait for some');
+				//console.log('XMENU: No params set at creation time, wait for some');
 			}
 			this.focus();
 			
@@ -255,23 +255,23 @@ custom methods
 			
 			//manage keyboard events
 			this.addEventListener("focus", function(event) {
-				console.log("give focus to the input");
+				//console.log("give focus to the input");
 				this.$.searchfield.focus()
 			}.bind(this),false);
 			
 			//manage propchange events
 			this.addEventListener("items-changed", function(event) {
-				console.log("Menu data",this, " changed with event", event);
+				//console.log("Menu data",this, " changed with event", event);
 				//update the visible menu-items
 				this.set('visibleitems', this.items);
 				
-				console.log("Menu data - Elements:",this.items.length);
-				console.log(this.$.table.tBodies[0]);
-				console.log(this.$.table.tBodies[0].rows);
+				//console.log("Menu data - Elements:",this.items.length);
+				//console.log(this.$.table.tBodies[0]);
+				//console.log(this.$.table.tBodies[0].rows);
 				
 				// workaround: se non uso settimeout il css non mostra la voce come selezionata
 				setTimeout(function(){
-					console.log("Timeout selection");
+					//console.log("Timeout selection");
 					if(this.items.length > 0){
 						this.selectedId=0;
 						this.selectItemById(this.selectedId);
@@ -282,7 +282,7 @@ custom methods
 			
 			//manage propchange events
 			this.addEventListener("visibleitems-changed", function(event) {
-				console.log("Menu visible data",this, " changed with event", event);
+				//console.log("Menu visible data",this, " changed with event", event);
 				//select the first element
 				if(this.items.length > 0){
 					this.selectedId=0;
@@ -293,8 +293,11 @@ custom methods
 		}
 		selectItemById(id){
 			//remove selected class from current element
-			console.log(this.$.table.tBodies[0]);
-			console.log(this.$.table.tBodies[0].rows);
+			//console.log(this.$.table.tBodies[0]);
+			console.log('Righe:',this.$.table.tBodies[0].rows);
+			console.log('Selezione attuale:',this.selectedId);
+			console.log('Nuova selezione:', id);
+			
 			/*todo: check id is in range*/
 			if(this.$.table.tBodies[0].rows.length > 0){
 				this.$.table.tBodies[0].rows[this.selectedId].classList.remove("selected");
@@ -306,42 +309,42 @@ custom methods
 			}
 		}
 		selectNext(){
-			console.log("select next");
-			console.log("items: ", this.visibleitems.length);
-			console.log("current: ", this.selectedId);
+			//console.log("select next");
+			//console.log("items: ", this.visibleitems.length);
+			//console.log("current: ", this.selectedId);
 			if(this.visibleitems.length - 1 > this.selectedId){
-				console.log("selecting: ", this.selectedId+1);
+				//console.log("selecting: ", this.selectedId+1);
 				this.selectItemById(this.selectedId+1);
 			}else{
-				console.log("selec next aborted: out of range");
+				//console.log("selec next aborted: out of range");
 			}
-			console.log(this.selectedId);
+			//console.log(this.selectedId);
 		}
 		selectPrev(id){
-			console.log("select prev");
-			console.log("items: ", this.visibleitems.length);
-			console.log("current: ", this.selectedId);
+			//console.log("select prev");
+			//console.log("items: ", this.visibleitems.length);
+			//console.log("current: ", this.selectedId);
 			if(this.selectedId > 0 && this.visibleitems.length > 0){
-				console.log("selecting: ", this.selectedId-1);
+				//console.log("selecting: ", this.selectedId-1);
 				this.selectItemById(this.selectedId-1);
 			}else{
-				console.log("selec prev aborted: out of range");
+				//console.log("selec prev aborted: out of range");
 			}
 		}
 		selectFirstOfThePage(){
-			console.log("select first");
+			//console.log("select first");
 			if(this.visibleitems.length > 0){
 				this.selectItemById(0);
 			}
 		}
 		selectLastOfThePage(){
-			console.log("select last");
+			//console.log("select last");
 			if(this.visibleitems.length > 0){
 				this.selectItemById(this.visibleitems.length-1);
 			}
 		}
 		getSelected(){
-			console.log("You have selected: ",this.visibleitems[this.selectedId]);
+			//console.log("You have selected: ",this.visibleitems[this.selectedId]);
 			return this.visibleitems[this.selectedId];
 		}
 		confirm(){
@@ -350,7 +353,8 @@ custom methods
 				var getType = {};
 				return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
 			}
-			
+			console.log('Was confirmed', this.getSelected())
+			console.log('With action', this.getSelected()._action);
 			//fire the action assigned to the element if there is one
 			if (isFunction(this.getSelected()._action)){
 				this.getSelected()._action();
@@ -394,9 +398,9 @@ custom methods
 		getFromServer(){
 			var ajaxRequest = new XMLHttpRequest();
 			ajaxRequest.onload = function (e) {
-				console.log(e);
-				console.log(e.target.response.message);
-				console.log(e.target.responseText);
+				//console.log(e);
+				//console.log(e.target.response.message);
+				//console.log(e.target.responseText);
 
 				var jsonList = JSON.parse(e.target.responseText);
 				console.log(jsonList);
@@ -411,18 +415,19 @@ custom methods
 						action: 'getAll',
 						params: JSON.parse(this.params)
 						};
+			/*
 			console.log("++++++++");
 			console.log(this.params);
 			console.log(JSON.parse(this.params));
 			console.log("++++++++");
 			console.log(requestData.params);
 			console.log(JSON.stringify(requestData.params));
-			
+			*/
 			
 			var obj=JSON.parse(this.params);
 			var arr = Object.keys(obj).map(function(k) { return obj[k] });
 			
-			console.log(arr);
+			//console.log(arr);
 			
 			ajaxRequest.open('POST', "./../do.php", true);
 			ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -518,16 +523,16 @@ custom methods
 		}
 		searchstringChanged(){
 			//console.log('XMENU: searching for >'+this.searchstring+'< into: ', this.list);
-			console.log("search string is: ", this.$.searchfield.value);
+			//console.log("search string is: ", this.$.searchfield.value);
 			this.searchstring = this.$.searchfield.value;
 			var searchstring = this.searchstring.toLowerCase();
 			
 			var filteredItems = this.items.filter(function(item){
-				console.log(item);
+				//console.log(item);
 				var result = false;
 				for (var prop in item){
 					if(prop[0] != '_'){
-						console.log(prop);
+						//console.log(prop);
 						var fullstring = item[prop].toLowerCase();
 						result = fullstring.search(searchstring);
 						//console.log('XMENU: scanned: ', fullstring, ' for: ', searchstring, 'with result: ', result)
@@ -576,18 +581,18 @@ custom methods
 				this.querySelector("#nome"),
 			];
 
-			console.log(columnsToHide);
+			//console.log(columnsToHide);
 			for (var i=0; i <= columnsToHide.length; i++){
 				var column = columnsToHide[i];
 				if(column){
-					console.log('Column hidden', column);
+					//console.log('Column hidden', column);
 					column.style.visibility='collapse';
 				}
 			}
 		}
 		_itemToArray(obj){
-			console.log("Converting to array...")
-			console.log(obj);
+			//console.log("Converting to array...")
+			//console.log(obj);
 			var toArray = new Array();
 			for(var prop in obj){
 				if (obj.hasOwnProperty(prop)) {
@@ -599,7 +604,7 @@ custom methods
 					}
 				}
 			}
-			console.log(toArray);
+			//console.log(toArray);
 			return toArray;
 			
 		}
