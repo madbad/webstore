@@ -149,8 +149,8 @@
 				var menu = document.createElement('x-menu');
 				menu.title="Gestione riga"
 				var list= [
-					{label:'Modifica riga',_action:function (){this.modificaRiga(this.$.numeroriga.val);}.bind(this)},
-					{label:'Cancella riga',_action:function (){this.eliminaRiga(this.$.numeroriga.val);}.bind(this)},
+					{label:'Modifica riga',_action:function (){this.modificaRiga(this.$.numeroriga.value);}.bind(this)},
+					{label:'Cancella riga',_action:function (){this.eliminaRiga(this.$.numeroriga.value);}.bind(this)},
 					{label:'Memorizza riga',_action:function (){this.memorizzaRiga(this.rigadamodificare);}.bind(this)},
 				];
 				//remember the full list that compose the menu
@@ -162,14 +162,13 @@
 				menu.set('visibleitems', menu.items);
 				menu.selectFirstOfThePage();
 
-
 				console.log('Appending menu to the body:', menu);
 				document.body.appendChild(menu);
 				console.log('menu added!')
 
 				//menu.createMenu (table.tBodies[0].children);
 
-				menu.onCancel = function (){
+				menu.oncancel = function (){
 					this.$.numeroriga.$.field.focus();
 				}.bind(this);
 
@@ -211,7 +210,7 @@
 
 				menu.createMenu (table.tBodies[0].children);
 
-				menu.onCancel = function (){
+				menu.oncancel = function (){
 					//give the focus to the first field
 					this.fields[0].querySelector('input').focus();
 				}.bind(this);
@@ -248,7 +247,7 @@
 
 					// manage focus advancement on enter key
 					for (var i = 0; i < this.fields.length; i++){
-						this.fields[i].addEventListener('keydown', function(event){
+						this.fields[i].addEventListener('keyup', function(event){
 							console.log('main click??');
 							switch (event.which){
 								case 13:
@@ -270,8 +269,12 @@
 					
 				//check for enter keyopress on riga field
 				//and fire the menu 
-				this.$.numeroriga.$.field.addEventListener('keydown', function(event) {
+				this.$.numeroriga.$.field.addEventListener('keyup', function(event) {
 					console.log('numerorigakeypress!!');
+					console.log(event);
+					console.log(this.$.numeroriga);
+					console.log(this);
+					//alert(this.$.numeroriga.value);
 					switch (event.which){
 						case 13: 
 							if(this.$.numeroriga.value=='' || this.$.numeroriga.value==null){
@@ -296,7 +299,7 @@
 					}
 				}.bind(this));
 				//
-				this.$.codiceiva.$.field.addEventListener('keydown',function(event) {
+				this.$.codiceiva.$.field.addEventListener('keyup',function(event) {
 					switch (event.which){
 						case 13: 
 							this.displayMenu().select(2);//autoselect memorizza riga
@@ -304,7 +307,7 @@
 					}
 				}.bind(this));
 				//esc menu
-				this.addEventListener('keydown', function(event) {
+				this.addEventListener('keyup', function(event) {
 					switch (event.which){
 						case 27: 
 							this.displayEscMenu();//display esc menu
@@ -320,7 +323,7 @@
 			}
 			modificaRiga(numRiga){
 				console.log('XDDT: richiesto di modificare la riga:', numRiga);
-				this.rigadamodificare=JSON.parse(JSON.stringify(this.ddt.righe[numRiga]));
+				this.rigadamodificare = JSON.parse(JSON.stringify(this.ddt.righe[numRiga]));
 				//do il focus al prossimo campo per iniziare la modifica della riga
 				this.$.codicearticolo.$.field.focus();
 			}
@@ -491,15 +494,15 @@
 				//wait for data to fullObj to be updated/propagated
 				this.$.codicearticolo.onDataReady = function(){
 					var fullObj = JSON.parse(this.$.codicearticolo.fullObj).articolo;
-					this.$.codiceum.val = fullObj.um_codice;
-					this.$.codiceiva.val = fullObj.iva_codice;
+					this.$.codiceum.value = fullObj.um_codice;
+					this.$.codiceiva.value = fullObj.iva_codice;
 					//self delette
 					this.$.codicearticolo.onDataReady= function(){};
 				}.bind(this);
 			}
 			modificatoPeso(oldValue, newValue) {
-				if(this.$.pesolordo.val>0){
-					this.$.pesonetto.val = this.$.pesolordo.val - this.$.tara.val;
+				if(this.$.pesolordo.value>0){
+					this.$.pesonetto.value = this.$.pesolordo.value - this.$.tara.value;
 				}
 			}
 			modificatoCliente(oldValue, newValue) {
@@ -512,12 +515,12 @@
 					var fullObj = JSON.parse(this.$.codiceclientefornitore.fullObj).clientefornitore;
 					if(this.$.codicemezzo.$.field.value==""){
 						//this.$.codicemezzo.$.field.value = fullObj.mezzo_codice;
-						this.$.codicemezzo.val = fullObj.mezzo_codice;
+						this.$.codicemezzo.value = fullObj.mezzo_codice;
 
 					}
 					if(this.$.codicevettore.$.field.value==""){
 						//this.$.codicevettore.$.field.value = fullObj.vettore_codice;
-						this.$.codicevettore.val = fullObj.vettore_codice;
+						this.$.codicevettore.value = fullObj.vettore_codice;
 					}
 					//self delette
 					this.$.codicearticolo.onDataReady= function(){};

@@ -118,7 +118,7 @@ window.addEventListener('WebComponentsReady', function() {
 
 	menu.set('items', list);
 	
-	menu.onCancel = function (){
+	menu.oncancel = function (){
 		//this.$.numeroriga.$.field.focus();
 	}.bind(this);
 
@@ -160,13 +160,13 @@ window.addEventListener('WebComponentsReady', function() {
 		
 		ddtList.params = JSON.stringify(params);
 		
-		ddtList.onConfirm = function (selection){
+		ddtList.onconfirm = function (selection){
 			//when the selection is confirmed start editing the ddt
 			console.log("selecionato il ddt", selection);
 			console.log("Procedo alla modifica...");
 			modificaDdt(selection);
 		}.bind(this);
-		ddtList.onCancel = function (selection){
+		ddtList.oncancel = function (selection){
 			console.log('XINPUT: HELP CANCELLED, claim focus back from the help menu');
 			//get the focus back
 			this.$.field.focus();

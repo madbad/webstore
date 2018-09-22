@@ -2,6 +2,11 @@
 
 <dom-module id='x-input'>
 	<template>
+		<style>
+			input:focus{
+				background-color:green;
+			}
+		</style>
 		<label>
 			<span style="color:grey">{{label}}</span>
 			<input 
@@ -66,13 +71,13 @@ events methods
 			onfocus(event, detail, sender){
 				
 				console.log("x-input: got focus", this);
-				/*
+				console.log('real target was: ', event.target);
 				//call our custom focus
 				//this.focus();
 				//select everithing on the field
 				var element = event.target;
 				element.select();
-				*/
+				
 			}
 			onblur(event, detail, sender){
 				console.log("x-input: lost focus", this);
@@ -118,7 +123,8 @@ custom methods
 				helpWindow.onconfirm = function (selection){
 					console.log('XINPUT: HELP CONFIRMED, retrieving data');
 					//retrieve the data
-					this.val=selection.codice;
+					this.value=selection.codice;
+					//this.$.field.value = selection.codice;
 					console.log('XINPUT: HELP CONFIRMED, claim focus back from the help menu');
 					//get the focus back
 					this.$.field.focus();

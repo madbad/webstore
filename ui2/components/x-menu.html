@@ -357,7 +357,7 @@ custom methods
 			}
 			
 			//call the onConfirma callback
-			this.onConfirm(this.getSelected());
+			this.onconfirm(this.getSelected());
 
 			//if is present remove the modalbackground
 			if(this.modalBackground){
@@ -374,7 +374,7 @@ custom methods
 			return;
 		}
 		cancel(){
-			this.onCancel();
+			this.oncancel();
 			//if is present remove the modalbackground
 			if(this.modalBackground){
 				this.parentNode.removeChild(this.modalBackground);
@@ -382,12 +382,12 @@ custom methods
 			//remove me from the dom without returning any value
 			this.parentNode.removeChild(this);
 		}
-		onConfirm(selectedObj){
+		onconfirm(selectedObj){
 			//use this as a callback
 			//return an obj of the selected menu-entry
 			return selectedObj;
 		}
-		onCancel(){
+		oncancel(){
 			//use this as a callback
 		}
 
