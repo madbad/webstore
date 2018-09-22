@@ -28,7 +28,9 @@ switch ($_POST["action"]){
 		echo $out;
 		break;
 	case "save":
+		echo $_POST["params"];
 		$params = json_decode($_POST["params"], true);
+		//echo get_object_vars(json_decode$params));
 		$myObj = new $params["_type"]($params);
 		$myObj->saveToDb();
 		break;

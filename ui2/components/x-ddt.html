@@ -145,7 +145,7 @@
 			=====================================================================================
 			*/
 			displayMenu(){
-				console.log('create the menu');
+				//console.log('create the menu');
 				var menu = document.createElement('x-menu');
 				menu.title="Gestione riga"
 				var list= [
@@ -162,9 +162,9 @@
 				menu.set('visibleitems', menu.items);
 				menu.selectFirstOfThePage();
 
-				console.log('Appending menu to the body:', menu);
+				//console.log('Appending menu to the body:', menu);
 				document.body.appendChild(menu);
-				console.log('menu added!')
+				//console.log('menu added!')
 
 				//menu.createMenu (table.tBodies[0].children);
 
@@ -188,7 +188,7 @@
 				return menu;
 			}
 			displayEscMenu(){
-				console.log('create the menu');
+				//console.log('create the menu');
 				var menu = document.createElement('x-menu');
 				menu.title="Gestione DDT"
 				var list= [
@@ -199,16 +199,18 @@
 					{label:'Cancella DDT',_action:function (){this.cancellaDdt();}.bind(this)}
 				];
 				//remember the full list that compose the menu
-				menu.fulllist = list;
+				menu.set('items', list);
+				menu.set('visibleitems', menu.items);
+				menu.selectFirstOfThePage();
 				//generate the table for the menu
-				var table = menu.generateTable (menu.fulllist);
-				console.log('the table for the menu is redy:', table);
+				//var table = menu.generateTable (menu.fulllist);
+				//console.log('the table for the menu is redy:', table);
 
-				console.log('Appending menu to the body:', menu);
+				//console.log('Appending menu to the body:', menu);
 				document.body.appendChild(menu);
-				console.log('menu added!')
+				//console.log('menu added!')
 
-				menu.createMenu (table.tBodies[0].children);
+				//menu.createMenu (table.tBodies[0].children);
 
 				menu.oncancel = function (){
 					//give the focus to the first field
@@ -236,9 +238,9 @@
 					this.fields = this.getFocusableElements();
 
 					/*
-					console.log('focusable fields: ', this.fields);
-					console.log('#########################################################################################');
-					console.log('will get focus: ', this.fields[0]);
+					//console.log('focusable fields: ', this.fields);
+					//console.log('#########################################################################################');
+					//console.log('will get focus: ', this.fields[0]);
 					*/
 
 
@@ -248,16 +250,16 @@
 					// manage focus advancement on enter key
 					for (var i = 0; i < this.fields.length; i++){
 						this.fields[i].addEventListener('keyup', function(event){
-							console.log('main click??');
+							//console.log('main click??');
 							switch (event.which){
 								case 13:
 									//focus the next field
-									console.log('target:',event.target);
+									//console.log('target:',event.target);
 									var next = 1+this.fields.indexOf(event.target);
 									if(next < this.fields.length){
-										console.log(this.fields.length, next);
+										//console.log(this.fields.length, next);
 										var newField = this.fields[next].shadowRoot.querySelector('input');
-										console.log('tryping to give focus to',this.fields[next], newField);
+										//console.log('tryping to give focus to',this.fields[next], newField);
 										newField.focus();
 									}
 								break; //enter
@@ -270,10 +272,10 @@
 				//check for enter keyopress on riga field
 				//and fire the menu 
 				this.$.numeroriga.$.field.addEventListener('keyup', function(event) {
-					console.log('numerorigakeypress!!');
-					console.log(event);
-					console.log(this.$.numeroriga);
-					console.log(this);
+					//console.log('numerorigakeypress!!');
+					//console.log(event);
+					//console.log(this.$.numeroriga);
+					//console.log(this);
 					//alert(this.$.numeroriga.value);
 					switch (event.which){
 						case 13: 
@@ -288,8 +290,9 @@
 								location.hash='#r'+this.$.numeroriga.value;
 								//display the menu
 								this.displayMenu();
+								//return false;
 							}else{
-								console.log('Riga inesistente!', this.$.numeroriga.value, this.ddt.righe.length);
+								//console.log('Riga inesistente!', this.$.numeroriga.value, this.ddt.righe.length);
 								setTimeout(function (){
 									this.$.numeroriga.$.field.focus();
 								}.bind(this), 10);
@@ -302,7 +305,10 @@
 				this.$.codiceiva.$.field.addEventListener('keyup',function(event) {
 					switch (event.which){
 						case 13: 
-							this.displayMenu().select(2);//autoselect memorizza riga
+							console.log('Displau the menu');
+							var menu = this.displayMenu()
+							console.log('select the second item');
+							menu.selectItemById(2);//autoselect memorizza riga
 						break; //enter
 					}
 				}.bind(this));
@@ -322,7 +328,7 @@
 				}.bind(this), 1000);
 			}
 			modificaRiga(numRiga){
-				console.log('XDDT: richiesto di modificare la riga:', numRiga);
+				//console.log('XDDT: richiesto di modificare la riga:', numRiga);
 				this.rigadamodificare = JSON.parse(JSON.stringify(this.ddt.righe[numRiga]));
 				//do il focus al prossimo campo per iniziare la modifica della riga
 				this.$.codicearticolo.$.field.focus();
@@ -330,7 +336,7 @@
 			eliminaRiga(numRiga){
 				this.rigadamodificare.numero=null;
 				this.$.numeroriga.value=null;
-				console.log('XDDT: richiesto di cancellare la riga:', numRiga);
+				//console.log('XDDT: richiesto di cancellare la riga:', numRiga);
 				this.ddt.righe.splice(numRiga, 1);
 				this.reindicizzaRighe();
 				this.iniziaRiga();
@@ -353,42 +359,63 @@
 							};
 			}
 			reindicizzaRighe(oRiga){
-				console.log('XDDT: reindicizzazzione righe in corso', this.ddt.righe.length)
+				//console.log('XDDT: reindicizzazzione righe in corso', this.ddt.righe.length)
 				for (var i=0; i < this.ddt.righe.length; i++){
 					var riga = this.ddt.righe[i];
-					console.log('XDDT: riga ',riga.numero,'diventa ',i)
+					//console.log('XDDT: riga ',riga.numero,'diventa ',i)
 					riga.numero = i;
 				}
 			}
 			memorizzaRiga(oRiga){
-				console.log('XDDT: memorizzazzione riga in corso', oRiga)
-				this.set('ddt.righe['+oRiga.numero+']',JSON.parse(JSON.stringify(oRiga)));
-				console.log('XDDT: resetto il numero riga')
+				//console.log('XDDT: memorizzazzione riga in corso', oRiga)
+				if (oRiga.numero <= this.ddt.righe.length){
+					this.set('ddt.righe.' + oRiga.numero , JSON.parse(JSON.stringify(oRiga)));
+				}else{
+					this.push('ddt.righe', JSON.parse(JSON.stringify(oRiga)));
+					this.set('ddt.righe.' + oRiga.numero , JSON.parse(JSON.stringify(oRiga)));
+				}
+
+				//console.log('memorizza2', this.ddt.righe);
+				//console.log('XDDT: resetto il numero riga')
 				this.iniziaRiga();
 				this.$.numeroriga.$.field.focus();
 			}
 			memorizzaDdt(){
-				console.log('Saving:', this.ddt)
-				//perform an ajax request to save the ddt
-				$.ajax({
-					type: "POST",
-					url: "./../do.php",
-					data: { action: 'save',
-							params: JSON.stringify(this.ddt)
-					},
-					context: this,
-				}).done(function( msg ) {
+				//impostiamo il tipo in quanto non sempre è già impostato
+				this.set('ddt._type','Ddt');
+
+				// prepare an ajax request
+				var ajaxRequest = new XMLHttpRequest();
+				
+				//callback for managing results
+				ajaxRequest.onload = function (e) {
 					alert('Ddt saved?');
-					console.log(msg);
+					console.log(e.target.responseText);
+					//console.log(msg);
 					this.abbandonaDdt();
-				});
+				}.bind(this);
+			
+				//request setup
+				var requestData ={
+					action: 'save',
+					params: JSON.stringify(this.ddt)
+				};
+				//console.log(requestData.params);
+				var obj=requestData.params;
+				var arr = Object.keys(obj).map(function(k) { return obj[k] });
+				
+				ajaxRequest.open('POST', "./../do.php", true);
+				ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				ajaxRequest.responseType = 'text';
+				ajaxRequest.send("action="+requestData.action+"&params="+requestData.params);
+
 			}
 			abbandonaDdt(){
 				this.onQuit();
 				this.parentNode.removeChild(this);
 			}
 			cancellaDdt(){
-				console.log('Deletting:', this.ddt)
+				//console.log('Deletting:', this.ddt)
 				//perform an ajax request to save the ddt
 				$.ajax({
 					type: "POST",
@@ -399,7 +426,7 @@
 					context: this,
 				}).done(function( msg ) {
 					alert('Ddt deletted?');
-					console.log(msg);
+					//console.log(msg);
 					this.abbandonaDdt();
 				});	
 			}
@@ -412,7 +439,7 @@
 				
 				//callback for managing results
 				ajaxRequest.onload = function (e) {
-						console.log(e.target.responseText);
+						//console.log(e.target.responseText);
 						var serverDdt = JSON.parse(e.target.responseText).ddt;
 						
 						/*
@@ -422,7 +449,7 @@
 							this.ddt.righe[i] =  {}; 
 						};
 						*/
-						console.log(serverDdt);
+						//console.log(serverDdt);
 						//this.ddt = JSON.parse(JSON.stringify(serverDdt));
 						this.set('ddt',JSON.parse(JSON.stringify(serverDdt)));
 						this.getRigheFromServer();
@@ -437,7 +464,7 @@
 					action: 'getOne',
 					params: this.ddt
 				};
-				console.log(requestData.params);
+				//console.log(requestData.params);
 				var obj=requestData.params;
 				var arr = Object.keys(obj).map(function(k) { return obj[k] });
 				
@@ -451,7 +478,7 @@
 				
 				//callback for managing results
 				ajaxRequest.onload = function (e) {
-					console.log(e.target.responseText);
+					//console.log(e.target.responseText);
 					var serverDdt = JSON.parse(e.target.responseText).ddt;
 					this.set('ddt.righe', JSON.parse(e.target.responseText));
 					this.reindicizzaRighe();
@@ -466,7 +493,7 @@
 								ddt_data: this.ddt.data,
 							}
 				};
-				console.log(requestData.params);
+				//console.log(requestData.params);
 				var obj=requestData.params;
 				var arr = Object.keys(obj).map(function(k) { return obj[k] });
 				
@@ -508,9 +535,9 @@
 			modificatoCliente(oldValue, newValue) {
 				//wait for data to fullObj to be updated/propagated
 				this.$.codiceclientefornitore.onDataReady = function(){
-				console.log('Il cliente è cambiato');
-				console.log(this.$.codicemezzo.$.field.value);
-				console.log(this.$.codicevettore.$.field.value);
+				//console.log('Il cliente è cambiato');
+				//console.log(this.$.codicemezzo.$.field.value);
+				//console.log(this.$.codicevettore.$.field.value);
 				
 					var fullObj = JSON.parse(this.$.codiceclientefornitore.fullObj).clientefornitore;
 					if(this.$.codicemezzo.$.field.value==""){
@@ -527,13 +554,13 @@
 				}.bind(this);
 			}
 			ddtChanged(){
-				console.log("DDT CHANGED!!!");
+				//console.log("DDT CHANGED!!!");
 			}
 			getFocusableElements(){
 				var focusables = Array();
 				Array.prototype.push.apply(focusables, this.shadowRoot.querySelectorAll('x-window > [value]'));
 				Array.prototype.push.apply(focusables, this.shadowRoot.querySelector('#inserimentoRiga').querySelectorAll('[id]'));
-				console.log('myfocusables', focusables);
+				//console.log('myfocusables', focusables);
 				return focusables;
 			}
 
