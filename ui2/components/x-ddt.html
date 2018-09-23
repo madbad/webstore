@@ -42,8 +42,9 @@
 		}
 		</style>
 	<x-window title="Gestione DDT">
-		<x-numerodoc value="{{ddt.numero}}" label="Numero"></x-numerodoc>
-		<x-data value="{{ddt.data}}" label="Data"></x-data>
+		<div id="intestazione">
+		<x-numerodoc value="{{ddt.numero}}" label="Numero" id="numedoc"></x-numerodoc>
+		<x-data value="{{ddt.data}}" label="Data" id="data"></x-data>
 		<br>
 		<x-codiceclientefornitore value="{{ddt.clientefornitore_codice}}" label="Fornitore o Cliente" id="codiceclientefornitore"></x-codiceclientefornitore>
 		<br>
@@ -53,7 +54,7 @@
 		<x-data value="{{ddt.fattura_data}}" label="Data.Fatt."></x-data>
 		-->
 		<br>
-		<x-codicecausale value="{{ddt.causale_codice}}" label="Causale di spedizione"></x-codicecausale>
+		<x-codicecausale value="{{ddt.causale_codice}}" label="Causale di spedizione"  id="codicecausale"></x-codicecausale>
 		<br>
 		<x-codicemezzo value="{{ddt.mezzo_codice}}" label="Mezzo di spedizione" id="codicemezzo"></x-codicemezzo>
 		<br>
@@ -61,7 +62,8 @@
 		<br>
 		<x-codiceclientefornitore value="{{ddt.destinatario_codice}}" label="Destinatario" id="codicedestinatario"></x-codiceclientefornitore>
 		<br>
-		<x-note value="{{ddt.note}}" label="Note"></x-note>
+		<x-note value="{{ddt.note}}" label="Note" id="note"></x-note>
+		</div>
 		<br>
 		Righe:
 		<div class="displayRighe" tabindex="">
@@ -82,7 +84,7 @@
 			</tr>
 			</thead>
 			<tbody>
-			<template is="dom-repeat" items="{{ddt.righe}}" as="r">
+			<template is="dom-repeat" items="{{ddt.righe}}" as="r" id="displayrigheTemplate">
 				<tr id="r{{r.numero}}">
 					<td><x-numeroriga value="{{r.numero}}" label=" {{r.numero}}" disabled="true" hiddeninput="true"></x-numeroriga></td>
 					<td><x-codicearticolo value="{{r.articolo_codice}}" label=" " disabled="true" hiddeninput="true"></x-codicearticolo></td>
@@ -142,6 +144,14 @@
 				}
 			}
 			/*
+			static get observers() {
+				return [
+					// Observer method name, followed by a list of dependencies, in parenthesis
+					'modificatoPeso(ddt.righepesolordo, ddt.pesousers.*, filter)'
+				]
+			}
+			*/
+			/*
 			=====================================================================================
 			*/
 			displayMenu(){
@@ -160,7 +170,7 @@
 				//console.log('the table for the menu is ready:', table);
 				menu.set('items', list);
 				menu.set('visibleitems', menu.items);
-				menu.selectFirstOfThePage();
+				//menu.selectFirstOfThePage();
 
 				//console.log('Appending menu to the body:', menu);
 				document.body.appendChild(menu);
@@ -201,7 +211,7 @@
 				//remember the full list that compose the menu
 				menu.set('items', list);
 				menu.set('visibleitems', menu.items);
-				menu.selectFirstOfThePage();
+				//menu.selectFirstOfThePage();
 				//generate the table for the menu
 				//var table = menu.generateTable (menu.fulllist);
 				//console.log('the table for the menu is redy:', table);
@@ -268,68 +278,67 @@
 					}
 					
 					
-					
-				//check for enter keyopress on riga field
-				//and fire the menu 
-				this.$.numeroriga.$.field.addEventListener('keyup', function(event) {
-					//console.log('numerorigakeypress!!');
-					//console.log(event);
-					//console.log(this.$.numeroriga);
-					//console.log(this);
-					//alert(this.$.numeroriga.value);
-					switch (event.which){
-						case 13: 
-							if(this.$.numeroriga.value=='' || this.$.numeroriga.value==null){
-								//inizio a creare una nuova riga
-								this.$.numeroriga.value = this.ddt.righe.length;
-								this.$.codicearticolo.$.field.focus();
-								//stop here
-								break;
-							}else if(this.$.numeroriga.value>=0 && this.$.numeroriga.value < this.ddt.righe.length){
-								//position to the displayRighe div to the current row
-								location.hash='#r'+this.$.numeroriga.value;
-								//display the menu
-								this.displayMenu();
-								//return false;
-							}else{
-								//console.log('Riga inesistente!', this.$.numeroriga.value, this.ddt.righe.length);
-								setTimeout(function (){
-									this.$.numeroriga.$.field.focus();
-								}.bind(this), 10);
-								//return false;
-							}
-						break; //enter
-					}
-				}.bind(this));
-				//
-				this.$.codiceiva.$.field.addEventListener('keyup',function(event) {
-					switch (event.which){
-						case 13: 
-							console.log('Displau the menu');
-							var menu = this.displayMenu()
-							console.log('select the second item');
-							menu.selectItemById(2);//autoselect memorizza riga
-						break; //enter
-					}
-				}.bind(this));
-				//esc menu
-				this.addEventListener('keyup', function(event) {
-					switch (event.which){
-						case 27: 
-							this.displayEscMenu();//display esc menu
-						break; //enter
-					}
-				}.bind(this));
-
-
-
-
-					
+						
+					//check for enter keyopress on riga field
+					//and fire the menu 
+					this.$.numeroriga.$.field.addEventListener('keyup', function(event) {
+						//console.log('numerorigakeypress!!');
+						//console.log(event);
+						//console.log(this.$.numeroriga);
+						//console.log(this);
+						//alert(this.$.numeroriga.value);
+						switch (event.which){
+							case 13: 
+								if(this.$.numeroriga.value=='' || this.$.numeroriga.value==null){
+									//inizio a creare una nuova riga
+									this.$.numeroriga.value = this.ddt.righe.length;
+									this.$.codicearticolo.$.field.focus();
+									//stop here
+									break;
+								}else if(this.$.numeroriga.value >= 0 && this.$.numeroriga.value < this.ddt.righe.length){
+									//modifico una riga esistente
+									//position to the displayRighe div to the current row
+									location.hash='#r'+this.$.numeroriga.value;
+									//display the menu
+									var menu = this.displayMenu();
+									menu.selectItemById(0);//autoselect modifica riga
+									return false;
+								}else{
+									//inizio una nuova riga
+									//console.log('Riga inesistente!', this.$.numeroriga.value, this.ddt.righe.length);
+									setTimeout(function (){
+										this.$.numeroriga.$.field.focus();
+									}.bind(this), 10);
+									//return false;
+								}
+							break; //enter
+						}
+					}.bind(this));
+					//
+					this.$.codiceiva.$.field.addEventListener('keyup',function(event) {
+						switch (event.which){
+							case 13: 
+								console.log('Displau the menu');
+								var menu = this.displayMenu()
+								menu.selectItemById(2); //autoselect memorizza riga
+							break; //enter
+						}
+					}.bind(this));
+					//esc menu
+					this.addEventListener('keyup', function(event) {
+						switch (event.which){
+							case 27: 
+								this.displayEscMenu();//display esc menu
+							break; //enter
+						}
+					}.bind(this));
 				}.bind(this), 1000);
 			}
 			modificaRiga(numRiga){
 				//console.log('XDDT: richiesto di modificare la riga:', numRiga);
 				this.rigadamodificare = JSON.parse(JSON.stringify(this.ddt.righe[numRiga]));
+				//move to that row the display
+				location.hash='#r'+numRiga;
 				//do il focus al prossimo campo per iniziare la modifica della riga
 				this.$.codicearticolo.$.field.focus();
 			}
@@ -337,7 +346,7 @@
 				this.rigadamodificare.numero=null;
 				this.$.numeroriga.value=null;
 				//console.log('XDDT: richiesto di cancellare la riga:', numRiga);
-				this.ddt.righe.splice(numRiga, 1);
+				this.splice('ddt.righe', numRiga, 1);
 				this.reindicizzaRighe();
 				this.iniziaRiga();
 				//rido' il focus al campo di selezione della riga
@@ -345,18 +354,20 @@
 			}
 			iniziaRiga(oRiga){
 				this.rigadamodificare = {
-							numero: null,
-							articolo_codice: null,
-							um_codice: null,
-							prezzo: null,
-							colli: null,
-							imballaggio_codice: null,
-							pesolordo:null,
-							tara:null,
-							pesonetto:null,
-							lotto:null,
-							iva_codice:null,
-							};
+					numero: null,
+					articolo_codice: null,
+					um_codice: null,
+					prezzo: null,
+					colli: null,
+					imballaggio_codice: null,
+					pesolordo:null,
+					tara:null,
+					pesonetto:null,
+					lotto:null,
+					iva_codice:null,
+					ddt_data: null,
+					ddt_numero: null,
+				};
 			}
 			reindicizzaRighe(oRiga){
 				//console.log('XDDT: reindicizzazzione righe in corso', this.ddt.righe.length)
@@ -368,15 +379,25 @@
 			}
 			memorizzaRiga(oRiga){
 				//console.log('XDDT: memorizzazzione riga in corso', oRiga)
-				if (oRiga.numero <= this.ddt.righe.length){
+				console.log(oRiga.numero, this.ddt.righe.length);
+				if (oRiga.numero < this.ddt.righe.length){
+				alert('doing wrong?');
 					this.set('ddt.righe.' + oRiga.numero , JSON.parse(JSON.stringify(oRiga)));
 				}else{
-					this.push('ddt.righe', JSON.parse(JSON.stringify(oRiga)));
+				//alert('doing?');
+					oRiga.ddt_data = this.ddt.data;
+					oRiga.ddt_numero = this.ddt.numero;
+					//console.log('memorizzo la riga', oRiga); 
+					//this.push('ddt.righe', JSON.parse(JSON.stringify(oRiga)));
 					this.set('ddt.righe.' + oRiga.numero , JSON.parse(JSON.stringify(oRiga)));
+					//this.notifyPath('ddt.righe');
+					//this.notifyPath('ddt.righe.'+oRiga.numero);
+					this.$.displayrigheTemplate.render();
 				}
-
+				//alert('done?');
 				//console.log('memorizza2', this.ddt.righe);
 				//console.log('XDDT: resetto il numero riga')
+				location.hash='#r'+oRiga.numero;
 				this.iniziaRiga();
 				this.$.numeroriga.$.field.focus();
 			}
@@ -488,10 +509,10 @@
 				var requestData ={
 					action: 'getAll',
 					params: {
-								_type: 'Riga',
-								ddt_numero: this.ddt.numero,
-								ddt_data: this.ddt.data,
-							}
+						_type: 'Riga',
+						ddt_numero: this.ddt.numero,
+						ddt_data: this.ddt.data,
+					}
 				};
 				//console.log(requestData.params);
 				var obj=requestData.params;
@@ -558,9 +579,8 @@
 			}
 			getFocusableElements(){
 				var focusables = Array();
-				Array.prototype.push.apply(focusables, this.shadowRoot.querySelectorAll('x-window > [value]'));
+				Array.prototype.push.apply(focusables, this.shadowRoot.querySelector('#intestazione').querySelectorAll('[id]'));
 				Array.prototype.push.apply(focusables, this.shadowRoot.querySelector('#inserimentoRiga').querySelectorAll('[id]'));
-				//console.log('myfocusables', focusables);
 				return focusables;
 			}
 

@@ -103,7 +103,7 @@
 				value="{{searchstring:change}}"
 				on-focus="onInputFocus"
 				on-blur="onInputBlur"
-				on-keydown="onInputKeydown"
+				on-keyup="onInputKeyup"
 			>
 		</div>
 		<div id="items">
@@ -122,7 +122,7 @@
 					</template>
 				</thead>
 				<tbody id="tableBody">
-					<template is="dom-repeat" items="{{visibleitems}}">
+					<template is="dom-repeat" items="{{visibleitems}}" id="mymenuitems">
 					<tr>
 						<template is="dom-repeat" items="{{_itemToArray(item)}}">
 							<td>
@@ -195,10 +195,10 @@ events methods
 			onInputBlur(event, detail, sender){
 				//console.log("x-menu: lost focus");
 			}
-			onInputKeydown(event, detail, sender){
+			onInputKeyup(event, detail, sender){
 				//console.log("x-menu: keydown");
 				switch (event.which){
-					case 38: /*console.log("up");*/this.selectPrev();/*console.log("up:done");*/break; //up
+					case 38: this.selectPrev();break; //up
 					case 40: this.selectNext();break; //down
 					case 33: this.selectFirstOfThePage();break; //pgup
 					case 34: this.selectLastOfThePage();break; //pgdown
@@ -231,7 +231,7 @@ custom methods
 				this
 			);
 			
-			this.keepAliveOnConfirm=false;
+			//this.keepAliveOnConfirm=false;
 			
 			if(this.params!=null){
 				//console.log('XMENU: Send a request to the server with params: ',this.params);
@@ -241,6 +241,7 @@ custom methods
 			}
 			this.focus();
 			
+			/*
 			//manage keyboard events
 			this.addEventListener("onkeydown", function(event) {
 				switch (event.which){
@@ -252,7 +253,7 @@ custom methods
 					case 27: this.cancel(); break; //esc
 				}
 			},false);
-			
+			*/
 			//manage keyboard events
 			this.addEventListener("focus", function(event) {
 				//console.log("give focus to the input");
@@ -270,13 +271,15 @@ custom methods
 				//console.log(this.$.table.tBodies[0].rows);
 				
 				// workaround: se non uso settimeout il css non mostra la voce come selezionata
-				setTimeout(function(){
-					//console.log("Timeout selection");
-					if(this.items.length > 0){
-						this.selectedId=0;
-						this.selectItemById(this.selectedId);
-					}
-				}.bind(this), 0);
+				if(this.selectedId ==''){
+					setTimeout(function(){
+						//console.log("Timeout selection");
+						if(this.items.length > 0){
+							this.selectedId=0;
+							this.selectItemById(this.selectedId);
+						}
+					}.bind(this), 0);
+				}
 				
 			}.bind(this),false);
 			
@@ -292,9 +295,12 @@ custom methods
 			
 		}
 		selectItemById(id){
+			//force a render of the menu items
+			//we need to do this or we could not be able to select the proper item
+			this.$.mymenuitems.render();
 			//remove selected class from current element
 			//console.log(this.$.table.tBodies[0]);
-			console.log('Righe:',this.$.table.tBodies[0].rows);
+			console.log('Righe:',this.$.table.tBodies[0].rows.length,this.$.table.tBodies[0].rows);
 			console.log('Selezione attuale:',this.selectedId);
 			console.log('Nuova selezione:', id);
 			
@@ -610,10 +616,9 @@ custom methods
 		}
 		_isFirst(index){
 			if (index ==0){
-			return true;
+				return true;
 			}else{
-			return false;
-
+				return false;
 			}
 		}
 	}

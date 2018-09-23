@@ -388,13 +388,13 @@
 						case 13: 
 							if(this.$.numeroriga.val=='' || this.$.numeroriga.val==null){
 								//inizio a creare una nuova riga
-								this.$.numeroriga.val = this.ddt.righe.length;
+								this.$.numeroriga.value = this.ddt.righe.length;
 								this.$.codicearticolo.$.field.focus();
 								//stop here
 								break;
-							}else if(this.$.numeroriga.val>=0 && this.$.numeroriga.val < this.ddt.righe.length){
+							}else if(this.$.numeroriga.value>=0 && this.$.numeroriga.value < this.ddt.righe.length){
 								//position to the displayRighe div to the current row
-								location.hash='#r'+this.$.numeroriga.val;
+								location.hash='#r'+this.$.numeroriga.value;
 								//display the menu
 								this.displayMenu();
 							}else{
@@ -707,15 +707,15 @@
 			//wait for data to fullObj to be updated/propagated
 			this.$.codicearticolo.onDataReady = function(){
 				var fullObj = JSON.parse(this.$.codicearticolo.fullObj).articolo;
-				this.$.codiceum.val = fullObj.um_codice;
-				this.$.codiceiva.val = fullObj.iva_codice;
+				this.$.codiceum.value = fullObj.um_codice;
+				this.$.codiceiva.value = fullObj.iva_codice;
 				//self delette
 				this.$.codicearticolo.onDataReady= function(){};
 			}.bind(this);
 		},
 		modificatoPeso: function(oldValue, newValue) {
-			if(this.$.pesolordo.val>0){
-				this.$.pesonetto.val = this.$.pesolordo.val - this.$.tara.val;
+			if(this.$.pesolordo.value>0){
+				this.$.pesonetto.valye = this.$.pesolordo.value - this.$.tara.value;
 			}
 		},
 		modificatoCliente: function(oldValue, newValue) {
@@ -727,13 +727,13 @@
 			
 				var fullObj = JSON.parse(this.$.codiceclientefornitore.fullObj).clientefornitore;
 				if(this.$.codicemezzo.$.field.value==""){
-					//this.$.codicemezzo.$.field.value = fullObj.mezzo_codice;		
-					this.$.codicemezzo.val = fullObj.mezzo_codice;		
+					//this.$.codicemezzo.$.field.value = fullObj.mezzo_codice;
+					this.$.codicemezzo.value = fullObj.mezzo_codice;
 
 				}
 				if(this.$.codicevettore.$.field.value==""){
-					//this.$.codicevettore.$.field.value = fullObj.vettore_codice;				
-					this.$.codicevettore.val = fullObj.vettore_codice;				
+					//this.$.codicevettore.$.field.value = fullObj.vettore_codice;
+					this.$.codicevettore.value = fullObj.vettore_codice;
 				}
 				//self delette
 				this.$.codicearticolo.onDataReady= function(){};

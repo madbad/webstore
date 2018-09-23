@@ -3,8 +3,8 @@
 <dom-module id='x-input'>
 	<template>
 		<style>
-			input:focus{
-				background-color:green;
+			#field:focus {
+				background-color: yellow;
 			}
 		</style>
 		<label>
@@ -81,7 +81,8 @@ events methods
 			}
 			onblur(event, detail, sender){
 				//console.log("x-input: lost focus", this);
-				//this.blur();
+				var element = event.target;
+				this.$.field.blur();
 			}
 			onkeydown(event, detail, sender){
 				//console.log("x-input: keydown");
@@ -135,25 +136,8 @@ custom methods
 					this.$.field.focus();
 				}.bind(this);
 				document.body.appendChild(helpWindow);
-				helpWindow.searchstring = this.val;
+				helpWindow.searchstring = this.value;
 
-				//wait a little and then position the help window in the middle of the body
-				//and remember his width so that it does not change during future modifcation of contents
-				//and show us
-				/*
-				setTimeout(function (){
-					this.addModalBackground();
-					var modifier = {
-						top: 50,
-						left: 0,
-						}
-					this.setPosition('tc','tc',document.body, modifier);
-					//console.log(this.offsetWidth);
-					this.style.width = this.offsetWidth+'px';
-					this.show();
-					this.focus();
-				}.bind(helpWindow), 150);
-				*/
 				helpWindow.addModalBackground();
 				helpWindow.show();
 				helpWindow.focus();

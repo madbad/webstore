@@ -51,6 +51,10 @@ label {
 input {
 	color:blue;
 }
+input:focus {
+	border-color: orange;
+	background-color:#ffe28e;
+}
 input:disabled {
 	color: #848484;
 	background-color: #D6D6D6;
@@ -93,23 +97,7 @@ window.addEventListener('WebComponentsReady', function() {
 								var ddtApp = document.createElement('x-ddt');
 								document.body.appendChild(ddtApp);
 							}.bind(this)},
-							/*
-		{label:'Modifica DDT',_action:function (){
-								var ddtWindow = document.createElement('x-window');
-								var ddtApp = document.createElement('x-ddt');
-								ddtApp.ddt={};
-
-								ddtApp.ddt._type='Ddt';
-								ddtApp.ddt.numero='1939';
-								ddtApp.ddt.data='16/11/2013';
-								
-								ddtApp.getDdtFromServer();
-								ddtWindow.appendChild(ddtApp);
-								document.body.appendChild(ddtWindow);
-							}.bind(this)}
-	*/
 	];
-
 
 	menu.keepAliveOnConfirm = true;
 
@@ -126,8 +114,6 @@ window.addEventListener('WebComponentsReady', function() {
 	//and remember his width so that it does not change during future modifcation of contents
 	//and show us
 	setTimeout(function (){
-		//menu.set('items', list);
-		//this.addModalBackground();
 		var modifier = {
 			top: 50,
 			left: 50,
@@ -162,8 +148,8 @@ window.addEventListener('WebComponentsReady', function() {
 		
 		ddtList.onconfirm = function (selection){
 			//when the selection is confirmed start editing the ddt
-			console.log("selecionato il ddt", selection);
-			console.log("Procedo alla modifica...");
+			//console.log("selecionato il ddt", selection);
+			//console.log("Procedo alla modifica...");
 			modificaDdt(selection);
 		}.bind(this);
 		ddtList.oncancel = function (selection){
