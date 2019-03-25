@@ -408,6 +408,15 @@ custom methods
 				//console.log(e.target.response.message);
 				//console.log(e.target.responseText);
 
+				try {
+					var jsonList = JSON.parse(e.target.responseText);
+				} catch (e) {
+					alert("Error happened: bad reaply from the server");
+					alert("Error: "+e.target.responseText);
+
+					console.log("This was the error:",e);
+				}
+
 				var jsonList = JSON.parse(e.target.responseText);
 				console.log(jsonList);
 				//the full array of objects we will use

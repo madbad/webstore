@@ -141,6 +141,11 @@
 						reflectToAttribute: true,
 						notify: true
 					},
+					rigadamodificare: {
+						type: Object,
+						reflectToAttribute: true,
+						notify: true
+					},
 				}
 			}
 			/*
@@ -291,11 +296,17 @@
 							case 13: 
 								if(this.$.numeroriga.value=='' || this.$.numeroriga.value==null){
 									//inizio a creare una nuova riga
+									if(!this.hasOwnProperty('ddt')){
+										this.ddt = {};
+									}
+									if(!this.ddt.hasOwnProperty('righe')){
+										this.ddt.righe = Array();
+									}
 									this.$.numeroriga.value = this.ddt.righe.length;
 									this.$.codicearticolo.$.field.focus();
 									//stop here
 									break;
-								}else if(this.$.numeroriga.value >= 0 && this.$.numeroriga.value < this.ddt.righe.length){
+								}else if(this.$.numeroriga.value >= 0 && this.hasOwnProperty('ddt') && this.ddt.hasOwnProperty('righe') && this.$.numeroriga.value < this.ddt.righe.length){
 									//modifico una riga esistente
 									//position to the displayRighe div to the current row
 									location.hash='#r'+this.$.numeroriga.value;

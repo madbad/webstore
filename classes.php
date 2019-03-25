@@ -164,9 +164,14 @@ class MyClass extends DefaultClass{
 		//$fieldsToAdd.=implode($indexes,' TEXT NOT NULL, ');
 		//chiavi primarie
 		$fieldsToAdd.=' PRIMARY KEY ('.implode($indexes,',').')';
-		echo $sqlite->database;
+		//echo $sqlite->database;
 		//apro il $DATAbase
-		$db = new SQLite3($sqlite->database);
+		
+		if ($this->getDbType()=='interno'){
+			$db = new SQLite3($sqlite->databaseInterno);
+		}else{
+			$db = new SQLite3($sqlite->databaseDitta);
+		}
 		//creo la tabella
 		$query="CREATE TABLE if not exists $table($fieldsToAdd)";
 		$db->exec($query) or die($query);
@@ -216,7 +221,11 @@ class MyClass extends DefaultClass{
 		$values="'".$values."'";
 
 		//apro il $DATAbase
-		$db = new SQLite3($sqlite->database);
+		if ($this->getDbType()=='interno'){
+			$db = new SQLite3($sqlite->databaseInterno);
+		}else{
+			$db = new SQLite3($sqlite->databaseDitta);
+		}
 		//creo la tabella
 		//to fix : letto su internet che se vado ad aggiornare una riga com esempio solo 3 campi su quattro il campo che non vado ad aggiornare in questo momento con i nuovi valori viene resettato al valore di default o messo a null
 		$query="INSERT OR REPLACE INTO $table (".implode($fields,',').") VALUES ($values)";
@@ -249,7 +258,11 @@ class MyClass extends DefaultClass{
 		$query='SELECT * FROM '.$table.' '.$where.$order;
 		//echo $query;
 		//apro il $DATAbase ed eseguo la query
-		$db = new SQLite3($sqlite->database);
+		if ($this->getDbType()=='interno'){
+			$db = new SQLite3($sqlite->databaseInterno);
+		}else{
+			$db = new SQLite3($sqlite->databaseDitta);
+		}
 		$results = $db->query($query) or die($query);
 		//importo i risultati nel mio oggetto
 		while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
@@ -281,7 +294,11 @@ class MyClass extends DefaultClass{
 		$query='DELETE FROM '.$table.' '.$where;
 		//echo $query;
 		//apro il $DATAbase ed eseguo la query
-		$db = new SQLite3($sqlite->database);
+		if ($this->getDbType()=='interno'){
+			$db = new SQLite3($sqlite->databaseInterno);
+		}else{
+			$db = new SQLite3($sqlite->databaseDitta);
+		}
 		$results = $db->query($query) or die($query);
 		return;
 	}
@@ -337,6 +354,10 @@ $t->URL = 			new Validatore(array('tipo'=>'TEXT',   'lunghezza'=>50));
 /*########################################################################################*/
 class Ddt  extends MyClass {
 	function __construct($params) {
+		$this->addProp('id', 'NUMERATORE');
+		$this->addProp('fattura_id', 'NUMERATORE');
+		$this->addProp('riga_id', 'NUMERATORE');
+		
 		$this->addProp('numero', 'NUMERATORE');
 		$this->addProp('data', 'DATA');
 		$this->addProp('clientefornitore_codice', 'CODICE');
@@ -344,8 +365,6 @@ class Ddt  extends MyClass {
 		$this->addProp('mezzo_codice', 'CODICE');
 		$this->addProp('vettore_codice', 'CODICE');
 		$this->addProp('destinatario_codice', 'CODICE');
-		$this->addProp('fattura_numero', 'NUMERATORE');
-		$this->addProp('fattura_data', 'DATA');
 		$this->addProp('note');
 		
 		$this->addProp('righe', 'ARRAY');
@@ -355,8 +374,12 @@ class Ddt  extends MyClass {
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
 	}
+	function getDbType(){
+		return 'ditta';
+	}
 	function getDbKeys(){
-		return array('numero','data');
+		//return array('numero','data');
+		return array('id');
 	}
 	//ovverride the default "deletteFromDb" function since we need to delette "rows" too
 	function deletteFromDb(){
@@ -375,6 +398,8 @@ class Ddt  extends MyClass {
 
 class Riga extends MyClass {
 	function __construct($params) {
+		$this->addProp('id', 'NUMERATORE');
+		
 		$this->addProp('ddt_data', 'DATA');
 		$this->addProp('ddt_numero', 'NUMERATORE');
 		$this->addProp('numero', 'NUMERATORE');
@@ -392,8 +417,12 @@ class Riga extends MyClass {
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
 	}
+	function getDbType(){
+		return 'ditta';
+	}
 	function getDbKeys(){
-		return array('ddt_data','ddt_numero','numero');
+		//return array('ddt_data','ddt_numero','numero');
+		return array('id');
 	}
 }
 
@@ -406,6 +435,9 @@ class Articolo extends MyClass {
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
+	}
+	function getDbType(){
+		return 'interno';
 	}
 	function getDbKeys(){
 		return array('codice');
@@ -421,6 +453,9 @@ class Imballaggio extends MyClass {
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
+	}
+	function getDbType(){
+		return 'interno';
 	}
 	function getDbKeys(){
 		return array('codice');
@@ -456,6 +491,9 @@ class Clientefornitore extends MyClass {
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
 	}
+	function getDbType(){
+		return 'interno';
+	}
 	function getDbKeys(){
 		return array('codice');
 	}
@@ -468,6 +506,9 @@ class Iva extends MyClass {
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
+	}
+	function getDbType(){
+		return 'interno';
 	}
 	function getDbKeys(){
 		return array('codice');
@@ -483,6 +524,9 @@ class Causale extends MyClass {
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
 	}
+	function getDbType(){
+		return 'interno';
+	}
 	function getDbKeys(){
 		return array('codice');
 	}
@@ -495,6 +539,9 @@ class Mezzo extends MyClass { //mittente / destinatario / vettore carico mittent
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
 	}
+	function getDbType(){
+		return 'interno';
+	}
 	function getDbKeys(){
 		return array('codice');
 	}
@@ -506,6 +553,9 @@ class Um extends MyClass {
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
+	}
+	function getDbType(){
+		return 'interno';
 	}
 	function getDbKeys(){
 		return array('codice');
@@ -717,7 +767,11 @@ $test=new MyList(
 		$table=$fakeObj->getDbName();
 		$query='SELECT '.$select.' FROM '.$table.' '.$where.$order;
 		//apro il $DATAbase ed eseguo la query
-		$db = new SQLite3($sqlite->database);
+		if ($fakeObj->getDbType()=='interno'){
+			$db = new SQLite3($sqlite->databaseInterno);
+		}else{
+			$db = new SQLite3($sqlite->databaseDitta);
+		}
 		$results = $db->query($query) or die($query);
 		//importo i risultati nel mio oggetto
 		while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
