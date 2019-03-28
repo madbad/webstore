@@ -96,6 +96,7 @@ window.addEventListener('WebComponentsReady', function() {
 		{label:'Inserisci DDT',_action:function (){
 								var ddtApp = document.createElement('x-ddt');
 								document.body.appendChild(ddtApp);
+								ddtApp.inizializzaNuovoDdt();
 							}.bind(this)},
 	];
 

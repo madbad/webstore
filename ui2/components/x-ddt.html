@@ -291,6 +291,11 @@
 							case 13: 
 								if(this.$.numeroriga.value=='' || this.$.numeroriga.value==null){
 									//inizio a creare una nuova riga
+									console.log('inizio una nuova riga');
+									console.log(this);
+									console.log(this.rigadamodificare);
+									this.iniziaRiga();
+									console.log('lunghezza', this.ddt.righe.length);
 									this.$.numeroriga.value = this.ddt.righe.length;
 									this.$.codicearticolo.$.field.focus();
 									//stop here
@@ -335,15 +340,17 @@
 				}.bind(this), 1000);
 			}
 			modificaRiga(numRiga){
-				//console.log('XDDT: richiesto di modificare la riga:', numRiga);
-				this.rigadamodificare = JSON.parse(JSON.stringify(this.ddt.righe[numRiga]));
+				console.log('XDDT: richiesto di modificare la riga:', numRiga);
+				//this.rigadamodificare = JSON.parse(JSON.stringify(this.ddt.righe[numRiga]));
+				this.set('rigadamodificare',JSON.parse(JSON.stringify(this.ddt.righe[numRiga])));
 				//move to that row the display
 				location.hash='#r'+numRiga;
 				//do il focus al prossimo campo per iniziare la modifica della riga
 				this.$.codicearticolo.$.field.focus();
 			}
 			eliminaRiga(numRiga){
-				this.rigadamodificare.numero=null;
+				//this.rigadamodificare.numero=null;
+				this.set('rigadamodificare.numero',null);
 				this.$.numeroriga.value=null;
 				//console.log('XDDT: richiesto di cancellare la riga:', numRiga);
 				this.splice('ddt.righe', numRiga, 1);
@@ -353,6 +360,24 @@
 				this.$.numeroriga.$.field.focus();
 			}
 			iniziaRiga(oRiga){
+				this.set('rigadamodificare',
+					{
+						numero: null,
+						articolo_codice: null,
+						um_codice: null,
+						prezzo: null,
+						colli: null,
+						imballaggio_codice: null,
+						pesolordo:null,
+						tara:null,
+						pesonetto:null,
+						lotto:null,
+						iva_codice:null,
+						ddt_data: null,
+						ddt_numero: null,
+					}
+				);
+				/*
 				this.rigadamodificare = {
 					numero: null,
 					articolo_codice: null,
@@ -368,6 +393,7 @@
 					ddt_data: null,
 					ddt_numero: null,
 				};
+				*/
 			}
 			reindicizzaRighe(oRiga){
 				//console.log('XDDT: reindicizzazzione righe in corso', this.ddt.righe.length)
@@ -576,6 +602,10 @@
 			}
 			ddtChanged(){
 				//console.log("DDT CHANGED!!!");
+			}
+			inizializzaNuovoDdt(){
+				this.set('ddt',{});
+				this.set('ddt.righe',[]);
 			}
 			getFocusableElements(){
 				var focusables = Array();
