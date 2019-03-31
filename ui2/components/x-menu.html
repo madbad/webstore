@@ -300,10 +300,11 @@ custom methods
 			this.$.mymenuitems.render();
 			//remove selected class from current element
 			//console.log(this.$.table.tBodies[0]);
+			/*
 			console.log('Righe:',this.$.table.tBodies[0].rows.length,this.$.table.tBodies[0].rows);
 			console.log('Selezione attuale:',this.selectedId);
 			console.log('Nuova selezione:', id);
-			
+			*/
 			/*todo: check id is in range*/
 			if(this.$.table.tBodies[0].rows.length > 0){
 				this.$.table.tBodies[0].rows[this.selectedId].classList.remove("selected");
@@ -537,9 +538,18 @@ custom methods
 			}
 		}
 		searchstringChanged(){
+			console.log('XMENU: the search string has been changed');
 			//console.log('XMENU: searching for >'+this.searchstring+'< into: ', this.list);
 			//console.log("search string is: ", this.$.searchfield.value);
-			this.searchstring = this.$.searchfield.value;
+			this.set('searchstring',this.$.searchfield.value);
+			//update the input field
+			
+			/*
+			if(this.$.searchfield.value == ''){
+				this.$.searchfield.value = this.searchstring;
+			}
+			*/
+			
 			var searchstring = this.searchstring.toLowerCase();
 			
 			var filteredItems = this.items.filter(function(item){

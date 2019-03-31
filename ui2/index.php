@@ -91,12 +91,16 @@ window.addEventListener('WebComponentsReady', function() {
 	var list= [
 		{label:'Elenca DDT',_action:function (){
 								console.log('test');
-								elencaDdt();
+								elencaDdt().bind(this);
 							}.bind(this)},
 		{label:'Inserisci DDT',_action:function (){
 								var ddtApp = document.createElement('x-ddt');
 								document.body.appendChild(ddtApp);
 								ddtApp.inizializzaNuovoDdt();
+								ddtApp.onQuit = function(){
+									console.log('quitting...');
+									menu.$.searchfield.focus();
+								}.bind(menu)
 							}.bind(this)},
 	];
 
@@ -110,6 +114,11 @@ window.addEventListener('WebComponentsReady', function() {
 	menu.oncancel = function (){
 		//this.$.numeroriga.$.field.focus();
 	}.bind(this);
+	
+	//sovrascrivo la funzione di uscita in modo che non sia possibile uscire
+	menu.cancel = function(){
+		console.log("Mi spiace non si esce da qui! Questo e' il main menu")
+	};
 
 	//wait a little and then position the help window in the middle of the body
 	//and remember his width so that it does not change during future modifcation of contents
@@ -146,7 +155,8 @@ window.addEventListener('WebComponentsReady', function() {
 		};
 		
 		ddtList.params = JSON.stringify(params);
-		
+		console.log(ddtList.params);
+		console.log(ddtList.params);
 		ddtList.onconfirm = function (selection){
 			//when the selection is confirmed start editing the ddt
 			//console.log("selecionato il ddt", selection);
@@ -156,7 +166,7 @@ window.addEventListener('WebComponentsReady', function() {
 		ddtList.oncancel = function (selection){
 			console.log('XINPUT: HELP CANCELLED, claim focus back from the help menu');
 			//get the focus back
-			this.$.field.focus();
+			menu.$.searchfield.focus();
 		}.bind(this);
 		document.body.appendChild(ddtList);
 

@@ -136,7 +136,14 @@ custom methods
 					this.$.field.focus();
 				}.bind(this);
 				document.body.appendChild(helpWindow);
-				helpWindow.searchstring = this.value;
+				console.log('before',helpWindow.searchstring);
+				
+				//aggiornaimo direttamente l'input field altrimenti non funzionava
+				helpWindow.$.searchfield.value = this.value;
+				//helpWindow.set('searchstring',this.value);
+				
+				console.log('after',helpWindow.searchstring);
+
 
 				helpWindow.addModalBackground();
 				helpWindow.show();

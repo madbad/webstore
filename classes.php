@@ -37,10 +37,8 @@ class MyClass extends DefaultClass{
 			//print_r($prop);
 			if(@$prop->nome!=''){
 				$out[]= $prop->nome;
-				//array_push($out, $prop->nome);
 			}
 		}
-		//print_r($out);
 		return $out;
 	}
 	public function mergeParams($params){
@@ -185,12 +183,27 @@ class MyClass extends DefaultClass{
 		
 		$sqlite=$GLOBALS['config']->sqlite;
 		
+		//questo in teoria non serve!!!
+		//anzi in teoria mi creava un duplicato del campo id
+		
 		//elenco di tutti i campi da aggiornare
-		$fields= array_merge ($fields, $indexes);
+		//$fields= array_merge ($fields, $indexes);
+		
+		print_r($fields);
+		
+		echo '>'.$this->id->getVal().'<';
+		//escludo il valore id se si tratta di una nuova memorizzazzione, verra aggiunto automaticamente dal database
+		if($this->id->getVal() == ''){
+			unset($fields[array_search('id',$fields)]);
+		}
+		echo 'updated:';
+		print_r($fields);
+		
 		
 		//creo l'elenco di tutti i valori da memorizzare
 		$values=array();
 		foreach ($fields as $field){
+			
 			if(is_array($this->$field->getVal())){
 				//this field is an array we need to treat it differently
 				$itemsId = array();
@@ -205,6 +218,8 @@ class MyClass extends DefaultClass{
 			}else{//do this for all the normal fields
 				$val=$this->$field->getVal();
 				$values[]=(string) $this->$field->getVal();
+				/*TODO: MAYBE ITS NEEDED*/
+				/*
 				if($val==='' && in_array($field, $indexes)){
 					// [ $val !=='0' ] devo fare anche questo test altrimenti la prima riga con indice 0 non mi viene salvata in quanto considera [ 0=='']
 					//abortisco una delle chiavi primarie è nulla: non posso salvare nel $DATAbase (e comunque non avrebbe senso farlo)
@@ -214,11 +229,17 @@ class MyClass extends DefaultClass{
 
 					return;
 				}
+				*/
 			}
 		}
+		/*TODO*/
+		$values=implode($values,'","');
+		$values='"'.$values.'"';
+		/*
 		//aggiungo le '' per evitare che il $TESTO venga trattato numericamente
 		$values=implode($values,"','");
 		$values="'".$values."'";
+		*/
 
 		//apro il $DATAbase
 		if ($this->getDbType()=='interno'){
