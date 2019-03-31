@@ -88,6 +88,7 @@ window.addEventListener('WebComponentsReady', function() {
 	//create the main app menu
 	console.log("MAIN DOCUMENT: create an x-menu");
 	var menu = document.createElement('x-menu');
+	menu.title = "Menu principale"
 	var list= [
 		{label:'Elenca DDT',_action:function (){
 								console.log('test');

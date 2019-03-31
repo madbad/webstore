@@ -139,7 +139,10 @@ custom methods
 				console.log('before',helpWindow.searchstring);
 				
 				//aggiornaimo direttamente l'input field altrimenti non funzionava
-				helpWindow.$.searchfield.value = this.value;
+				if(this.value != undefined){
+					helpWindow.$.searchfield.value = this.value;					
+				}
+
 				//helpWindow.set('searchstring',this.value);
 				
 				console.log('after',helpWindow.searchstring);

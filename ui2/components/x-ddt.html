@@ -202,7 +202,7 @@
 				}.bind(menu), 150);
 				return menu;
 			}
-			displayEscMenu(){
+			displayEscMenu(oldFocusedElement){
 				//console.log('create the menu');
 				var menu = document.createElement('x-menu');
 				menu.title="Gestione DDT"
@@ -216,21 +216,25 @@
 				//remember the full list that compose the menu
 				menu.set('items', list);
 				menu.set('visibleitems', menu.items);
-				//menu.selectFirstOfThePage();
+
 				//generate the table for the menu
 				//var table = menu.generateTable (menu.fulllist);
 				//console.log('the table for the menu is redy:', table);
 
 				//console.log('Appending menu to the body:', menu);
 				document.body.appendChild(menu);
+				menu.selectFirstOfThePage();
 				//console.log('menu added!')
 
 				//menu.createMenu (table.tBodies[0].children);
-
+console.log('old focused element', oldFocusedElement);
 				menu.oncancel = function (){
-					//give the focus to the first field
-					this.fields[0].querySelector('input').focus();
-				}.bind(this);
+					//give the focus back to the elemnt who called us
+					console.log('Cancelling the ddt exit menu, try to give the focus back to',this);
+					this.focus();
+					this.$.field.focus()
+					//this.fields[0].querySelector('input').focus();
+				}.bind(oldFocusedElement);
 
 				//wait a little and then position the help window in the middle of the body
 				//and remember his width so that it does not change during future modifcation of contents
@@ -338,7 +342,10 @@
 					this.addEventListener('keyup', function(event) {
 						switch (event.which){
 							case 27: 
-								this.displayEscMenu();//display esc menu
+								var giveFocusBackTo=document.activeElement;
+								var giveFocusBackTo=document.querySelector( ':focus' );
+								var giveFocusBackTo=this.shadowRoot.activeElement;
+								this.displayEscMenu(giveFocusBackTo);//display esc menu
 							break; //enter
 						}
 					}.bind(this));
