@@ -148,14 +148,17 @@
 					},
 				}
 			}
-			/*
+			
 			static get observers() {
 				return [
 					// Observer method name, followed by a list of dependencies, in parenthesis
-					'modificatoPeso(ddt.righepesolordo, ddt.pesousers.*, filter)'
+					'modificatoPeso(rigadamodificare.tara,rigadamodificare.tarapesolordo)',
+					'modificatoArticolo(rigadamodificare.articolo_codice)',
+					'modificatoCliente(ddt.clientefornitore_codice)',
+					'modificatoTipoSpedizione(ddt.mezzo_codice)'
 				]
 			}
-			*/
+			
 			/*
 			=====================================================================================
 			*/
@@ -288,7 +291,7 @@ console.log('old focused element', oldFocusedElement);
 					
 					
 						
-					//check for enter keyopress on riga field
+					//check for enter keypress on riga field
 					//and fire the menu 
 					this.$.numeroriga.$.field.addEventListener('keyup', function(event) {
 						//console.log('numerorigakeypress!!');
@@ -328,16 +331,18 @@ console.log('old focused element', oldFocusedElement);
 							break; //enter
 						}
 					}.bind(this));
-					//
+					
+					//menu di inizio/modifica riga
 					this.$.codiceiva.$.field.addEventListener('keyup',function(event) {
 						switch (event.which){
 							case 13: 
-								console.log('Displau the menu');
+								console.log('DisplaY the menu');
 								var menu = this.displayMenu()
 								menu.selectItemById(2); //autoselect memorizza riga
 							break; //enter
 						}
 					}.bind(this));
+					
 					//esc menu
 					this.addEventListener('keyup', function(event) {
 						switch (event.which){
@@ -389,23 +394,6 @@ console.log('old focused element', oldFocusedElement);
 						ddt_numero: null,
 					}
 				);
-				/*
-				this.rigadamodificare = {
-					numero: null,
-					articolo_codice: null,
-					um_codice: null,
-					prezzo: null,
-					colli: null,
-					imballaggio_codice: null,
-					pesolordo:null,
-					tara:null,
-					pesonetto:null,
-					lotto:null,
-					iva_codice:null,
-					ddt_data: null,
-					ddt_numero: null,
-				};
-				*/
 			}
 			reindicizzaRighe(oRiga){
 				//console.log('XDDT: reindicizzazzione righe in corso', this.ddt.righe.length)
@@ -417,26 +405,26 @@ console.log('old focused element', oldFocusedElement);
 			}
 			memorizzaRiga(oRiga){
 				//console.log('XDDT: memorizzazzione riga in corso', oRiga)
-				console.log(oRiga.numero, this.ddt.righe.length);
+				//console.log(oRiga.numero, this.ddt.righe.length);
+				
 				if (oRiga.numero < this.ddt.righe.length){
-				alert('doing wrong?');
+					//si tratta di una vecchia riga
+					//devo solo aggiornare quello che è già memorizzato
 					this.set('ddt.righe.' + oRiga.numero , JSON.parse(JSON.stringify(oRiga)));
 				}else{
-				//alert('doing?');
+					//si tratta di una nuova riga
+					//le assegno numero e data ddt (che ancora non ha)
 					oRiga.ddt_data = this.ddt.data;
 					oRiga.ddt_numero = this.ddt.numero;
-					//console.log('memorizzo la riga', oRiga); 
-					//this.push('ddt.righe', JSON.parse(JSON.stringify(oRiga)));
+					//la aggiungo alle righe del ddt
 					this.set('ddt.righe.' + oRiga.numero , JSON.parse(JSON.stringify(oRiga)));
-					//this.notifyPath('ddt.righe');
-					//this.notifyPath('ddt.righe.'+oRiga.numero);
 					this.$.displayrigheTemplate.render();
 				}
-				//alert('done?');
-				//console.log('memorizza2', this.ddt.righe);
-				//console.log('XDDT: resetto il numero riga')
+				//sposto la vista (scrollo) del riquadro righe sulla riga appena salvata
 				location.hash='#r'+oRiga.numero;
+				//resetto i campi di inserimento
 				this.iniziaRiga();
+				//e do il focus al primo campo
 				this.$.numeroriga.$.field.focus();
 			}
 			memorizzaDdt(){
@@ -489,35 +477,56 @@ console.log('old focused element', oldFocusedElement);
 					this.abbandonaDdt();
 				});	
 			}
+			
+			//chiamato esternamente quando viene creato una nuova applicazione ddt in alternativa a getDdtFromServer
+			inizializzaNuovoDdt(){
+				this.set('ddt',{});
+				this.set('ddt.righe',[]);
+				
+				//ricavo la data odierna
+				var today = new Date();
+				var dd = today.getDate();
+				var mm = today.getMonth() + 1; //January is 0!
+
+				var yyyy = today.getFullYear();
+				if (dd < 10) {
+				  dd = '0' + dd;
+				} 
+				if (mm < 10) {
+				  mm = '0' + mm;
+				} 
+				var today = dd + '/' + mm + '/' + yyyy;
+				
+				//la imposto nel ddt
+				this.set('ddt.data', today);
+				
+				//imposto la causale del ddt a vendita (02) per default
+				this.set('ddt.causale_codice', '02');
+			}
+			
+			//chiamato esternamente quando viene creato una nuova applicazione ddt in alternativa a inizializzaNuovoDdt
 			getDdtFromServer(){
 				//impostiamo il tipo in quanto non sempre è già impostato
 				this.set('ddt._type','Ddt');
-
+				
 				// prepare an ajax request
 				var ajaxRequest = new XMLHttpRequest();
 				
 				//callback for managing results
 				ajaxRequest.onload = function (e) {
 						//console.log(e.target.responseText);
-						var serverDdt = JSON.parse(e.target.responseText).ddt;
 						
-						/*
-						this.ddt={};
-						this.ddt.righe =  new Array(serverDdt.length);
-						for (var i=0; i<=serverDdt.length; i++){
-							this.ddt.righe[i] =  {}; 
-						};
-						*/
-						//console.log(serverDdt);
-						//this.ddt = JSON.parse(JSON.stringify(serverDdt));
+						//ottengo intestazione ddt dal server
+						var serverDdt = JSON.parse(e.target.responseText).ddt;
 						this.set('ddt',JSON.parse(JSON.stringify(serverDdt)));
+						
+						//ottengo righe dal server
 						this.getRigheFromServer();
-
+						
 						//inizializza i campi per una nuova riga
 						this.iniziaRiga();
-					
 				}.bind(this);
-			
+				
 				//request setup
 				var requestData ={
 					action: 'getOne',
@@ -542,7 +551,7 @@ console.log('old focused element', oldFocusedElement);
 					this.set('ddt.righe', JSON.parse(e.target.responseText));
 					this.reindicizzaRighe();
 				}.bind(this);
-			
+				
 				//request setup
 				var requestData ={
 					action: 'getAll',
@@ -565,18 +574,7 @@ console.log('old focused element', oldFocusedElement);
 				//use this as a callback
 				//for when the aplication is closed/quitted
 			}
-		
-			//automatismi
-			/*
-			observe: {
-				'rigadamodificare.articolo_codice': 'modificatoArticolo',
-				'rigadamodificare.pesolordo': 'modificatoPeso',
-				'rigadamodificare.tara': 'modificatoPeso',
-				//'rigadamodificare.pesonetto': 'modificatoPeso',
-				'ddt.clientefornitore_codice': 'modificatoCliente',
-			},
-			*/
-			modificatoArticolo(oldValue, newValue) {
+			modificatoArticolo(newValue) {
 				//wait for data to fullObj to be updated/propagated
 				this.$.codicearticolo.onDataReady = function(){
 					var fullObj = JSON.parse(this.$.codicearticolo.fullObj).articolo;
@@ -586,38 +584,51 @@ console.log('old focused element', oldFocusedElement);
 					this.$.codicearticolo.onDataReady= function(){};
 				}.bind(this);
 			}
-			modificatoPeso(oldValue, newValue) {
+			modificatoPeso(newValue) {
 				if(this.$.pesolordo.value>0){
 					this.$.pesonetto.value = this.$.pesolordo.value - this.$.tara.value;
 				}
 			}
-			modificatoCliente(oldValue, newValue) {
+			modificatoCliente(newValue) {
 				//wait for data to fullObj to be updated/propagated
 				this.$.codiceclientefornitore.onDataReady = function(){
-				//console.log('Il cliente è cambiato');
-				//console.log(this.$.codicemezzo.$.field.value);
-				//console.log(this.$.codicevettore.$.field.value);
-				
+					
 					var fullObj = JSON.parse(this.$.codiceclientefornitore.fullObj).clientefornitore;
-					if(this.$.codicemezzo.$.field.value==""){
-						//this.$.codicemezzo.$.field.value = fullObj.mezzo_codice;
-						this.$.codicemezzo.value = fullObj.mezzo_codice;
 
+					if(this.$.codicemezzo.$.field.value==""){
+						this.$.codicemezzo.value = fullObj.mezzo_codice;
 					}
+
+					//se non è specificato un codice vettore e il tipo di spedizione richiede un vettore, assegno quello di default del cliente
 					if(this.$.codicevettore.$.field.value==""){
-						//this.$.codicevettore.$.field.value = fullObj.vettore_codice;
-						this.$.codicevettore.value = fullObj.vettore_codice;
+						if(this.$.codicemezzo.$.field.value=="03" || this.$.codicemezzo.$.field.value=="04"){
+							this.$.codicevettore.value = fullObj.vettore_codice;
+						}
 					}
-					//self delette
-					this.$.codicearticolo.onDataReady= function(){};
 				}.bind(this);
 			}
+			
+			modificatoTipoSpedizione(newValue) {
+				//provo a leggere il vettore di default del codice cliente in uso.
+				//se non ci riesco abortisco, probabilmente non ce ancora un codice cliente impostato
+				try {
+				  var fullObj = JSON.parse(this.$.codiceclientefornitore.fullObj).clientefornitore;
+				}
+				catch(err) {
+					console.log('Abortisco la ricerca del vettore del cliente per evitare un errore dell applicazzione che ferma esecuzione del codice');
+					return;
+				}
+
+				//se non è specificato un codice vettore e il tipo di spedizione richiede un vettore, assegno quello di default del cliente
+				if(this.$.codicemezzo.$.field.value=="03" || this.$.codicemezzo.$.field.value=="04"){
+					if(this.$.codicevettore.$.field.value==""){
+						this.$.codicevettore.value = fullObj.vettore_codice;
+					}
+				}
+			}
+			
 			ddtChanged(){
 				//console.log("DDT CHANGED!!!");
-			}
-			inizializzaNuovoDdt(){
-				this.set('ddt',{});
-				this.set('ddt.righe',[]);
 			}
 			getFocusableElements(){
 				var focusables = Array();
