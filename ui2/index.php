@@ -92,7 +92,8 @@ window.addEventListener('WebComponentsReady', function() {
 	var list= [
 		{label:'Elenca DDT',_action:function (){
 								console.log('test');
-								elencaDdt().bind(this);
+								//elencaDdt().bind(this);
+								elencaDdt();
 							}.bind(this)},
 		{label:'Inserisci DDT',_action:function (){
 								var ddtApp = document.createElement('x-ddt');
@@ -151,7 +152,7 @@ window.addEventListener('WebComponentsReady', function() {
 		*/
 		var params =  {
 			_type: 'Ddt',
-			_select: 'numero,data',	
+			_select: 'numero,data,clientefornitore_codice',	
 			data: ['!=',''],
 			clientefornitore_codice: ['!=','']
 		};
@@ -161,7 +162,7 @@ window.addEventListener('WebComponentsReady', function() {
 		console.log(ddtList.params);
 		ddtList.onconfirm = function (selection){
 			//when the selection is confirmed start editing the ddt
-			//console.log("selecionato il ddt", selection);
+			//console.log("selezionato il ddt", selection);
 			//console.log("Procedo alla modifica...");
 			modificaDdt(selection);
 		}.bind(this);

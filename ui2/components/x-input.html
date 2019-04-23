@@ -140,7 +140,7 @@ custom methods
 				
 				//aggiornaimo direttamente l'input field altrimenti non funzionava
 				if(this.value != undefined){
-					helpWindow.$.searchfield.value = this.value;					
+					helpWindow.$.searchfield.value = this.value;
 				}
 
 				//helpWindow.set('searchstring',this.value);
@@ -502,6 +502,18 @@ hidden$="{{hiddeninput}}"
 				if(this.attributes.hasOwnProperty('label')){
 					//this.label = this.attributes.label.nodeValue;
 				}
+				
+				allowedKeycodes =[8,9,13,16,17,18,19,20,27,33,34,35,36,37,38,39,40,45,46,91,92,93,112,113,114,115,116,117,118,119,120,121,122,123,144,145]
+				//only allow numbers and slashes
+				this.$.field.onkeypress = function(e) {
+					var chr = String.fromCharCode(e.which);
+					if (("123456789/".indexOf(chr) < 0) && )
+						return false;
+				};
+			}
+			validate(){//to be customized for each child type
+				//valido i valori del campo
+				return true;
 			}
 		}
 		customElements.define(xData.is, xData);

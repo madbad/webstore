@@ -312,7 +312,7 @@ console.log('old focused element', oldFocusedElement);
 									this.$.codicearticolo.$.field.focus();
 									//stop here
 									break;
-								}else if(this.$.numeroriga.value >= 0 && this.hasOwnProperty('ddt') && this.ddt.hasOwnProperty('righe') && this.$.numeroriga.value < this.ddt.righe.length){
+								}else if(this.$.numeroriga.value >= 0 /*&& this.hasOwnProperty('ddt') //tolto creava solo problemi*/ && this.ddt.hasOwnProperty('righe') && this.$.numeroriga.value < this.ddt.righe.length){
 									//modifico una riga esistente
 									//position to the displayRighe div to the current row
 									location.hash='#r'+this.$.numeroriga.value;
@@ -322,6 +322,11 @@ console.log('old focused element', oldFocusedElement);
 									return false;
 								}else{
 									//inizio una nuova riga
+									console.log('valore riga maggiore uguale a zero',this.$.numeroriga.value >= 0);
+									console.log('ha ddt',this.hasOwnProperty('ddt'), this);
+									console.log('ha righe',this.ddt.hasOwnProperty('righe'));
+									console.log('numero riga inferiore a numero righe',this.$.numeroriga.value < this.ddt.righe.length);
+									
 									//console.log('Riga inesistente!', this.$.numeroriga.value, this.ddt.righe.length);
 									setTimeout(function (){
 										this.$.numeroriga.$.field.focus();
