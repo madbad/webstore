@@ -503,13 +503,47 @@ hidden$="{{hiddeninput}}"
 					//this.label = this.attributes.label.nodeValue;
 				}
 				
-				allowedKeycodes =[8,9,13,16,17,18,19,20,27,33,34,35,36,37,38,39,40,45,46,91,92,93,112,113,114,115,116,117,118,119,120,121,122,123,144,145]
+				var allowedKeycodes =[8,9,13,16,17,18,19,20,27,33,34,35,36,37,38,39,40,45,46,91,92,93,112,113,114,115,116,117,118,119,120,121,122,123,144,145]
+				
 				//only allow numbers and slashes
-				this.$.field.onkeypress = function(e) {
-					var chr = String.fromCharCode(e.which);
-					if (("123456789/".indexOf(chr) < 0) && )
+				this.$.field.addEventListener('keypress', function (event){
+					var chr = String.fromCharCode(event.which);
+					console.log('first function',event.target.value);
+					console.log('char fit',"0123456789/".indexOf(chr) < 0 );
+					console.log('keycode fit',allowedKeycodes.indexOf( event.keyCode) < 0);
+					console.log(event.target.value.indexOf('/'));
+					if (("0123456789/".indexOf(chr) < 0) && allowedKeycodes.indexOf( event.keyCode) < 0){
+						console.log('returnng false');
+						event.preventDefault();
 						return false;
-				};
+					}else{
+						console.log('al good go on');
+						return true;
+					}
+				}.bind(this));
+				
+				this.$.field.addEventListener('keyup', function(event){
+					if(event.keyCode == 13 || event.keyCode == 9){
+						console.log('on focus out');
+						console.log(event.target.value);
+						var matched = /^([0-9][0-9]\/[0-9][0-9]\/[0-9][0-9][0-9][0-9])$/.test(event.target.value); 
+						if (!matched){
+							console.log('matched:', matched);
+							console.log('keep the focus');
+							event.target.focus();
+							event.preventDefault();
+							event.stopPropagation();
+							displayError('Valore non valido per il campo data.');
+							return false;
+						}else{
+							console.log('matched:', matched);
+							return true;
+						}
+						//return result;
+					}
+
+				}.bind(this));
+				
 			}
 			validate(){//to be customized for each child type
 				//valido i valori del campo

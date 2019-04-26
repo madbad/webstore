@@ -341,7 +341,7 @@ console.log('old focused element', oldFocusedElement);
 					this.$.codiceiva.$.field.addEventListener('keyup',function(event) {
 						switch (event.which){
 							case 13: 
-								console.log('DisplaY the menu');
+								console.log('Display the menu');
 								var menu = this.displayMenu()
 								menu.selectItemById(2); //autoselect memorizza riga
 							break; //enter
@@ -352,8 +352,8 @@ console.log('old focused element', oldFocusedElement);
 					this.addEventListener('keyup', function(event) {
 						switch (event.which){
 							case 27: 
-								var giveFocusBackTo=document.activeElement;
-								var giveFocusBackTo=document.querySelector( ':focus' );
+								//var giveFocusBackTo=document.activeElement;
+								//var giveFocusBackTo=document.querySelector( ':focus' );
 								var giveFocusBackTo=this.shadowRoot.activeElement;
 								this.displayEscMenu(giveFocusBackTo);//display esc menu
 							break; //enter

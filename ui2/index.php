@@ -75,10 +75,34 @@ input:disabled {
 </style>
 </head>
 <body>
-
+<div id="errorDisplay">Here we will put some error</div>
 
 
 <script>
+function displayError(errorMsg, params){
+	params={};
+	params.time = 3;
+
+	var div = document.getElementById("errorDisplay");
+	var div = document.createElement("div");
+	div.style.width = "100%";
+	div.style.height = "3em";
+	div.style.background = "red";
+	div.style.color = "black";
+	div.style.textAlign = "center"; 
+	div.innerHTML = errorMsg;
+	//document.body.appendChild(div);
+	console.log('errordiv:',div);
+	//remove it after the time has passed
+	
+	setTimeout(function (){
+		this.parentNode.removeChild(this);
+	}.bind(div), params.time*100);
+	
+	
+
+}
+
 	
 window.addEventListener('WebComponentsReady', function() {
 	console.log("MAIN DOCUMENT: WebComponents are ready to be used!");
