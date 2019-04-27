@@ -467,20 +467,32 @@ console.log('old focused element', oldFocusedElement);
 				this.parentNode.removeChild(this);
 			}
 			cancellaDdt(){
-				//console.log('Deletting:', this.ddt)
-				//perform an ajax request to save the ddt
-				$.ajax({
-					type: "POST",
-					url: "./../do.php",
-					data: { action: 'delette',
-							params: JSON.stringify(this.ddt)
-					},
-					context: this,
-				}).done(function( msg ) {
+				confirm ("Confermi la cancellazzione del ddt?")
+
+				// prepare an ajax request
+				var ajaxRequest = new XMLHttpRequest();
+				
+				//callback for managing results
+				ajaxRequest.onload = function (e) {
 					alert('Ddt deletted?');
 					//console.log(msg);
 					this.abbandonaDdt();
-				});	
+				}.bind(this);
+			
+				//request setup
+				var requestData ={
+					action: 'delette',
+					params: JSON.stringify(this.ddt)
+				};
+				//console.log(requestData.params);
+				var obj=requestData.params;
+				var arr = Object.keys(obj).map(function(k) { return obj[k] });
+				
+				ajaxRequest.open('POST', "./../do.php", true);
+				ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				ajaxRequest.responseType = 'text';
+				ajaxRequest.send("action="+requestData.action+"&params="+requestData.params);
+
 			}
 			
 			//chiamato esternamente quando viene creato una nuova applicazione ddt in alternativa a getDdtFromServer

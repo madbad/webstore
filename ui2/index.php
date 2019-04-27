@@ -71,6 +71,20 @@ input:disabled {
 	z-index: 100;
 	opacity:0.5;
 }
+#errorDisplay{
+	width: 100%;
+	height: 1.5em;
+	background-color:#ad0f0f;
+	color:white;
+	text-align: center;
+	visibility: hidden;
+	font-size:1.5em;
+	font-family: 'Inconsolata', sans-serif;
+	z-index: 10000;
+	position:absolute;
+	top: 0px;
+	let: 0px;
+}
 
 </style>
 </head>
@@ -81,29 +95,19 @@ input:disabled {
 <script>
 function displayError(errorMsg, params){
 	params={};
-	params.time = 3;
+	params.time = 2;
 
 	var div = document.getElementById("errorDisplay");
-	var div = document.createElement("div");
-	div.style.width = "100%";
-	div.style.height = "3em";
-	div.style.background = "red";
-	div.style.color = "black";
-	div.style.textAlign = "center"; 
-	div.innerHTML = errorMsg;
-	//document.body.appendChild(div);
+	div.innerHTML = '<span style="font-weight:bold; color: #ff5926;">Errore: </span>'+errorMsg;
+	div.style.visibility = 'visible';
 	console.log('errordiv:',div);
 	//remove it after the time has passed
 	
 	setTimeout(function (){
-		this.parentNode.removeChild(this);
-	}.bind(div), params.time*100);
-	
-	
-
+		this.style.visibility = 'hidden';
+	}.bind(div), params.time*1000);
 }
 
-	
 window.addEventListener('WebComponentsReady', function() {
 	console.log("MAIN DOCUMENT: WebComponents are ready to be used!");
 /*================================

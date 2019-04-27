@@ -3,6 +3,12 @@ include ('./config.inc.php');
 //print_r($_POST);
 //print_r($_GET);
 
+//todo:temp workaroud to be fixed
+
+if(array_key_exists("action",$_GET)){
+	$_POST=$_GET;
+}
+
 switch ($_POST["action"]){
 	case "getOne":
 		$myparams = json_decode($_POST["params"], true);
@@ -67,6 +73,16 @@ switch ($_POST["action"]){
 
 		echo '<br>BackupRigheDDT:<br>';
 		*/
+		break;
+	
+	case "print":
+		$_POST["params"]='{"id":"2","fattura_id":"","riga_id":"","numero":"2222","data":"01/01/2001","clientefornitore_codice":"LAFAVO","causale_codice":"01","mezzo_codice":"02","vettore_codice":"","destinatario_codice":"","note":"","righe":"0","_type":"Ddt"}';
+		$params = json_decode($_POST["params"], true);
+		
+		$myObj = new $params["_type"]($params);
+		$myObj->getFromDb();
+		$myObj->stampa();
+		
 		break;
 	default:
 		break;

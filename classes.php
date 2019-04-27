@@ -1,4 +1,28 @@
 <?php
+include('./print.ddt.php');
+include('./libs/tcpdf/tcpdf.php');
+
+
+
+//require_once(realpath($_SERVER["DOCUMENT_ROOT"]).'/webContab/my/php/libs/tcpdf/config/lang/ita.php');
+require_once('./libs/tcpdf/tcpdf.php');
+// Extend the TCPDF class to create custom Header and Footer
+class MYPDF extends TCPDF {
+	//Page header
+	public function Header() {
+		// full background image
+		// store current auto-page-break status
+		$bMargin = $this->getBreakMargin();
+		$auto_page_break = $this->AutoPageBreak;
+		$this->SetAutoPageBreak(false, 0);
+		$this->Image($GLOBALS['img_file'], 0, 0, 210, 297, '', '', '', false, 300, '', false, false, 0);
+		// restore auto-page-break status
+		$this->SetAutoPageBreak($auto_page_break, $bMargin);
+	}
+}
+
+
+
 /*to fix anche il tipo andrebbe inserito nelle primary key delle fatture?? se una fattura e una nota credito hanno stesso $NUMERO e $DATA cosa succede??*/
 
 
@@ -323,6 +347,9 @@ class MyClass extends DefaultClass{
 		$results = $db->query($query) or die($query);
 		return;
 	}
+	public function stampa(){
+
+	}
 }
 
 class Proprietà extends DefaultClass {
@@ -414,6 +441,16 @@ class Ddt  extends MyClass {
 			$riga->deletteFromDb();
 		});
 		parent::deletteFromDb();
+	}
+	function stampa(){
+		generaPdfDdt($this);
+		//url completo del file pdf
+		$pdfUrl=$this->getPdfFileUrl();
+		// impostiamo l'header di un file pdf
+		header('Content-type: application/pdf');
+		// e inviamolo al browser
+		readfile($pdfUrl);
+		return;
 	}
 }
 
