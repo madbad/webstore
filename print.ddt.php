@@ -378,10 +378,14 @@ function addDestinatarioDdt ($ddt,$pdf){
 	$def_size=7;
 	
 	$fromLeft=107;
-	
-	
+print_r($ddt);	
+$test=$ddt->clientefornitore_codice->extend();
+echo '<br>-->';
+
+print_r($test);
+
 	if($ddt->tipocodiceclientefornitore->getVal()=='C'){
-		$destinatario=$ddt->cod_destinatario->extend();
+		$destinatario=$ddt->clientefornitore_codice->extend();
 	}else{
 		$destinatario=new ClienteFornitore(array(
 		'codice'=>$ddt->cod_destinatario->getVal(),

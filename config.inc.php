@@ -24,4 +24,47 @@ $config->sqlite->databaseInterno =realpath($_SERVER["DOCUMENT_ROOT"]).'/webstore
 $config->sqlite->databaseDitta =realpath($_SERVER["DOCUMENT_ROOT"]).'/webstore/dati/ditta_brungimmi.sqlite3';
 
 
+/*-------------------------------------
+**    datiDitta
+-------------------------------------*/
+
+$params= Array(
+	'ragionesociale'=> 'Brun Gimmi',
+	'via'			=> 'Valle n.3',
+	'paese'			=> 'Isola della Scala',
+	'citta'			=> 'VR',
+	'cap'			=> '37063',
+	'p_iva'			=> '',
+	'sigla_paese'	=> 'IT',	
+	'cod_fiscale'	=> 'BRNGMM79',
+	'telefono'		=> '045-6630397',
+	'fax'			=> '045-7302598',
+	'email'			=> 'gimmi.brun@gmail.com',
+//	'emailpec'		=> 'lafavorita_srl@pec.it',
+	'website'		=> 'http://lafavorita.awardspace.com',
+	'_autoExtend'	=> -1,
+);
+
+$config->azienda= new ClienteFornitore($params);
+$config->azienda->addProp('_emailpec');
+$config->azienda->addProp('_bndoo');
+$config->azienda->addProp('_rea');
+$config->azienda->addProp('_capitalesociale');
+$config->azienda->addProp('_registroimprese');
+$config->azienda->addProp('_logo');
+$config->azienda->addProp('_logobg');
+$config->azienda->addProp('_ragionesocialeestesa');
+$config->azienda->addProp('_titolare');
+
+$config->azienda->_emailpec->setVal				('lafavorita_srl@pec.it');
+$config->azienda->_bndoo->setVal				('001691/VR');
+$config->azienda->_rea->setVal					('VR-185024');
+$config->azienda->_capitalesociale->setVal		('€ 41.600,00');
+$config->azienda->_registroimprese->setVal		('VR 01588530236');
+$config->azienda->_logo->setVal					(realpath($_SERVER["DOCUMENT_ROOT"]).'/webcontab/my/php/img/logo.gif');
+$config->azienda->_logobg->setVal				(realpath($_SERVER["DOCUMENT_ROOT"]).'/webcontab/my/php/img/logobg.svg');
+$config->azienda->_ragionesocialeestesa->setVal	('DI BRUN G. & G. S.R.L. Unipersonale');
+$config->azienda->_titolare->setVal				('Brun Gionni');
+
+
 ?>
