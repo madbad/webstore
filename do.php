@@ -60,7 +60,7 @@ switch ($_POST["action"]){
 										'ddt_numero'=>$myddt->numero->getVal(),
 										'ddt_data'=>$myddt->data->getVal()));
 
-		$myddtRigheBACKUP = array();								
+		$myddtRigheBACKUP = array();
 		$myddtrighe->iterate(function($riga){
 			global $myddtRigheBACKUP;
 			$myddtRigheBACKUP[] = $riga->toJson();
@@ -74,15 +74,40 @@ switch ($_POST["action"]){
 		echo '<br>BackupRigheDDT:<br>';
 		*/
 		break;
-	
+
+/*
 	case "print":
-		$_POST["params"]='{"id":"2","fattura_id":"","riga_id":"","numero":"2222","data":"01/01/2001","clientefornitore_codice":"LAFAVO","causale_codice":"01","mezzo_codice":"02","vettore_codice":"","destinatario_codice":"","note":"","righe":"0","_type":"Ddt"}';
+		$_POST["params"]='{"id":"16","fattura_id":"","riga_id":"","numero":"2222","data":"01/01/2001","clientefornitore_codice":"LAFAVO","causale_codice":"01","mezzo_codice":"02","vettore_codice":"","destinatario_codice":"","note":"","righe":"0","_type":"Ddt"}';
 		$params = json_decode($_POST["params"], true);
 		
 		$myObj = new $params["_type"]($params);
 		$myObj->getFromDb();
 		$myObj->stampa();
 		
+		break;
+*/
+	case "print":
+		//echo $_POST["params"];
+		$params = json_decode($_POST["params"], true);
+		$myObj = new $params["_type"]($params);
+		
+		
+		//creo una mylist vuota
+		$myddtrighe = new MyList(array( '_type'=>'Riga',
+										'ddt_id'=>''
+		));
+		//print_r($myObj->righe->valore);
+		//aggiungo le mie righe
+		foreach (($myObj->righe->valore) as $key => $value){
+			//echo "\n**".$key.'=>'.$value;
+			$myddtrighe->add($value);
+			//echo 'test';
+		//print_r($myddtrighe);
+		}
+		$myObj->_oRighe = $myddtrighe;
+		
+		//print_r($myddtrighe);
+		$myObj->stampa();
 		break;
 	default:
 		break;

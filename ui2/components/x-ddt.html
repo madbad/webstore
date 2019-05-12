@@ -211,7 +211,7 @@
 				menu.title="Gestione DDT"
 				var list= [
 					{label:'Memorizza DDT',_action:function (){this.memorizzaDdt();}.bind(this)},
-					{label:'Stampa DDT',_action:'none'},
+					{label:'Stampa DDT',_action:function (){this.stampaDdt(oldFocusedElement);}.bind(this)},
 					{label:'Stampa e memorizza DDT',_action:'none'},
 					{label:'Abbandona DDT',_action:function (){this.abbandonaDdt();}.bind(this)},
 					{label:'Cancella DDT',_action:function (){this.cancellaDdt();}.bind(this)}
@@ -494,6 +494,46 @@ console.log('old focused element', oldFocusedElement);
 				ajaxRequest.send("action="+requestData.action+"&params="+requestData.params);
 
 			}
+			stampaDdt(oldFocusedElement){
+				//impostiamo il tipo in quanto non sempre è già impostato
+
+				// prepare an ajax request
+				var ajaxRequest = new XMLHttpRequest();
+				
+				//callback for managing results
+				ajaxRequest.onload = function (e) {
+
+					//console.log(e.target.response);
+					
+					var a = document.createElement('a');
+					a.href = window.URL.createObjectURL(e.target.response);
+					// Give filename you wish to download
+					a.download = "file.pdf";
+					a.style.display = 'none';
+					document.body.appendChild(a);
+					a.click();
+
+					alert('Ddt printed?');
+					//redisplay the esc menu
+					this.displayEscMenu(oldFocusedElement);//display esc menu
+					//console.log(msg);
+					//this.abbandonaDdt();
+				}.bind(this);
+			
+				//request setup
+				var requestData ={
+					action: 'print',
+					params: JSON.stringify(this.ddt)
+				};
+				//console.log(requestData.params);
+				var obj=requestData.params;
+				var arr = Object.keys(obj).map(function(k) { return obj[k] });
+				
+				ajaxRequest.open('POST', "./../do.php", true);
+				ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				ajaxRequest.responseType = 'blob';
+				ajaxRequest.send("action="+requestData.action+"&params="+requestData.params);
+			}
 			
 			//chiamato esternamente quando viene creato una nuova applicazione ddt in alternativa a getDdtFromServer
 			inizializzaNuovoDdt(){
@@ -574,8 +614,7 @@ console.log('old focused element', oldFocusedElement);
 					action: 'getAll',
 					params: {
 						_type: 'Riga',
-						ddt_numero: this.ddt.numero,
-						ddt_data: this.ddt.data,
+						ddt_id: this.ddt.id,
 					}
 				};
 				//console.log(requestData.params);

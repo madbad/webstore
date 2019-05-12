@@ -15,7 +15,7 @@ class MYPDF extends TCPDF {
 		$bMargin = $this->getBreakMargin();
 		$auto_page_break = $this->AutoPageBreak;
 		$this->SetAutoPageBreak(false, 0);
-		$this->Image($GLOBALS['img_file'], 0, 0, 210, 297, '', '', '', false, 300, '', false, false, 0);
+//		$this->Image($GLOBALS['img_file'], 0, 0, 210, 297, '', '', '', false, 300, '', false, false, 0);
 		// restore auto-page-break status
 		$this->SetAutoPageBreak($auto_page_break, $bMargin);
 	}
@@ -32,19 +32,19 @@ class MYPDF extends TCPDF {
 //require_once(realpath($_SERVER["DOCUMENT_ROOT"]).'//webContab/my/php/libs/phpmailer/class.phpmailer.php');
 
 class DefaultClass {
-    public function __call($method, $args)     {
-        if (isset($this->$method)) {
-        	$func = $this->$method;
-        	if(is_callable($func)){
+	public function __call($method, $args)     {
+		if (isset($this->$method)) {
+			$func = $this->$method;
+			if(is_callable($func)){
 				return $func($this);
-            }
-        }
-    }
+			}
+		}
+	}
 }
 
 class MyClass extends DefaultClass{
 //la mia classe di base con proprietà e metodi aggiuntivi
-   public function addProp($nome, $validatore=null) {
+	public function addProp($nome, $validatore=null) {
 		$this->$nome=new Proprietà($nome, $validatore, $this);
 		return $this;
 	}
@@ -91,9 +91,10 @@ class MyClass extends DefaultClass{
 			//print_r($value);
 			}
 			
-			
-			if($key[0]!='_' && method_exists($this->$key, 'setVal')){
-				$this->$key->setVal($value);
+			if(property_exists($this,$key)){
+				if($key[0]!='_' && method_exists($this->$key, 'setVal')){
+					$this->$key->setVal($value);
+				}
 			}
 		}
 	}
@@ -110,14 +111,14 @@ class MyClass extends DefaultClass{
 		foreach($this as $key => $value) {
 			//se la proprietà è un oggetto (ovvero l'ho definita io come oggetto) provo ad estenderla
 			if(is_object($this->$key)){
-				$extendedObj=$this->$key->extend();
-				if ($extendedObj){
-					//se si stende chiamo il metodo json del suo oggetto
-					//echo "estendo $key<br>";
-					$out.='"'.$key.'":{';
-					$out.='"_type":"'.strtolower(get_class($extendedObj)).'",';
-					$out.=$extendedObj->toJson(1);
-				}else{
+//				$extendedObj=$this->$key->extend();
+//				if ($extendedObj){
+//					//se si stende chiamo il metodo json del suo oggetto
+//					//echo "estendo $key<br>";
+//					$out.='"'.$key.'":{';
+//					$out.='"_type":"'.strtolower(get_class($extendedObj)).'",';
+//					$out.=$extendedObj->toJson(1);
+//				}else{
 					//altrimento si tratta di una semplice proprietà e la converto io in json
 					if($key[0]!='_'){
 						$val=$this->$key->getVal();
@@ -128,7 +129,7 @@ class MyClass extends DefaultClass{
 						
 						$out.='"'.$key.'":"'.$val.'",';
 					}
-				}
+//				}
 			}
 
 			//se invece è una proprietà
@@ -206,28 +207,30 @@ class MyClass extends DefaultClass{
 		$indexes=$this->getDbKeys();
 		
 		$sqlite=$GLOBALS['config']->sqlite;
-		
-		//questo in teoria non serve!!!
-		//anzi in teoria mi creava un duplicato del campo id
-		
-		//elenco di tutti i campi da aggiornare
-		//$fields= array_merge ($fields, $indexes);
-		
-		print_r($fields);
-		
-		echo '>'.$this->id->getVal().'<';
+
 		//escludo il valore id se si tratta di una nuova memorizzazzione, verra aggiunto automaticamente dal database
 		if($this->id->getVal() == ''){
-			unset($fields[array_search('id',$fields)]);
+			if ($this->getDbType()=='interno'){
+				$db = new SQLite3($sqlite->databaseInterno);
+			}else{
+				$db = new SQLite3($sqlite->databaseDitta);
+			}
+			$query="INSERT INTO $table DEFAULT VALUES";
+			$db->exec($query) or die($query);
+			$assignedId = $db->lastInsertRowid();
+			$this->id->setVal($assignedId);
+			//unset($fields[array_search('id',$fields)]);
 		}
-		echo 'updated:';
-		print_r($fields);
+
+		//echo 'updated:';
+		//print_r($fields);
 		
 		
 		//creo l'elenco di tutti i valori da memorizzare
 		$values=array();
 		foreach ($fields as $field){
 			
+			///se è un array (probabilmente si tratta di una riga) gli passo i dati di riferimento del ddt
 			if(is_array($this->$field->getVal())){
 				//this field is an array we need to treat it differently
 				$itemsId = array();
@@ -235,6 +238,7 @@ class MyClass extends DefaultClass{
 //print_r($this->$field->getVal()[$itemk]);
 					$itemv->ddt_numero->setVal($this->numero->getVal());
 					$itemv->ddt_data->setVal($this->data->getVal());
+					$itemv->ddt_id->setVal($this->id->getVal());
 					$itemv->saveToDb();
 					$itemsId[] = $itemv->numero->getVal(); 
 				}
@@ -371,6 +375,30 @@ class Proprietà extends DefaultClass {
 	}
 	public function getDataType(){
 	}
+	public function extend($recupera_da=''){
+		if ($recupera_da!=''){
+			//echo 'qui'.$recupera_da;
+			//non considero come origine dai dati quella che mi ricavo dalla proprietà ma quella che mi sono passato in reupera_da
+			preg_match('/^([a-z]*)_([a-z]*)$/', $recupera_da, $matches);
+		}else{
+			//uso normale
+			preg_match('/^([a-z]*)_([a-z]*)$/', $this->nome, $matches);
+		}
+//print_r($matches);
+		if($matches!=''){
+			$dbName = ucfirst($matches[1]);
+			$dbKey = $matches[2];
+			//echo 'Extensible property:'.$dbName.' with key: '.$dbKey;
+			$newObj = new $dbName(array(
+				$dbKey => $this->valore
+			));
+			$newObj->getFromDb();
+			return $newObj;
+		}else{
+			echo '<br>not an extensible property:'.$this->nome; 
+		}
+		
+	}
 }
 Class Validatore {
 	function __construct($params) {
@@ -432,8 +460,8 @@ class Ddt  extends MyClass {
 	//ovverride the default "deletteFromDb" function since we need to delette "rows" too
 	function deletteFromDb(){
 		$myddtrighe = new MyList(array( '_type'=>'Riga',
-										'ddt_numero'=>$this->numero->getVal(),
-										'ddt_data'=>$this->data->getVal()));
+										'ddt_id'=>$this->id->getVal()
+		));
 
 		$myddtrighe->iterate(function($riga){
 			global $myddtRigheBACKUP;
@@ -452,6 +480,65 @@ class Ddt  extends MyClass {
 		readfile($pdfUrl);
 		return;
 	}
+	function getPdfFileName(){
+		$numero=str_replace(" ", "0", $this->numero->getVal());
+		$tipo=$this->causale_codice->getVal();
+		
+		$arr=explode("/", $this->data->getVal());
+								//mese   //giorno //anno
+		$newVal=mktime(0, 0, 0, $arr[0], $arr[1], $arr[2]);
+		$newVal=date ( 'Ymd' , $newVal);
+		$data=$newVal;
+		
+		$nomefile=$data.'_'.$tipo.$numero.'.pdf';
+		return $nomefile;
+	}
+	function getPdfFileUrl(){
+		//il nome del file esempio: 20120121_N00000001.pdf
+		$filename=$this->getPdfFileName();
+		//la cartella principale delle stampe
+		$dirDelleStampe=$GLOBALS['config']->pdfDir;
+		//l'url completo del file esempio: c:/Program%20Files/EasyPHP-5.3.6.0/www/webcontab/my/php/stampe/ft/20120121_N00000001.pdf
+		$fileUrl=$dirDelleStampe.'/ft/'.$filename;
+		
+		//verifichiamo che il file esista prima di comunicarlo
+		//altrimenti lo generiamo "al volo"
+		if(!file_exists($fileUrl)){
+			//echo 'il file non esiste devo generarlo!!';
+			$this->generaPdf();
+		}
+		return $fileUrl;
+	}
+	function getRighe(){
+		if($this->_oRighe){
+			//do nothing we already have what we need
+			//echo 'Im fine!';
+			
+		}else{
+			//echo 'I need righe!';
+			//get them from the db
+			$this->_oRighe = new MyList(array(
+				'_type'=>'Riga',
+				'ddt_id'=>$this->id->getVal()
+			));
+		}
+		return $this->_oRighe;
+	}
+	function getTotaleColli(){
+		$GLOBALS['tempColliTot']=0;
+		$this->getRighe()->iterate(function($riga){
+			$GLOBALS['tempColliTot'] +=$riga->colli->getVal();
+		});
+		return $GLOBALS['tempColliTot'];
+	}
+	function getTotalePesoLordo(){
+		$GLOBALS['tempPesoLordoTot']=0;
+		$this->getRighe()->iterate(function($riga){
+			$GLOBALS['tempPesoLordoTot'] +=$riga->pesolordo->getVal();
+		});
+		return $GLOBALS['tempPesoLordoTot'];
+	}
+	
 }
 
 class Riga extends MyClass {
@@ -460,6 +547,7 @@ class Riga extends MyClass {
 		
 		$this->addProp('ddt_data', 'DATA');
 		$this->addProp('ddt_numero', 'NUMERATORE');
+		$this->addProp('ddt_id', 'NUMERATORE');
 		$this->addProp('numero', 'NUMERATORE');
 		$this->addProp('articolo_codice', 'CODICE');
 		$this->addProp('um_codice', 'CODICE');
@@ -855,10 +943,12 @@ $test=new MyList(
 	function remove(){
 	}
 	function iterate($function,$args=null){
+		$strResult='';
 		//esegue una funzione su ogni riga
 		foreach ($this->arr as $key => $value){
-			$function($value,$args);
+			$strResult.=$function($value,$args);
 		}
+		return $strResult;
 	}
 }
 
