@@ -123,7 +123,24 @@ window.addEventListener('WebComponentsReady', function() {
 								//elencaDdt().bind(this);
 								elencaDdt();
 							}.bind(this)},
-		{label:'Inserisci DDT',_action:function (){
+		{label:'Inserisci DDT di vendita',_action:function (){
+								var ddtApp = document.createElement('x-ddt');
+								document.body.appendChild(ddtApp);
+								//inizializzo un nuovo ddt
+								ddtApp.inizializzaNuovoDdt();
+								//imposto la causale vendita
+								ddtApp.set('ddt.causale','02');
+								ddtApp.shadowRoot.querySelector('x-codicecausale').disabled = true;
+								//ddtApp.set('ddt.numero','99');
+								ddtApp.shadowRoot.querySelector('x-numerodoc').disabled = true;
+								//select the second input
+								//ddtApp.getFocusableElements()[1].shadowRoot.querySelector('input').focus();
+								ddtApp.onQuit = function(){
+									console.log('quitting...');
+									menu.$.searchfield.focus();
+								}.bind(menu)
+							}.bind(this)},
+		{label:'Inserisci DDT di acquisto',_action:function (){
 								var ddtApp = document.createElement('x-ddt');
 								document.body.appendChild(ddtApp);
 								//inizializzo un nuovo ddt

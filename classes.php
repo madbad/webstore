@@ -219,12 +219,15 @@ class MyClass extends DefaultClass{
 			$db->exec($query) or die($query);
 			$assignedId = $db->lastInsertRowid();
 			$this->id->setVal($assignedId);
-			//unset($fields[array_search('id',$fields)]);
+			
+			//ottengo ilnumero ddt più alto e da li aggiungo un numero per assegnarlo al nuovo ddt che vado a memorizzare
+			$query="SELECT MAX(CAST(numero AS int)) as ULTIMODDT FROM $table";
+			$queryResults = $db->query($query) or die($query);
+			while ($row = $queryResults->fetchArray()) {
+				$lastDdtNumber = $row['ULTIMODDT'];
+			}
+			$this->numero->setVal($lastDdtNumber+1);
 		}
-
-		//echo 'updated:';
-		//print_r($fields);
-		
 		
 		//creo l'elenco di tutti i valori da memorizzare
 		$values=array();

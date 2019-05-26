@@ -688,8 +688,8 @@ console.log('old focused element', oldFocusedElement);
 			}
 			getFocusableElements(){
 				var focusables = Array();
-				Array.prototype.push.apply(focusables, this.shadowRoot.querySelector('#intestazione').querySelectorAll('[id]'));
-				Array.prototype.push.apply(focusables, this.shadowRoot.querySelector('#inserimentoRiga').querySelectorAll('[id]'));
+				Array.prototype.push.apply(focusables, this.shadowRoot.querySelector('#intestazione').querySelectorAll('[id]:not([disabled])'));
+				Array.prototype.push.apply(focusables, this.shadowRoot.querySelector('#inserimentoRiga').querySelectorAll('[id]:not([disabled])'));
 				return focusables;
 			}
 
