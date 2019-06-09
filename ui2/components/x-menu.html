@@ -154,6 +154,7 @@
 					page: {
 						type: Number,
 						reflectToAttribute: true,
+						value:1,
 					},
 					pages: {
 						type: Number,
@@ -170,6 +171,11 @@
 						notify: true,
 					},
 					itemsProperties: {
+						type: Array,
+						reflectToAttribute: true,
+						notify: true,
+					},
+					filtereditems: {
 						type: Array,
 						reflectToAttribute: true,
 						notify: true,
@@ -200,8 +206,37 @@ events methods
 				switch (event.which){
 					case 38: this.selectPrev();break; //up
 					case 40: this.selectNext();break; //down
-					case 33: this.selectFirstOfThePage();break; //pgup
-					case 34: this.selectLastOfThePage();break; //pgdown
+					case 33://pgup
+					console.log(
+						this.visibleitems.indexOf(this.getSelected()),
+						this.visibleitems.length-1
+					)
+					console.log(
+						'curpage:',
+						this.page
+					)
+						//se sono gia al primo elemento seleziono ultimo elemento della pagina precedente
+						if(this.visibleitems.indexOf(this.getSelected()) == 0){
+							if(this.page > 1){
+								this.selectPrevPage();
+								this.selectLastOfThePage();
+							}
+						}else{
+							this.selectFirstOfThePage();
+						}
+						break; 
+					case 34: //pgdown
+						//se sono gia al ultimo elemento seleziono il primo elemento della pagina successiva
+						if(this.visibleitems.indexOf(this.getSelected()) == (this.visibleitems.length-1)){
+							//se ci sono ancora pagine
+							if(this.page < this.pages){
+								this.selectNextPage();
+								this.selectFirstOfThePage();
+							}
+						}else{
+							this.selectLastOfThePage();
+						}
+						break; 
 					case 13: this.confirm(); break; //enter
 					case 27: this.cancel(); break; //esc
 					default:
@@ -323,6 +358,10 @@ custom methods
 				//console.log("selecting: ", this.selectedId+1);
 				this.selectItemById(this.selectedId+1);
 			}else{
+				//ci sono altre pagine nel menu?
+				if(this.page < this.pages){
+					this.selectNextPage();
+				}
 				//console.log("selec next aborted: out of range");
 			}
 			//console.log(this.selectedId);
@@ -335,6 +374,10 @@ custom methods
 				//console.log("selecting: ", this.selectedId-1);
 				this.selectItemById(this.selectedId-1);
 			}else{
+				//ci sono altre pagine nel menu?
+				if(this.page > 1){
+					this.selectPrevPage();
+				}
 				//console.log("selec prev aborted: out of range");
 			}
 		}
@@ -353,6 +396,20 @@ custom methods
 		getSelected(){
 			//console.log("You have selected: ",this.visibleitems[this.selectedId]);
 			return this.visibleitems[this.selectedId];
+		}
+		selectNextPage(){
+			console.log('pages', this.page, this.pages)
+			if(this.page < this.pages){
+				this.page++;
+				this.filterElementsByPage();
+			}
+		}
+		selectPrevPage(){
+			console.log('pages', this.page, this.pages)
+			if(this.page > 1){
+				this.page--;
+				this.filterElementsByPage();
+			}
 		}
 		confirm(){
 			//an utility function
@@ -552,21 +609,52 @@ custom methods
 			
 			var searchstring = this.searchstring.toLowerCase();
 			
-			var filteredItems = this.items.filter(function(item){
-				//console.log(item);
-				var result = false;
-				for (var prop in item){
-					if(prop[0] != '_'){
-						//console.log(prop);
-						var fullstring = item[prop].toLowerCase();
-						result = fullstring.search(searchstring);
-						//console.log('XMENU: scanned: ', fullstring, ' for: ', searchstring, 'with result: ', result)
-						if (result > -1) return true;
+			//filtro in base al paramentro di ricerca
+			this.set('filteredItems',
+				this.items.filter(function(item){
+					//console.log(item);
+					var result = false;
+					for (var prop in item){
+						if(prop[0] != '_'){
+							//console.log(prop);
+							var fullstring = item[prop].toLowerCase();
+							result = fullstring.search(searchstring);
+							//console.log('XMENU: scanned: ', fullstring, ' for: ', searchstring, 'with result: ', result)
+							//the string match
+							if (result > -1){
+								return true;
+							}
+						}
 					}
-					}
-				});
-			this.visibleitems = filteredItems;
+				})
+			);
+			
+			//filter by page
+			this.filterElementsByPage();
+
+			//seleziono il primo elemento
 			this.selectFirstOfThePage();
+		}
+		
+		filterElementsByPage(){
+			var filterOptions = {};
+			filterOptions.maxVisibleElements = 10;
+			filterOptions.dontFilter = false;
+			
+			console.log(
+				'Prova filtro pagine:',
+				((this.page-1)*filterOptions.maxVisibleElements),
+				((this.page-1)*filterOptions.maxVisibleElements)+filterOptions.maxVisibleElements
+			)
+			
+			//arrotondo le pagine al numero superiore
+			this.pages = Math.ceil(this.filteredItems.length / filterOptions.maxVisibleElements);
+			
+			//mostro solo x elementi per pagina
+			this.visibleitems = this.filteredItems.slice(
+				((this.page-1)*filterOptions.maxVisibleElements),
+				((this.page-1)*filterOptions.maxVisibleElements)+filterOptions.maxVisibleElements
+			)
 		}
 		/*
 		onfocus(){

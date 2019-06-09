@@ -238,6 +238,72 @@ custom methods
 			onDataReady(){
 				//use this as a callback;
 			}
+			validatoreCodici (event){
+				if(event.keyCode == 13 || event.keyCode == 9){
+					
+					//check if we allow empty values
+
+					if (this.attributes.hasOwnProperty('allowempty')){
+						if(this.attributes.allowempty.nodeValue == "true" && event.target.value==''){
+							console.log('The input is empty but we allow it');
+							return true;
+						}
+					}
+					
+					//check if this exist in the database...
+
+					//extract from the nodeName the object type removing the 'x-codice' string
+					var objType = this.getFieldType();
+					//now capitalize it: the php class has it capitalized: so we need it
+					objType = objType.charAt(0).toUpperCase() + objType.slice(1);
+					
+					//request setup
+					var requestData ={
+						action: 'getOne',
+						params: {
+							_type: objType,
+							codice: event.target.value
+						},
+					};
+					var obj=requestData.params;
+					var arr = Object.keys(obj).map(function(k) { return obj[k] });
+					
+					// prepare an ajax request
+					var ajaxRequest = new XMLHttpRequest();
+					ajaxRequest.open('POST', "./../do.php", false);
+					ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+					ajaxRequest.send("action="+requestData.action+"&params="+JSON.stringify(requestData.params));
+
+					var serverReply = JSON.parse(ajaxRequest.responseText)[objType.toLowerCase()];
+					console.log(serverReply);
+					
+					if (serverReply.hasOwnProperty('ragionesociale')){
+						var propToCheck = 'ragionesociale';
+					}else{
+						var propToCheck = 'descrizione';
+					}
+					
+					if(serverReply[propToCheck] !=''){
+						var found = true;
+					}else{
+						var found = false;
+					}
+
+					if (found){
+						console.log('Found:', serverReply);
+						return true;
+					}else{
+						event.target.focus();
+						event.preventDefault();
+						event.stopPropagation();
+						console.log(event.target);
+						//displayError('Valore non valido per il campo '+event.target.parentElement.innerText+' di tipo ' +objType);
+						displayError('Codice * '+event.target.parentElement.innerText+'* inesistente');
+						return false;
+					}
+					//return result;
+				}
+			}
 		}
 		// Register the new element with the browser
 		customElements.define(xInput.is, xInput);
@@ -447,16 +513,49 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='prezzo';
 				this.length=10;
-				//console.log(this.attributes);
-				/*todo: questo è un hack... 
-				in pratica per far passare un valore che imposto come
-				attributo (quando scrivo l'html) 
-				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
-				devo copiarlo io manualmente...
-				... perchè polymer non lo fa da solo?*/
-				if(this.attributes.hasOwnProperty('label')){
-					//this.label = this.attributes.label.nodeValue;
-				}
+				
+				//only allow numbers and slashes
+				//only allow numbers and slashes
+				this.$.field.addEventListener('keypress', function (event){
+					
+					var allowedKeys =allowedKeysNumbers;
+					allowedKeys.push(',');
+					
+					if (allowedKeys.indexOf(event.key) > -1){
+						//console.log('al good go on', event.keyCode);
+						return true;
+					}else{
+						//console.log('returning false');
+						//replace eventual dots with commas
+						console.log(event.key);
+						if (event.key =='.'){
+							event.target.value +=',';
+						}
+						event.preventDefault();
+						return false;
+					}
+				}.bind(this));
+				
+				this.$.field.addEventListener('keyup', function(event){
+					if(event.keyCode == 13 || event.keyCode == 9){
+						console.log('on focus out');
+						console.log(event.target.value);
+						var matched = /^([0-9]*,[0-9]*)$/.test(event.target.value); 
+						if (!matched){
+							console.log('matched:', matched);
+							console.log('keep the focus');
+							event.target.focus();
+							event.preventDefault();
+							event.stopPropagation();
+							displayError('Valore non valido per il campo prezzo.');
+							return false;
+						}else{
+							console.log('matched:', matched);
+							return true;
+						}
+						//return result;
+					}
+				}.bind(this));
 			}
 		}
 		customElements.define(xPrezzo.is, xPrezzo);
@@ -492,36 +591,25 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='data';
 				this.length=10;
-				//console.log(this.attributes);
-				/*todo: questo è un hack... 
-				in pratica per far passare un valore che imposto come
-				attributo (quando scrivo l'html) 
-				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
-				devo copiarlo io manualmente...
-				... perchè polymer non lo fa da solo?*/
-				if(this.attributes.hasOwnProperty('label')){
-					//this.label = this.attributes.label.nodeValue;
-				}
 				
-				var allowedKeycodes =[8,9,13,16,17,18,19,20,27,33,34,35,36,37,38,39,40,45,46,91,92,93,112,113,114,115,116,117,118,119,120,121,122,123,144,145]
-				
+				//filtraggio INPUT
 				//only allow numbers and slashes
 				this.$.field.addEventListener('keypress', function (event){
-					var chr = String.fromCharCode(event.which);
-					console.log('first function',event.target.value);
-					console.log('char fit',"0123456789/".indexOf(chr) < 0 );
-					console.log('keycode fit',allowedKeycodes.indexOf( event.keyCode) < 0);
-					console.log(event.target.value.indexOf('/'));
-					if (("0123456789/".indexOf(chr) < 0) && allowedKeycodes.indexOf( event.keyCode) < 0){
-						console.log('returnng false');
+					
+					var allowedKeys =allowedKeysNumbers;
+					allowedKeys.push('/');
+					
+					if (allowedKeys.indexOf(event.key) > -1){
+						//console.log('al good go on', event.keyCode);
+						return true;
+					}else{
+						//console.log('returning false');
 						event.preventDefault();
 						return false;
-					}else{
-						console.log('al good go on');
-						return true;
 					}
 				}.bind(this));
 				
+				//validazione
 				this.$.field.addEventListener('keyup', function(event){
 					if(event.keyCode == 13 || event.keyCode == 9){
 						console.log('on focus out');
@@ -533,7 +621,7 @@ hidden$="{{hiddeninput}}"
 							event.target.focus();
 							event.preventDefault();
 							event.stopPropagation();
-							displayError('Valore non valido per il campo data.');
+							displayError('Valore non valido per il campo data. Formato atteso gg/mm/aaaa');
 							return false;
 						}else{
 							console.log('matched:', matched);
@@ -541,13 +629,7 @@ hidden$="{{hiddeninput}}"
 						}
 						//return result;
 					}
-
 				}.bind(this));
-				
-			}
-			validate(){//to be customized for each child type
-				//valido i valori del campo
-				return true;
 			}
 		}
 		customElements.define(xData.is, xData);
@@ -582,16 +664,8 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=6;
-				//console.log(this.attributes);
-				/*todo: questo è un hack... 
-				in pratica per far passare un valore che imposto come
-				attributo (quando scrivo l'html) 
-				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
-				devo copiarlo io manualmente...
-				... perchè polymer non lo fa da solo?*/
-				if(this.attributes.hasOwnProperty('label')){
-					//this.label = this.attributes.label.nodeValue;
-				}
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
 		}
 		customElements.define(xCodiceclientefornitore.is, xCodiceclientefornitore);
@@ -625,16 +699,8 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=2;
-				//console.log(this.attributes);
-				/*todo: questo è un hack... 
-				in pratica per far passare un valore che imposto come
-				attributo (quando scrivo l'html) 
-				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
-				devo copiarlo io manualmente...
-				... perchè polymer non lo fa da solo?*/
-				if(this.attributes.hasOwnProperty('label')){
-					//this.label = this.attributes.label.nodeValue;
-				}
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
 		}
 		customElements.define(xCodicecausale.is, xCodicecausale);
@@ -668,16 +734,8 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=2;
-				//console.log(this.attributes);
-				/*todo: questo è un hack... 
-				in pratica per far passare un valore che imposto come
-				attributo (quando scrivo l'html) 
-				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
-				devo copiarlo io manualmente...
-				... perchè polymer non lo fa da solo?*/
-				if(this.attributes.hasOwnProperty('label')){
-					//this.label = this.attributes.label.nodeValue;
-				}
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
 		}
 		customElements.define(xCodicemezzo.is, xCodicemezzo);
@@ -712,16 +770,8 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=6;
-				//console.log(this.attributes);
-				/*todo: questo è un hack... 
-				in pratica per far passare un valore che imposto come
-				attributo (quando scrivo l'html) 
-				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
-				devo copiarlo io manualmente...
-				... perchè polymer non lo fa da solo?*/
-				if(this.attributes.hasOwnProperty('label')){
-					//this.label = this.attributes.label.nodeValue;
-				}
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
 		}
 		customElements.define(xCodicearticolo.is, xCodicearticolo);
@@ -754,17 +804,8 @@ hidden$="{{hiddeninput}}"
 			constructor() {
 				super();
 				this.tipo='testo';
-				this.length=2;
-				//console.log(this.attributes);
-				/*todo: questo è un hack... 
-				in pratica per far passare un valore che imposto come
-				attributo (quando scrivo l'html) 
-				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
-				devo copiarlo io manualmente...
-				... perchè polymer non lo fa da solo?*/
-				if(this.attributes.hasOwnProperty('label')){
-					//this.label = this.attributes.label.nodeValue;
-				}
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
 		}
 		customElements.define(xCodiceum.is, xCodiceum);
@@ -800,16 +841,8 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=5;
-				//console.log(this.attributes);
-				/*todo: questo è un hack... 
-				in pratica per far passare un valore che imposto come
-				attributo (quando scrivo l'html) 
-				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
-				devo copiarlo io manualmente...
-				... perchè polymer non lo fa da solo?*/
-				if(this.attributes.hasOwnProperty('label')){
-					//this.label = this.attributes.label.nodeValue;
-				}
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
 		}
 		customElements.define(xCodiceimballagio.is, xCodiceimballagio);
@@ -844,16 +877,8 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=3;
-				//console.log(this.attributes);
-				/*todo: questo è un hack... 
-				in pratica per far passare un valore che imposto come
-				attributo (quando scrivo l'html) 
-				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
-				devo copiarlo io manualmente...
-				... perchè polymer non lo fa da solo?*/
-				if(this.attributes.hasOwnProperty('label')){
-					//this.label = this.attributes.label.nodeValue;
-				}
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
 		}
 		customElements.define(xCodiceiva.is, xCodiceiva);
@@ -886,16 +911,6 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=15;
-				//console.log(this.attributes);
-				/*todo: questo è un hack... 
-				in pratica per far passare un valore che imposto come
-				attributo (quando scrivo l'html) 
-				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
-				devo copiarlo io manualmente...
-				... perchè polymer non lo fa da solo?*/
-				if(this.attributes.hasOwnProperty('label')){
-					//this.label = this.attributes.label.nodeValue;
-				}
 			}
 		}
 		customElements.define(xLotto.is, xLotto);
@@ -929,16 +944,6 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=100;
-				//console.log(this.attributes);
-				/*todo: questo è un hack... 
-				in pratica per far passare un valore che imposto come
-				attributo (quando scrivo l'html) 
-				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
-				devo copiarlo io manualmente...
-				... perchè polymer non lo fa da solo?*/
-				if(this.attributes.hasOwnProperty('label')){
-					//this.label = this.attributes.label.nodeValue;
-				}
 			}
 		}
 		customElements.define(xNote.is, xNote);

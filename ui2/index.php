@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
 <head>
+	<script src="./libs/keycodes.js"></script>
 	<script src="https://polygit.org/webcomponentsjs+1.0.0-rc.5/components/webcomponentsjs/webcomponents-loader.js"></script>
 	<?php
 	$components='';
