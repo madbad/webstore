@@ -151,6 +151,21 @@ window.addEventListener('WebComponentsReady', function() {
 									menu.$.searchfield.focus();
 								}.bind(menu)
 							}.bind(this)},
+		{label:'Elenca Fatture',_action:function (){
+								console.log('test');
+								//elencaDdt().bind(this);
+								elencaFt();
+							}.bind(this)},
+		{label:'Emetti Fattura',_action:function (){
+								var ftApp = document.createElement('x-ft');
+								document.body.appendChild(ftApp);
+								//inizializzo un nuovo ddt
+								ftApp.inizializzaNuovoDdt();
+								ftApp.onQuit = function(){
+									console.log('quitting...');
+									menu.$.searchfield.focus();
+								}.bind(menu)
+							}.bind(this)},
 	];
 
 	menu.keepAliveOnConfirm = true;
@@ -246,6 +261,58 @@ window.addEventListener('WebComponentsReady', function() {
 			menu.focus();
 		}
 		document.body.appendChild(ddtApp);
+	}
+	
+	/*================================
+	  LIST FATTURE
+	=================================*/
+	function elencaFt(params){
+		console.log('create the menu');
+		var ftList = document.createElement('x-menu');
+		ftList.title="Seleziona FATTURA";
+		/*
+		ftList.params = {
+			_type: 'Ddt',
+			data: ['!=',''],
+			cliente_codice: ['!=','']
+		}
+		*/
+		var params =  {
+			_type: 'Ft',
+			_select: 'numero,data,clientefornitore_codice',	
+			data: ['!=',''],
+			clientefornitore_codice: ['!=','']
+		};
+		
+		ftList.params = JSON.stringify(params);
+		ftList.onconfirm = function (selection){
+			//when the selection is confirmed start editing the ft
+			//console.log("selezionata la ft", selection);
+			//console.log("Procedo alla modifica...");
+			modificaFt(selection);
+		}.bind(this);
+		ftList.oncancel = function (selection){
+			console.log('XINPUT: HELP CANCELLED, claim focus back from the help menu');
+			//get the focus back
+			menu.$.searchfield.focus();
+		}.bind(this);
+		document.body.appendChild(ftList);
+
+		//wait a little and then position the help window in the middle of the body
+		//and remember his width so that it does not change during future modifcation of contents
+		//and show us
+		setTimeout(function (){
+			this.addModalBackground();
+			var modifier = {
+				top: 50,
+				left: 0,
+				}
+			this.setPosition('tc','tc',document.body, modifier);
+			console.log(this.offsetWidth);
+			this.style.width = this.offsetWidth+'px';
+			this.show();
+			this.focus();
+		}.bind(ftList), 150);
 	}
 },false);
 

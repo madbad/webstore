@@ -713,6 +713,197 @@ class Um extends MyClass {
 
 
 
+class Ft  extends MyClass {
+	function __construct($params) {
+		$this->addProp('id', 'NUMERATORE');
+		
+		$this->addProp('numero', 'NUMERATORE');
+		$this->addProp('data', 'DATA');
+		$this->addProp('clientefornitore_codice', 'CODICE');
+		$this->addProp('tipofattura_codice', ''); //vendta o nota credito
+		
+		$this->addProp('banca_codice', '');
+		$this->addProp('pagamentoscadenza_codice', '');
+		$this->addProp('pagamentomodalita_codice', '');
+		
+		$this->addProp('imponibile', '');
+		$this->addProp('iva', '');
+		$this->addProp('totale', '');
+		
+		$this->addProp('ddt', 'ARRAY');
+		$this->addProp('righe', 'ARRAY');
+		
+		//importo eventuali valori delle proprietà che mi sono passato come $params
+		$this->mergeParams($params);
+	}
+	function getDbType(){
+		return 'ditta';
+	}
+	function getDbKeys(){
+		//return array('numero','data');
+		return array('id');
+	}
+	//ovverride the default "deletteFromDb" function since we need to delette "rows" too
+	function deletteFromDb(){
+		/*
+		$myddtrighe = new MyList(array( '_type'=>'Riga',
+										'ddt_id'=>$this->id->getVal()
+		));
+
+		$myddtrighe->iterate(function($riga){
+			global $myddtRigheBACKUP;
+			$myddtRigheBACKUP[] = $riga->toJson();
+			$riga->deletteFromDb();
+		});
+		parent::deletteFromDb();
+		*/
+	}
+	function stampa(){
+		/*
+		generaPdfDdt($this);
+		//url completo del file pdf
+		$pdfUrl=$this->getPdfFileUrl();
+		// impostiamo l'header di un file pdf
+		header('Content-type: application/pdf');
+		// e inviamolo al browser
+		readfile($pdfUrl);
+		return;
+		*/
+	}
+	function getPdfFileName(){
+		/*
+		$numero=str_replace(" ", "0", $this->numero->getVal());
+		$tipo=$this->causale_codice->getVal();
+		
+		$arr=explode("/", $this->data->getVal());
+								//mese   //giorno //anno
+		$newVal=mktime(0, 0, 0, $arr[0], $arr[1], $arr[2]);
+		$newVal=date ( 'Ymd' , $newVal);
+		$data=$newVal;
+		
+		$nomefile=$data.'_'.$tipo.$numero.'.pdf';
+		return $nomefile;
+		*/
+	}
+	function getPdfFileUrl(){
+		/*
+		//il nome del file esempio: 20120121_N00000001.pdf
+		$filename=$this->getPdfFileName();
+		//la cartella principale delle stampe
+		$dirDelleStampe=$GLOBALS['config']->pdfDir;
+		//l'url completo del file esempio: c:/Program%20Files/EasyPHP-5.3.6.0/www/webcontab/my/php/stampe/ft/20120121_N00000001.pdf
+		$fileUrl=$dirDelleStampe.'/ft/'.$filename;
+		
+		//verifichiamo che il file esista prima di comunicarlo
+		//altrimenti lo generiamo "al volo"
+		if(!file_exists($fileUrl)){
+			//echo 'il file non esiste devo generarlo!!';
+			$this->generaPdf();
+		}
+		return $fileUrl;
+		*/
+	}
+	function getRighe(){
+		/*
+		if($this->_oRighe){
+			//do nothing we already have what we need
+			//echo 'Im fine!';
+			
+		}else{
+			//echo 'I need righe!';
+			//get them from the db
+			$this->_oRighe = new MyList(array(
+				'_type'=>'Riga',
+				'ddt_id'=>$this->id->getVal()
+			));
+		}
+		return $this->_oRighe;
+		*/
+	}
+	function getTotaleColli(){
+		/*
+		$GLOBALS['tempColliTot']=0;
+		$this->getRighe()->iterate(function($riga){
+			$GLOBALS['tempColliTot'] +=$riga->colli->getVal();
+		});
+		return $GLOBALS['tempColliTot'];
+		*/
+	}
+	function getTotalePesoLordo(){
+		/*
+		$GLOBALS['tempPesoLordoTot']=0;
+		$this->getRighe()->iterate(function($riga){
+			$GLOBALS['tempPesoLordoTot'] +=$riga->pesolordo->getVal();
+		});
+		return $GLOBALS['tempPesoLordoTot'];
+		*/
+	}
+	
+}
+
+class Banca extends MyClass {
+	function __construct($params) {
+		$this->addProp('codice', 'CODICE');
+		$this->addProp('descrizione', 'TESTO');//iban
+		
+		//importo eventuali valori delle proprietà che mi sono passato come $params
+		$this->mergeParams($params);
+	}
+	function getDbType(){
+		return 'ditta';
+	}
+	function getDbKeys(){
+		return array('codice');
+	}
+}
+
+
+class Pagamentoscadenza extends MyClass {
+	function __construct($params) {
+		$this->addProp('codice', 'CODICE');
+		$this->addProp('descrizione', 'TESTO');//iban
+		
+		//importo eventuali valori delle proprietà che mi sono passato come $params
+		$this->mergeParams($params);
+	}
+	function getDbType(){
+		return 'interno';
+	}
+	function getDbKeys(){
+		return array('codice');
+	}
+}
+class Pagamentomodalita extends MyClass {
+	function __construct($params) {
+		$this->addProp('codice', 'CODICE');
+		$this->addProp('descrizione', 'TESTO');
+		
+		//importo eventuali valori delle proprietà che mi sono passato come $params
+		$this->mergeParams($params);
+	}
+	function getDbType(){
+		return 'interno';
+	}
+	function getDbKeys(){
+		return array('codice');
+	}
+}
+class Tipofattura extends MyClass {
+	function __construct($params) {
+		$this->addProp('codice', 'CODICE');
+		$this->addProp('descrizione', 'TESTO');
+		
+		//importo eventuali valori delle proprietà che mi sono passato come $params
+		$this->mergeParams($params);
+	}
+	function getDbType(){
+		return 'interno';
+	}
+	function getDbKeys(){
+		return array('codice');
+	}
+}
+
 class MyList {
 /*
 example usage
