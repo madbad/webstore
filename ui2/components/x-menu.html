@@ -24,6 +24,11 @@
 			position:fixed;
 			border-collapse:separate;
 		}
+		
+		.multipleselected {
+			color:green;
+			font-weight: bold;
+		}
 		.selected {
 			background-image: none;
 			border-color:orange;
@@ -190,6 +195,17 @@
 						reflectToAttribute: true,
 						value:0,
 					},
+					multipleselectionitems: {
+						type: Array,
+						reflectToAttribute: true,
+						notify: true,
+						value: new Array(),
+					},
+					allowmultipleselection: {
+						type: Boolean,
+						reflectToAttribute: true,
+						value:false,
+					},
 				}
 			}
 /*
@@ -239,6 +255,8 @@ events methods
 						break; 
 					case 13: this.confirm(); break; //enter
 					case 27: this.cancel(); break; //esc
+					case 39: if(this.allowmultipleselection) {this.addCurrentItemToMultipleSelection();} break;//rightarrow
+					case 37: if(this.allowmultipleselection) {this.removeCurrentItemFromMultipleSelection();}break; //leftaarrow
 					default:
 						//every time a key is pressed we schedule a future search on the visible items list
 						//if another key is pressed before the search actually happen 
@@ -425,7 +443,11 @@ custom methods
 			}
 			
 			//call the onConfirma callback
-			this.onconfirm(this.getSelected());
+			if(this.allowmultipleselection){
+				this.onconfirm(this.multipleselectionitems);
+			}else{
+				this.onconfirm(this.getSelected());
+			}
 
 			//if is present remove the modalbackground
 			if(this.modalBackground){
@@ -641,11 +663,13 @@ custom methods
 			filterOptions.maxVisibleElements = 10;
 			filterOptions.dontFilter = false;
 			
+			/*
 			console.log(
 				'Prova filtro pagine:',
 				((this.page-1)*filterOptions.maxVisibleElements),
 				((this.page-1)*filterOptions.maxVisibleElements)+filterOptions.maxVisibleElements
 			)
+			*/
 			
 			//arrotondo le pagine al numero superiore
 			this.pages = Math.ceil(this.filteredItems.length / filterOptions.maxVisibleElements);
@@ -672,7 +696,7 @@ custom methods
 			document.body.removeChild(this.modalBackground);
 		}
 		onReady(){
-			//callback for whe we istantiate from the server and are ready to show us
+			//callback for when we istantiate from the server and are ready to show us
 		}
 		hideColumn(){
 			//try to hide some columns
@@ -726,6 +750,29 @@ custom methods
 				return true;
 			}else{
 				return false;
+			}
+		}
+		addCurrentItemToMultipleSelection(){
+			//se non è già tra i selezionati lo aggiungo
+			var index = this.multipleselectionitems.indexOf(this.getSelected());
+			if (index < 0){
+				console.log('add to multiple selction', this.getSelected());
+				this.push('multipleselectionitems', this.getSelected());
+				this.$.table.tBodies[0].rows[this.selectedId].classList.add("multipleselected");
+				console.log('selection is now', this.multipleselectionitems);
+			}else{
+				console.log('NOT added because already present in selection', this.getSelected(), index);
+			}
+		}
+		removeCurrentItemFromMultipleSelection(){
+			console.log('remove from multiple selction', this.getSelected());
+			var index = this.multipleselectionitems.indexOf(this.getSelected());
+			if(index > -1){
+				this.splice('multipleselectionitems', index, 1);
+				this.$.table.tBodies[0].rows[this.selectedId].classList.remove("multipleselected");
+				console.log('selection is now', this.multipleselectionitems);
+			}else{
+				console.log('NOT removed because it as not there in selection', this.getSelected(), index);
 			}
 		}
 	}

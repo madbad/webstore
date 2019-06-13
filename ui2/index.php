@@ -325,5 +325,6 @@ window.addEventListener('WebComponentsReady', function() {
 </x-window>
 
 -->
+<x-emissionefattura></x-emissionefattura>
 </body>
 </html>

@@ -1,0 +1,90 @@
+<link rel="import"  href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/polymer-element.html">
+<link rel="import" href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/lib/elements/dom-repeat.html">
+
+<dom-module id='x-emissionefattura'>
+	<template>
+		<style>
+		</style>
+		<x-window title="Emissione fattura">
+			Data: <x-data></x-data>
+			<br>Cliente: <x-codiceclientefornitore value={{clientefornitore_codice}} id="codiceclientefornitore"></x-codiceclientefornitore>
+			<br>DDT da fatturare: <!--<x-menu id="ddtselector" allowmultipleselection="true"></x-menu>-->
+		</x-window>
+	</template>
+	<script>
+		class xEmissionefattura extends Polymer.Element {
+			static get is() { return "x-emissionefattura"; }
+			constructor() {
+				super();
+			}
+			static get properties() {
+				return {
+					clientefornitore_codice: {
+						type: String,
+						reflectToAttribute: true,
+						notify: true,
+						value:'',
+						observer: '_clientefornitore_codiceChanged'
+					},
+				}
+			}
+			_clientefornitore_codiceChanged (newValue, oldValue){
+				console.log('UPDATING THE DDT LIST');
+				console.log(this.$.ddtselector);
+
+				//var ddtList = document.querySelector("x-menum");
+				var ddtList = document.createElement('x-menu');
+				ddtList.allowmultipleselection = true;
+				ddtList.title="Seleziona DDT da fatturare";
+				
+				var params =  {
+					_type: 'Ddt',
+					_select: 'numero,data,clientefornitore_codice',	
+					data: ['!=',''],
+					clientefornitore_codice: ['==',this.clientefornitore_codice],
+					fattura_id: ['==','']
+				};
+				
+				
+				ddtList.params = JSON.stringify(params);
+				
+				//RETRIEVE FROM THE SERVER
+				ddtList.getFromServer();
+
+				ddtList.onconfirm = function (selection){
+					//when the selection is confirmed start editing the ddt
+					console.log('selezione confermata');
+					console.log(selection);
+					if(selection.legth < 1){
+						alert('nessun ddt selezionato per la fatturazzione')
+					}else{
+						confirm('Procedere con la fatturazzione dei ddt selezionati?');
+					}
+				}.bind(this);
+				ddtList.oncancel = function (selection){
+					this.$.codiceclientefornitore.focus();
+				}.bind(this);
+				document.body.appendChild(ddtList);
+
+				//wait a little and then position the help window in the middle of the body
+				//and remember his width so that it does not change during future modifcation of contents
+				//and show us
+				setTimeout(function (){
+					//this.addModalBackground();
+					var modifier = {
+						top: 50,
+						left: 0,
+						}
+					this.setPosition('tc','tc',document.body, modifier);
+					console.log(this.offsetWidth);
+					this.style.width = this.offsetWidth+'px';
+					this.show();
+					this.focus();
+				}.bind(ddtList), 150);
+
+			}
+		}
+		// Register the new element with the browser
+		customElements.define(xEmissionefattura.is, xEmissionefattura);
+	</script>
+</dom-module>
