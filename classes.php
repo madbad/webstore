@@ -632,7 +632,11 @@ class Clientefornitore extends MyClass {
 		$this->addProp('email', 'MAIL');
 		$this->addProp('web', 'URL');
 		$this->addProp('valuta', 'TESTO');
-
+		
+		$this->addProp('banca_codice', '');
+		$this->addProp('pagamentoscadenza_codice', '');
+		$this->addProp('pagamentomodalita_codice', '');
+		
 		$this->addProp('nome', 'TESTO');
 		$this->addProp('vettore', 'TESTO');
 		$this->addProp('codifica', 'TESTO');
@@ -652,6 +656,7 @@ class Iva extends MyClass {
 	function __construct($params) {
 		$this->addProp('codice', 'CODICE');
 		$this->addProp('descrizione', 'TESTO');
+		$this->addProp('aliquota', 'NUMERO');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
@@ -713,7 +718,7 @@ class Um extends MyClass {
 
 
 
-class Ft  extends MyClass {
+class Fattura  extends MyClass {
 	function __construct($params) {
 		$this->addProp('id', 'NUMERATORE');
 		

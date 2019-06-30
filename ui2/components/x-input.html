@@ -949,3 +949,134 @@ hidden$="{{hiddeninput}}"
 		customElements.define(xNote.is, xNote);
 	</script>
 </dom-module>
+
+<dom-module id='x-codicebanca'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodicebanca extends xInput {
+			static get is() { return "x-codicebanca"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodicebanca.is, xCodicebanca);
+	</script>
+</dom-module>
+
+
+<dom-module id='x-codicepagamentoscadenza'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodicepagamentoscadenza extends xInput {
+			static get is() { return "x-codicepagamentoscadenza"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodicepagamentoscadenza.is, xCodicepagamentoscadenza);
+	</script>
+</dom-module>
+
+
+<dom-module id='x-codicepagamentomodalita'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodicepagamentomodalita extends xInput {
+			static get is() { return "x-codicepagamentomodalita"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodicepagamentomodalita.is, xCodicepagamentomodalita);
+	</script>
+</dom-module>
+
+
+<dom-module id='x-codicetipofattura'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodicetipofattura extends xInput {
+			static get is() { return "x-codicetipofattura"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodicetipofattura.is, xCodicetipofattura);
+	</script>
+</dom-module>

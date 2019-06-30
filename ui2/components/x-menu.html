@@ -457,6 +457,7 @@ custom methods
 			//remove me from the dom
 			//console.log('XMENU: remove the menu from the dom')
 			if(!this.keepAliveOnConfirm){
+				console.log('XMENU: deletting ourself');
 				this.parentNode.removeChild(this);
 			}
 			//and quit
@@ -484,26 +485,28 @@ custom methods
 		getFromServer(){
 			var ajaxRequest = new XMLHttpRequest();
 			ajaxRequest.onload = function (e) {
-				//console.log(e);
-				//console.log(e.target.response.message);
-				//console.log(e.target.responseText);
-
 				try {
-					var jsonList = JSON.parse(e.target.responseText);
+					if(e.target.responseText==''){
+						console.log("Warning:\nEmpty reply from the server:",e);
+						var jsonList=[];
+					}else{
+						var jsonList = JSON.parse(e.target.responseText);
+					}
+					//the full array of objects we will use
+					this.fulllist = jsonList;
+					this.set('items', jsonList);
+					this.searchstringChanged();
+					this.onReady();
 				} catch (e) {
-					alert("Error happened: bad reaply from the server");
-					alert("Error: "+e.target.responseText);
-
+					displayError("Error:\n Bad reaply from the server");
+					console.log("Error:\n Bad reaply from the server");
+					if(e.hasOwnProperty('target')){
+						if(e.target.hasOwnProperty('responseText')){
+							alert("(***see the console for more info*** \n\nError:\n "+e.target.responseText);
+						}
+					}
 					console.log("This was the error:",e);
 				}
-
-				var jsonList = JSON.parse(e.target.responseText);
-				console.log(jsonList);
-				//the full array of objects we will use
-				this.fulllist = jsonList;
-				this.set('items', jsonList);
-				this.searchstringChanged();
-				this.onReady();
 				
 			}.bind(this);
 			var requestData ={

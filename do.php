@@ -109,6 +109,29 @@ switch ($_POST["action"]){
 		//print_r($myddtrighe);
 		$myObj->stampa();
 		break;
+	case "emettift":
+		//echo $_POST["params"];
+		$params = json_decode($_POST["params"], true);
+		$myObj = new $params["_type"]($params);
+		
+		
+		//creo una mylist vuota
+		$myddtrighe = new MyList(array( '_type'=>'Riga',
+										'ddt_id'=>''
+		));
+		//print_r($myObj->righe->valore);
+		//aggiungo le mie righe
+		foreach (($myObj->righe->valore) as $key => $value){
+			//echo "\n**".$key.'=>'.$value;
+			$myddtrighe->add($value);
+			//echo 'test';
+		//print_r($myddtrighe);
+		}
+		$myObj->_oRighe = $myddtrighe;
+		
+		//print_r($myddtrighe);
+		$myObj->stampa();
+		break;
 	default:
 		break;
 }
