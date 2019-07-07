@@ -48,9 +48,9 @@
 				<br>DDT:  <input type="button" value="Clicca per selezionare i DDT" id="triggerselezioneddt" >
 				
 				<tbody>
-				<template is="dom-repeat" items="{{ft.ddt}}" as="ddt" id="displayddtTemplate">
+				<template is="dom-repeat" items="{{ft.ddt_id}}" as="ddt_id" id="displayddtTemplate">
 					<tr>
-						<td>D.d.T. n. {{ddt.numero}} del {{ddt.data}} cliente {{ddt.clientefornitore_codice}}</td>
+						<td>D.d.T. n. {{ddt_id.numero}} del {{ddt_id.data}} cliente {{ddt_id.clientefornitore_codice}}</td>
 					</tr>
 				</template>
 				</tbody>
@@ -82,7 +82,7 @@
 				</tr>
 				</thead>
 				<tbody>
-				<template is="dom-repeat" items="{{ft.righe}}" as="r" id="displayrigheTemplate">
+				<template is="dom-repeat" items="{{ft.riga_id}}" as="r" id="displayrigheTemplate">
 					<tr id="r{{r.numero}}">
 						<td><x-numerodoc value="{{r.ddt_numero}}" label=" {{r.ddt_numero}}" disabled="true" hiddeninput="true"></x-numerodoc></td>
 						<td><x-data value="{{r.ddt_data}}" label=" {{r.ddt_data}}" disabled="true" hiddeninput="true"></x-data></td>
@@ -142,7 +142,7 @@
 				return [
 					// Observer method name, followed by a list of dependencies, in parenthesis
 					'_clienteChanged(ft.clientefornitore_codice)',
-					'_ricalcolatotali(ft.righe)',
+					'_ricalcolatotali(ft.riga_id)',
 				]
 			}
 			_ricalcolatotali (newValue, oldValue){
@@ -179,7 +179,7 @@
 				
 				
 				
-				this.ft.righe.forEach(function(myRiga) {
+				this.ft.riga_id.forEach(function(myRiga) {
 					//elencoIdRighe.push(myRiga.id);
 					var peso = myRiga.pesonetto.replace(/,/, ".");
 					var prezzo = myRiga.prezzo.replace(/,/, "."); 
@@ -234,11 +234,11 @@
 							console.log(myDdt);
 							elencoIdDdt.push(myDdt.id)
 						});
-						this.set('ft.ddt',selection);
+						this.set('ft.ddt_id',selection);
 					//id righe
 						var params = {};
 						params._type ='Riga';
-						//ddt.unshift('==');
+						//ddt_id.unshift('==');
 						params.ddt_id = elencoIdDdt;
 						console.log('Parametri richiesta righe', params)
 						var request = new XMLHttpRequest();
@@ -256,7 +256,7 @@
 						if (request.status === 200) {
 							var objRighe = JSON.parse(request.responseText);
 							
-							this.set('ft.righe',objRighe);
+							this.set('ft.riga_id',objRighe);
 							console.log('Righe',objRighe);
 						}
 
@@ -269,15 +269,17 @@
 		
 
 
-//						this.set('ft.ddt', elencoIdDdt);
-						//this.set('ft.righe', elencoIdRighe);
-//						this.set('ft.righe', objRighe);
+//						this.set('ft.ddt_id', elencoIdDdt);
+						//this.set('ft.riga_id', elencoIdRighe);
+//						this.set('ft.riga_id', objRighe);
 						
 						console.log(this.ft);
 					}
+					this.displayEscMenu();
 				}.bind(this);
 				ddtList.oncancel = function (selection){
 					this.$.codiceclientefornitore.focus();
+					this.displayEscMenu();
 				}.bind(this);
 				document.body.appendChild(ddtList);
 
@@ -329,7 +331,7 @@
 
 			inizializzaNuovaFt(){
 				this.set('ft',{});
-				this.set('ft.righe',[]);
+				this.set('ft.riga_id',[]);
 				
 				//ricavo la data odierna
 				var today = new Date();
@@ -351,6 +353,157 @@
 				//imposto la causale del ddt a vendita (02) per default
 				this.set('ft.tipofattura_codice', 'FT');
 			}
+
+			displayEscMenu(oldFocusedElement){
+				//console.log('create the menu');
+				var menu = document.createElement('x-menu');
+				menu.title="Gestione FT"
+				var list= [
+					{label:'Memorizza FT',_action:function (){this.memorizzaFt();}.bind(this)},
+					{label:'Stampa FT',_action:function (){this.stampaFt(oldFocusedElement);}.bind(this)},
+					{label:'Stampa e memorizza FT',_action:'none'},
+					{label:'Abbandona FT',_action:function (){this.abbandonaFt();}.bind(this)},
+					{label:'Cancella FT',_action:function (){this.cancellaFt();}.bind(this)}
+				];
+				//remember the full list that compose the menu
+				menu.set('items', list);
+				menu.set('visibleitems', menu.items);
+
+				//console.log('Appending menu to the body:', menu);
+				document.body.appendChild(menu);
+				menu.selectFirstOfThePage();
+
+				//
+				menu.oncancel = function (){
+					//give the focus back to the elemnt who called us
+					console.log('Cancelling the FT exit menu, try to give the focus back to',this);
+					this.focus();
+					this.$.field.focus()
+					//this.fields[0].querySelector('input').focus();
+				}.bind(oldFocusedElement);
+
+				//wait a little and then position the help window in the middle of the body
+				//and remember his width so that it does not change during future modifcation of contents
+				//and show us
+				setTimeout(function (){
+					this.addModalBackground();
+					this.setPosition('cc','cc',document.body);
+					this.show();
+					this.focus();
+				}.bind(menu), 150);
+				return menu;
+			}
+			
+			
+			
+
+			memorizzaFt(){
+				//impostiamo il tipo in quanto non sempre è già impostato
+				this.set('ft._type','Fattura');
+
+				// prepare an ajax request
+				var ajaxRequest = new XMLHttpRequest();
+				
+				//callback for managing results
+				ajaxRequest.onload = function (e) {
+					alert('Ft saved?');
+					console.log(e.target.responseText);
+					//console.log(msg);
+					this.abbandonaFt();
+				}.bind(this);
+			
+				//request setup
+				var requestData ={
+					action: 'save',
+					params: JSON.stringify(this.ft)
+				};
+				//console.log(requestData.params);
+				var obj=requestData.params;
+				var arr = Object.keys(obj).map(function(k) { return obj[k] });
+				
+				ajaxRequest.open('POST', "./../do.php", true);
+				ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				ajaxRequest.responseType = 'text';
+				ajaxRequest.send("action="+requestData.action+"&params="+requestData.params);
+
+			}
+			abbandonaFt(){
+				this.onQuit();
+				this.parentNode.removeChild(this);
+			}
+			cancellaFt(){
+				confirm ("Confermi la cancellazzione della fattura?")
+
+				// prepare an ajax request
+				var ajaxRequest = new XMLHttpRequest();
+				
+				//callback for managing results
+				ajaxRequest.onload = function (e) {
+					alert('Ft deletted?');
+					//console.log(msg);
+					this.abbandonaFt();
+				}.bind(this);
+			
+				//request setup
+				var requestData ={
+					action: 'delette',
+					params: JSON.stringify(this.ft)
+				};
+				//console.log(requestData.params);
+				var obj=requestData.params;
+				var arr = Object.keys(obj).map(function(k) { return obj[k] });
+				
+				ajaxRequest.open('POST', "./../do.php", true);
+				ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				ajaxRequest.responseType = 'text';
+				ajaxRequest.send("action="+requestData.action+"&params="+requestData.params);
+
+			}
+			stampaFt(oldFocusedElement){
+				//impostiamo il tipo in quanto non sempre è già impostato
+
+				// prepare an ajax request
+				var ajaxRequest = new XMLHttpRequest();
+				
+				//callback for managing results
+				ajaxRequest.onload = function (e) {
+
+					//console.log(e.target.response);
+					
+					var a = document.createElement('a');
+					a.href = window.URL.createObjectURL(e.target.response);
+					// Give filename you wish to download
+					a.download = "file.pdf";
+					a.style.display = 'none';
+					document.body.appendChild(a);
+					a.click();
+
+					alert('Ft printed?');
+					//redisplay the esc menu
+					this.displayEscMenu(oldFocusedElement);//display esc menu
+				}.bind(this);
+			
+				//request setup
+				var requestData ={
+					action: 'print',
+					params: JSON.stringify(this.ft)
+				};
+				//console.log(requestData.params);
+				var obj=requestData.params;
+				var arr = Object.keys(obj).map(function(k) { return obj[k] });
+				
+				ajaxRequest.open('POST', "./../do.php", true);
+				ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				ajaxRequest.responseType = 'blob';
+				ajaxRequest.send("action="+requestData.action+"&params="+requestData.params);
+			}
+			
+			
+			onQuit(){
+				//use this as a callback
+				//for when the aplication is closed/quitted
+			}
+			
 			getFocusableElements(){
 				var focusables = Array();
 				Array.prototype.push.apply(focusables, this.shadowRoot.querySelector('#intestazione').querySelectorAll('[id]:not([disabled])'));

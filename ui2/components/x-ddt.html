@@ -84,7 +84,7 @@
 			</tr>
 			</thead>
 			<tbody>
-			<template is="dom-repeat" items="{{ddt.righe}}" as="r" id="displayrigheTemplate">
+			<template is="dom-repeat" items="{{ddt.riga_id}}" as="r" id="displayrigheTemplate">
 				<tr id="r{{r.numero}}">
 					<td><x-numeroriga value="{{r.numero}}" label=" {{r.numero}}" disabled="true" hiddeninput="true"></x-numeroriga></td>
 					<td><x-codicearticolo value="{{r.articolo_codice}}" label=" " disabled="true" hiddeninput="true"></x-codicearticolo></td>
@@ -307,12 +307,12 @@ console.log('old focused element', oldFocusedElement);
 									console.log(this);
 									console.log(this.rigadamodificare);
 									this.iniziaRiga();
-									console.log('lunghezza', this.ddt.righe.length);
-									this.$.numeroriga.value = this.ddt.righe.length;
+									console.log('lunghezza', this.ddt.riga_id.length);
+									this.$.numeroriga.value = this.ddt.riga_id.length;
 									this.$.codicearticolo.$.field.focus();
 									//stop here
 									break;
-								}else if(this.$.numeroriga.value >= 0 /*&& this.hasOwnProperty('ddt') //tolto creava solo problemi*/ && this.ddt.hasOwnProperty('righe') && this.$.numeroriga.value < this.ddt.righe.length){
+								}else if(this.$.numeroriga.value >= 0 /*&& this.hasOwnProperty('ddt') //tolto creava solo problemi*/ && this.ddt.hasOwnProperty('riga_id') && this.$.numeroriga.value < this.ddt.riga_id.length){
 									//modifico una riga esistente
 									//position to the displayRighe div to the current row
 									location.hash='#r'+this.$.numeroriga.value;
@@ -324,10 +324,10 @@ console.log('old focused element', oldFocusedElement);
 									//inizio una nuova riga
 									console.log('valore riga maggiore uguale a zero',this.$.numeroriga.value >= 0);
 									console.log('ha ddt',this.hasOwnProperty('ddt'), this);
-									console.log('ha righe',this.ddt.hasOwnProperty('righe'));
-									console.log('numero riga inferiore a numero righe',this.$.numeroriga.value < this.ddt.righe.length);
+									console.log('ha righe',this.ddt.hasOwnProperty('riga_id'));
+									console.log('numero riga inferiore a numero righe',this.$.numeroriga.value < this.ddt.riga_id.length);
 									
-									//console.log('Riga inesistente!', this.$.numeroriga.value, this.ddt.righe.length);
+									//console.log('Riga inesistente!', this.$.numeroriga.value, this.ddt.riga_id.length);
 									setTimeout(function (){
 										this.$.numeroriga.$.field.focus();
 									}.bind(this), 10);
@@ -363,8 +363,8 @@ console.log('old focused element', oldFocusedElement);
 			}
 			modificaRiga(numRiga){
 				console.log('XDDT: richiesto di modificare la riga:', numRiga);
-				//this.rigadamodificare = JSON.parse(JSON.stringify(this.ddt.righe[numRiga]));
-				this.set('rigadamodificare',JSON.parse(JSON.stringify(this.ddt.righe[numRiga])));
+				//this.rigadamodificare = JSON.parse(JSON.stringify(this.ddt.riga_id[numRiga]));
+				this.set('rigadamodificare',JSON.parse(JSON.stringify(this.ddt.riga_id[numRiga])));
 				//move to that row the display
 				location.hash='#r'+numRiga;
 				//do il focus al prossimo campo per iniziare la modifica della riga
@@ -375,7 +375,7 @@ console.log('old focused element', oldFocusedElement);
 				this.set('rigadamodificare.numero',null);
 				this.$.numeroriga.value=null;
 				//console.log('XDDT: richiesto di cancellare la riga:', numRiga);
-				this.splice('ddt.righe', numRiga, 1);
+				this.splice('ddt.riga_id', numRiga, 1);
 				this.reindicizzaRighe();
 				this.iniziaRiga();
 				//rido' il focus al campo di selezione della riga
@@ -401,28 +401,28 @@ console.log('old focused element', oldFocusedElement);
 				);
 			}
 			reindicizzaRighe(oRiga){
-				//console.log('XDDT: reindicizzazzione righe in corso', this.ddt.righe.length)
-				for (var i=0; i < this.ddt.righe.length; i++){
-					var riga = this.ddt.righe[i];
+				//console.log('XDDT: reindicizzazzione righe in corso', this.ddt.riga_id.length)
+				for (var i=0; i < this.ddt.riga_id.length; i++){
+					var riga = this.ddt.riga_id[i];
 					//console.log('XDDT: riga ',riga.numero,'diventa ',i)
 					riga.numero = i;
 				}
 			}
 			memorizzaRiga(oRiga){
 				//console.log('XDDT: memorizzazzione riga in corso', oRiga)
-				//console.log(oRiga.numero, this.ddt.righe.length);
+				//console.log(oRiga.numero, this.ddt.riga_id.length);
 				
-				if (oRiga.numero < this.ddt.righe.length){
+				if (oRiga.numero < this.ddt.riga_id.length){
 					//si tratta di una vecchia riga
 					//devo solo aggiornare quello che è già memorizzato
-					this.set('ddt.righe.' + oRiga.numero , JSON.parse(JSON.stringify(oRiga)));
+					this.set('ddt.riga_id.' + oRiga.numero , JSON.parse(JSON.stringify(oRiga)));
 				}else{
 					//si tratta di una nuova riga
 					//le assegno numero e data ddt (che ancora non ha)
 					oRiga.ddt_data = this.ddt.data;
 					oRiga.ddt_numero = this.ddt.numero;
 					//la aggiungo alle righe del ddt
-					this.set('ddt.righe.' + oRiga.numero , JSON.parse(JSON.stringify(oRiga)));
+					this.set('ddt.riga_id.' + oRiga.numero , JSON.parse(JSON.stringify(oRiga)));
 					this.$.displayrigheTemplate.render();
 				}
 				//sposto la vista (scrollo) del riquadro righe sulla riga appena salvata
@@ -538,7 +538,7 @@ console.log('old focused element', oldFocusedElement);
 			//chiamato esternamente quando viene creato una nuova applicazione ddt in alternativa a getDdtFromServer
 			inizializzaNuovoDdt(){
 				this.set('ddt',{});
-				this.set('ddt.righe',[]);
+				this.set('ddt.riga_id',[]);
 				
 				//ricavo la data odierna
 				var today = new Date();
@@ -605,7 +605,7 @@ console.log('old focused element', oldFocusedElement);
 				ajaxRequest.onload = function (e) {
 					//console.log(e.target.responseText);
 					var serverDdt = JSON.parse(e.target.responseText).ddt;
-					this.set('ddt.righe', JSON.parse(e.target.responseText));
+					this.set('ddt.riga_id', JSON.parse(e.target.responseText));
 					this.reindicizzaRighe();
 				}.bind(this);
 				

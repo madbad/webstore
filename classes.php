@@ -70,15 +70,35 @@ class MyClass extends DefaultClass{
 		$this->_params=$params;
 		foreach ($params as $key => $value){
 			//se si tratta delle righe devo prepararle in modo particolare
-			if($key=='righe'){
+			if($key=='riga_id'){
 				//creo gli oggetti riga
 				if(is_array($value)){
 					//se il campo righe è gia un array allora significa che contiene già tutti i dati che mi servono in formato json quindi lo lascio comè e lo trasformo in un oggetto riga
-					$righe = $value;	
+					$righe = $value;
 					$value= array();
 					
 					foreach ($righe as $rkey => $rvalue ){
 						$riga = new Riga($rvalue);
+						//value diventa il mio array di oggetti Riga
+						$value[]= $riga;
+					}
+				}else{
+					//altrimenti significa che è solo una stringa di numeri che si riferiscono alle mie righe quindi devo ricavarmi i dati dalle righe... 
+					//oppure lascio semplicmente perdere e lascio il valore così com'è
+					$value=$value;
+				}
+
+			//print_r($value);
+			}
+			if($key=='ddt_id'){
+				//creo gli oggetti riga
+				if(is_array($value)){
+					//se il campo righe è gia un array allora significa che contiene già tutti i dati che mi servono in formato json quindi lo lascio comè e lo trasformo in un oggetto riga
+					$righe = $value;
+					$value= array();
+					
+					foreach ($righe as $rkey => $rvalue ){
+						$riga = new Ddt($rvalue);
 						//value diventa il mio array di oggetti Riga
 						$value[]= $riga;
 					}
@@ -219,48 +239,49 @@ class MyClass extends DefaultClass{
 			$db->exec($query) or die($query);
 			$assignedId = $db->lastInsertRowid();
 			$this->id->setVal($assignedId);
-			
-			//ottengo ilnumero ddt più alto e da li aggiungo un numero per assegnarlo al nuovo ddt che vado a memorizzare
-			$query="SELECT MAX(CAST(numero AS int)) as ULTIMODDT FROM $table";
+
+			//ottengo il numero documento (ddt o ft) più alto e da li aggiungo un numero per assegnarlo al nuovo documento (ddt o ft) che vado a memorizzare
+			$query="SELECT MAX(CAST(numero AS int)) as ULTIMODOCUMENTO FROM $table";
 			$queryResults = $db->query($query) or die($query);
 			while ($row = $queryResults->fetchArray()) {
-				$lastDdtNumber = $row['ULTIMODDT'];
+				$lastDocNumber = $row['ULTIMODOCUMENTO'];
 			}
-			$this->numero->setVal($lastDdtNumber+1);
+			$this->numero->setVal($lastDocNumber+1);
 		}
 		
 		//creo l'elenco di tutti i valori da memorizzare
 		$values=array();
 		foreach ($fields as $field){
-			
-			///se è un array (probabilmente si tratta di una riga) gli passo i dati di riferimento del ddt
+			echo "\n\n\n############ ".$field." : ".is_array($this->$field->getVal());
+			if($field == "ddt_id"){
+				print_r($this->$field->getVal());
+			}
+			///se è un array (probabilmente si tratta di un elenco di righe o ddt, gli passo i dati di riferimento del mio oggetto attuale (ddt o fattura)
 			if(is_array($this->$field->getVal())){
+				//echo "\n\n\n############ ".$field."\n\n\n";
 				//this field is an array we need to treat it differently
 				$itemsId = array();
 				foreach ($this->$field->getVal() as $itemk => $itemv){
-//print_r($this->$field->getVal()[$itemk]);
-					$itemv->ddt_numero->setVal($this->numero->getVal());
-					$itemv->ddt_data->setVal($this->data->getVal());
-					$itemv->ddt_id->setVal($this->id->getVal());
+					//if it is a ddt
+					if (get_class($this) == 'Ddt'){
+						if(property_exists ( $itemv , 'ddt_numero' )){ $itemv->ddt_numero->setVal($this->numero->getVal());}
+						if(property_exists ( $itemv , 'ddt_data' )){ $itemv->ddt_data->setVal($this->data->getVal());}
+						if(property_exists ( $itemv , 'ddt_id' )){ $itemv->ddt_id->setVal($this->id->getVal());}
+					}
+					//if it is a ft
+					if (get_class($this) == 'Fattura'){
+						//print_r($itemv);
+						if(property_exists ( $itemv , 'fattura_id' )){ $itemv->fattura_id->setVal($this->id->getVal());}
+					}
 					$itemv->saveToDb();
-					$itemsId[] = $itemv->numero->getVal(); 
+					$itemsId[] = $itemv->id->getVal();
 				}
 				$values[] = implode(',', $itemsId);
-			}else{//do this for all the normal fields
+				
+			}else{
+				//do this for all the *normal* fields
 				$val=$this->$field->getVal();
 				$values[]=(string) $this->$field->getVal();
-				/*TODO: MAYBE ITS NEEDED*/
-				/*
-				if($val==='' && in_array($field, $indexes)){
-					// [ $val !=='0' ] devo fare anche questo test altrimenti la prima riga con indice 0 non mi viene salvata in quanto considera [ 0=='']
-					//abortisco una delle chiavi primarie è nulla: non posso salvare nel $DATAbase (e comunque non avrebbe senso farlo)
-					echo '<br>aborting save of '.$this->numero->getVal();
-					echo '<br>(1)'.($val==='').' ==>'.$val;
-					echo '<br>(2)'.in_array($field, $indexes);
-
-					return;
-				}
-				*/
 			}
 		}
 		/*TODO*/
@@ -281,7 +302,7 @@ class MyClass extends DefaultClass{
 		//creo la tabella
 		//to fix : letto su internet che se vado ad aggiornare una riga com esempio solo 3 campi su quattro il campo che non vado ad aggiornare in questo momento con i nuovi valori viene resettato al valore di default o messo a null
 		$query="INSERT OR REPLACE INTO $table (".implode($fields,',').") VALUES ($values)";
-
+echo "\n".$query;
 		$db->exec($query) or die($query);
 		return;
 	}
@@ -446,7 +467,7 @@ class Ddt  extends MyClass {
 		$this->addProp('destinatario_codice', 'CODICE');
 		$this->addProp('note');
 		
-		$this->addProp('righe', 'ARRAY');
+//		$this->addProp('riga_id', 'ARRAY');
 		//$this->righe/**/
 		//$this->righe=array();
 		
@@ -551,6 +572,7 @@ class Riga extends MyClass {
 		$this->addProp('ddt_data', 'DATA');
 		$this->addProp('ddt_numero', 'NUMERATORE');
 		$this->addProp('ddt_id', 'NUMERATORE');
+		$this->addProp('fattura_id', 'NUMERATORE');
 		$this->addProp('numero', 'NUMERATORE');
 		$this->addProp('articolo_codice', 'CODICE');
 		$this->addProp('um_codice', 'CODICE');
@@ -735,8 +757,8 @@ class Fattura  extends MyClass {
 		$this->addProp('iva', '');
 		$this->addProp('totale', '');
 		
-		$this->addProp('ddt', 'ARRAY');
-		$this->addProp('righe', 'ARRAY');
+		$this->addProp('ddt_id', 'ARRAY');
+		$this->addProp('riga_id', 'ARRAY');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);

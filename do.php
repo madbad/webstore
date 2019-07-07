@@ -109,11 +109,11 @@ switch ($_POST["action"]){
 		//print_r($myddtrighe);
 		$myObj->stampa();
 		break;
+	/*
 	case "emettift":
 		//echo $_POST["params"];
 		$params = json_decode($_POST["params"], true);
 		$myObj = new $params["_type"]($params);
-		
 		
 		//creo una mylist vuota
 		$myddtrighe = new MyList(array( '_type'=>'Riga',
@@ -132,6 +132,7 @@ switch ($_POST["action"]){
 		//print_r($myddtrighe);
 		$myObj->stampa();
 		break;
+	*/
 	default:
 		break;
 }
