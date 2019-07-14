@@ -468,16 +468,56 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='numeri';
 				this.length=5;
-				//console.log(this.attributes);
-				/*todo: questo è un hack... 
-				in pratica per far passare un valore che imposto come
-				attributo (quando scrivo l'html) 
-				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
-				devo copiarlo io manualmente...
-				... perchè polymer non lo fa da solo?*/
-				if(this.attributes.hasOwnProperty('label')){
-					//this.label = this.attributes.label.nodeValue;
-				}
+				//only allow numbers and slashes
+				//only allow numbers and slashes
+				this.$.field.addEventListener('keypress', function (event){
+					
+					var allowedKeys =allowedKeysNumbers;
+					allowedKeys.push(',');
+					
+					if (allowedKeys.indexOf(event.key) > -1){
+						//console.log('al good go on', event.keyCode);
+						return true;
+					}else{
+						//console.log('returning false');
+						//replace eventual dots with commas
+						console.log(event.key);
+						if (event.key =='.'){
+							event.target.value +=',';
+						}
+						event.preventDefault();
+						return false;
+					}
+				}.bind(this));
+				
+				this.$.field.addEventListener('keyup', function(event){
+					if(event.keyCode == 13 || event.keyCode == 9){
+						console.log('on focus out');
+						console.log(event.target.value);
+						
+						//try to match a number with decimals
+						var matched = /^([0-9]*,[0-9]*)$/.test(event.target.value); 
+						
+						//if not try to match an integer number
+						if (!matched){
+							var matched = /^([0-9]*)$/.test(event.target.value); 
+						}
+						//if both failed
+						if (!matched){
+							console.log('matched:', matched);
+							console.log('keep the focus');
+							event.target.focus();
+							event.preventDefault();
+							event.stopPropagation();
+							displayError('Valore non valido per il campo peso');
+							return false;
+						}else{
+							console.log('matched:', matched);
+							return true;
+						}
+						//return result;
+					}
+				}.bind(this));
 			}
 		}
 		customElements.define(xPeso.is, xPeso);
@@ -540,7 +580,16 @@ hidden$="{{hiddeninput}}"
 					if(event.keyCode == 13 || event.keyCode == 9){
 						console.log('on focus out');
 						console.log(event.target.value);
+						
+						//try to match a number with decimals
 						var matched = /^([0-9]*,[0-9]*)$/.test(event.target.value); 
+						
+						//if not try to match an integer number
+						if (!matched){
+							var matched = /^([0-9]*)$/.test(event.target.value); 
+						}
+						
+						//if both failed
 						if (!matched){
 							console.log('matched:', matched);
 							console.log('keep the focus');
@@ -1078,5 +1127,38 @@ hidden$="{{hiddeninput}}"
 			}
 		}
 		customElements.define(xCodicetipofattura.is, xCodicetipofattura);
+	</script>
+</dom-module>
+
+<dom-module id='x-valuta'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xValuta extends xInput {
+			static get is() { return "x-valuta"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.length=3;
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xValuta.is, xValuta);
 	</script>
 </dom-module>

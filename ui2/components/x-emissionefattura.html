@@ -40,7 +40,7 @@
 				<br>Data: <x-data id="data" value={{ft.data}} id="data"></x-data>
 				<br>Tipo fattura: <x-codicetipofattura value={{ft.tipofattura_codice}} id="tipofattura"></x-codicetipofattura>
 				<br>Cliente: <x-codiceclientefornitore value={{ft.clientefornitore_codice}} id="codiceclientefornitore"></x-codiceclientefornitore>
-
+				<br>Valuta: <x-valuta value={{ft.valuta}} id="valuta"></x-valuta>
 				<br>Pagamento Scadenza: <x-codicepagamentoscadenza value={{ft.pagamentoscadenza_codice}} id="codicepagamentoscadenza"></x-codicepagamentoscadenza>
 				<br>Pagamento Modalita: <x-codicepagamentomodalita value={{ft.pagamentomodalita_codice}} id="codicepagamentomodalita"></x-codicepagamentomodalita>
 				<br>Pagamento Banca: <x-codicebanca value={{ft.banca_codice}} id="codicebanca"></x-codicebanca>
@@ -352,6 +352,9 @@
 				
 				//imposto la causale del ddt a vendita (02) per default
 				this.set('ft.tipofattura_codice', 'FT');
+
+				//imposto la valuta
+				this.set('ft.valuta', 'EUR');
 			}
 
 			displayEscMenu(oldFocusedElement){

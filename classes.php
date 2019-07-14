@@ -1,7 +1,11 @@
 <?php
+include('./utils.php');
 include('./print.ddt.php');
+include('./xml.fattura.php');
+//genera pdf
 include('./libs/tcpdf/tcpdf.php');
-
+//classe per l'invio di email
+require_once('./libs/phpmailer/class.phpmailer.php');
 
 
 //require_once(realpath($_SERVER["DOCUMENT_ROOT"]).'/webContab/my/php/libs/tcpdf/config/lang/ita.php');
@@ -641,6 +645,7 @@ class Clientefornitore extends MyClass {
 		$this->addProp('paese', 'TESTO');
 		$this->addProp('provincia', 'TESTO');
 		$this->addProp('cap', 'NUMERO');
+		$this->addProp('nazione', 'TESTO');
 		$this->addProp('alboautotrasportatori', 'ALBO');
 
 		$this->addProp('mezzo_codice', 'CODICE');
@@ -663,6 +668,9 @@ class Clientefornitore extends MyClass {
 		$this->addProp('vettore', 'TESTO');
 		$this->addProp('codifica', 'TESTO');
 		
+		$this->addProp('pec', 'TESTO');
+		$this->addProp('codiceSDI', 'TESTO');
+		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
 	}
@@ -679,6 +687,7 @@ class Iva extends MyClass {
 		$this->addProp('codice', 'CODICE');
 		$this->addProp('descrizione', 'TESTO');
 		$this->addProp('aliquota', 'NUMERO');
+		$this->addProp('codiceSDI', 'TESTO');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
@@ -753,12 +762,15 @@ class Fattura  extends MyClass {
 		$this->addProp('pagamentoscadenza_codice', '');
 		$this->addProp('pagamentomodalita_codice', '');
 		
+		$this->addProp('valuta', '');
 		$this->addProp('imponibile', '');
 		$this->addProp('iva', '');
 		$this->addProp('totale', '');
 		
 		$this->addProp('ddt_id', 'ARRAY');
 		$this->addProp('riga_id', 'ARRAY');
+		
+		$this->addProp('progressivoSDI', '');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
@@ -785,6 +797,11 @@ class Fattura  extends MyClass {
 		parent::deletteFromDb();
 		*/
 	}
+	function visualizzaXml(){
+		$dati= estrapolaDatiPerXmlFt($this);
+		generaXmlDaDatiFattura($dati);
+	}
+
 	function stampa(){
 		/*
 		generaPdfDdt($this);
@@ -831,8 +848,7 @@ class Fattura  extends MyClass {
 		*/
 	}
 	function getRighe(){
-		/*
-		if($this->_oRighe){
+		if(property_exists($this,'_oRighe')){
 			//do nothing we already have what we need
 			//echo 'Im fine!';
 			
@@ -841,11 +857,10 @@ class Fattura  extends MyClass {
 			//get them from the db
 			$this->_oRighe = new MyList(array(
 				'_type'=>'Riga',
-				'ddt_id'=>$this->id->getVal()
+				'fattura_id'=>$this->id->getVal()
 			));
 		}
 		return $this->_oRighe;
-		*/
 	}
 	function getTotaleColli(){
 		/*
@@ -865,7 +880,146 @@ class Fattura  extends MyClass {
 		return $GLOBALS['tempPesoLordoTot'];
 		*/
 	}
-	
+	function getProgressivoInvioSDI(){
+		$myfile = fopen("./dati/brungimmi/progressivoSDI.txt", "r") or die("Unable to open file!");
+		$ultimoProgressivoSDIUtilizzato = fgets($myfile);
+		//echo "\n precedente: ".$ultimoProgressivoSDIUtilizzato;
+		$prossimoProgresivoSDI = (int)ltrim($ultimoProgressivoSDIUtilizzato, "0")+1;
+		fclose($myfile);
+		$stringaProgressivoSDI = str_pad ($prossimoProgresivoSDI, 5, "0", STR_PAD_LEFT); 
+		//echo "\n uso: ".$stringaProgressivoSDI;
+		return $stringaProgressivoSDI;
+	}
+	function saveUsedProgressivoInvioSDI(){
+		$stringaProgressivoSDI = $this->getProgressivoInvioSDI();
+		$myfile = fopen("./dati/brungimmi/progressivoSDI.txt", "w") or die("Unable to open file!");
+		//echo "\n ho usato: ".$stringaProgressivoSDI;
+		//echo "\n";
+		fwrite($myfile, $stringaProgressivoSDI);
+		fclose($myfile);
+	}
+	function getSDIXmlFileName(){
+		if(property_exists($this,'nomeFileXml')){
+			if($this->nomeFileXml!=''){
+				return $this->nomeFileXml;
+			}
+		}
+		
+		$nomeFile = $GLOBALS['config']->azienda->nazione->getVal();
+		$nomeFile .= $GLOBALS['config']->azienda->piva->getVal();
+		$nomeFile .= '_';
+		$nomeFile .= $this->getProgressivoInvioSDI();
+		$nomeFile .= '.xml';
+
+		$this->nomeFileXml = $nomeFile;
+		return $this->nomeFileXml;
+	}
+	function getSDIXmlFileUrl(){
+		$urlFile = './dati/brungimmi/fattureVenditaXML/'.$this->getSDIXmlFileName();
+		return $urlFile;
+	}
+	function getSDITempFileUrl(){
+		$urlFile = './dati/brungimmi/temp/'.$this->getSDIXmlFileName();
+		return $urlFile;
+	}
+	function getSDIOfficialFileUrl(){
+		$urlFile = './dati/brungimmi/fattureVenditaXML/'.$this->getSDIXmlFileName();
+		return $urlFile;
+	}
+	function generaTempSDIXmlFile(){
+		$dati= estrapolaDatiPerXmlFt($this);
+		$urlFileSaving = $this->getSDITempFileUrl();
+		generaXmlDaDatiFattura($dati, $urlFileSaving);
+	}
+
+	public function inviaSDI(){
+		//rigenero il file pdf della fattura
+
+		$this->generaTempSDIXmlFile();
+
+		//importo i dati di configurazione della pec
+		$pec=$GLOBALS['config']->pec;
+		//$cliente=$this->cod_cliente->extend();
+		//var_dump($cliente);
+		$mail = new PHPMailer(true); // the true param means it will throw exceptions on errors, which we need to catch
+
+		$mail->IsSMTP(); // telling the class to use SMTP
+
+		try {
+			$mail->Host       = $pec->Host;
+			$mail->SMTPDebug  = $pec->SMTPDebug;
+			$mail->SMTPAuth   = $pec->SMTPAuth;
+			$mail->Port       = $pec->Port;
+			$mail->Username   = $pec->Username;
+			$mail->Password   = $pec->Password;
+
+			//indirizzo mail PEC
+			$mail->AddAddress($GLOBALS['config']->SDIpec, 'SDI'); //destinatario
+			
+			//mi faccio mandare la ricevuta di lettura
+			$mail->ConfirmReadingTo=$pec->ReplyTo->Mail;
+			$mail->SetFrom($pec->From->Mail, $pec->From->Name);
+			$mail->AddReplyTo($pec->ReplyTo->Mail, $pec->ReplyTo->Name);
+			//Invio a SDI - 20190115_F00000001 - File IT01588530236_00001.xml - FT n.1 del 15-01-2019 - Primo Invio
+			$mail->Subject = 'Invio a SDI - File '.$this->getSDIXmlFileName().' - '.$this->tipofattura_codice->extend()->descrizione->getVal().' Nr. '.$this->numero->getVal().' del '.$this->data->getVal().' - Primo Invio'; //oggetto
+			
+			/*
+			Si invia in allegato file relativo alla Fattura Elettronica
+			FT n.1 del 15-01-2019
+			File IT01588530236_00001.xml
+			Primo invio 
+			*/
+			//$message="[Messaggio automatizzato] <br><br>\n\n Si invia in allegato file relativo alla Fattura Elettronica";
+			$message="<br>\n".$this->tipofattura_codice->extend()->descrizione->getVal().' Nr. '.$this->numero->getVal().' del '.$this->data->getVal();
+			$message.="<br>\n"."File ".$this->getSDIXmlFileName();
+			$message.="<br>\n"."Primo invio";
+
+
+			$mail->MsgHTML($message);
+			//$mail->Body($message); 
+
+			//allego l'xml della fattura
+			$mail->AddAttachment($this->getSDITempFileUrl()); 
+			
+			//var_dump($mail);
+			
+			if($mail->Send()){
+			//	$html= '<h2 style="color:green">Messaggio Inviato</h2>';
+			//	$html.= '<br>Il messaggio con oggetto: ';
+			//	$html.= '<b>'.$mail->Subject.'</b>';
+			//	$html.='<br>E\' stato inviato a: <b>'.$cliente->ragionesociale->getVal().'</b>';
+			//	$html.='<br>all\'indirizzo: <b>'.$cliente->__pec->getVal().'</b>';
+			//	$html.='<br>con allegato il file: <b>'.$this->getPdfFileUrl().'</b>';
+				
+				//memorizzo la data di invio
+	//			$this->__datainviopec->setVal(date("d/m/Y"));
+	//			$this->saveSqlDbData();
+				//mostro il messaggio di avvenuto invio
+			//	echo $html;
+			//	var_dump($message);
+				//all seems ok
+				
+				//mi ricordo il progressivo utilizzato
+				$this->progressivoSDI->setVal($this->getProgressivoInvioSDI());
+				
+				//mi ricordo di aver utilizzato questo id per questa fattura
+				$this->saveUsedProgressivoInvioSDI();
+				
+				//salvo id utilizzato nel databse con la fattura
+				$this->saveToDb();
+				
+				//sposto il file temporaneo nella cartella ufficiale
+				rename($this->getSDITempFileUrl(),$this->getSDIOfficialFileUrl());
+				
+				return true;
+			}
+		} catch (phpmailerException $e) {
+			echo $e->errorMessage(); //Pretty error messages from PHPMailer
+		} catch (Exception $e) {
+			echo $e->getMessage(); //Boring error messages from anything else!
+		}
+		return false;
+	}
 }
 
 class Banca extends MyClass {
@@ -904,6 +1058,7 @@ class Pagamentomodalita extends MyClass {
 	function __construct($params) {
 		$this->addProp('codice', 'CODICE');
 		$this->addProp('descrizione', 'TESTO');
+		$this->addProp('codiceSDI', 'TESTO');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
@@ -919,6 +1074,7 @@ class Tipofattura extends MyClass {
 	function __construct($params) {
 		$this->addProp('codice', 'CODICE');
 		$this->addProp('descrizione', 'TESTO');
+		$this->addProp('codiceSDI', 'TESTO');
 		
 		//importo eventuali valori delle proprietà che mi sono passato come $params
 		$this->mergeParams($params);
@@ -1163,7 +1319,7 @@ $test=new MyList(
 	}
 	function remove(){
 	}
-	function iterate($function,$args=null){
+	function iterate($function,$args=''){
 		$strResult='';
 		//esegue una funzione su ogni riga
 		foreach ($this->arr as $key => $value){

@@ -152,7 +152,7 @@
 			static get observers() {
 				return [
 					// Observer method name, followed by a list of dependencies, in parenthesis
-					'modificatoPeso(rigadamodificare.tara,rigadamodificare.tarapesolordo)',
+					'modificatoPeso(rigadamodificare.tara,rigadamodificare.pesolordo)',
 					'modificatoArticolo(rigadamodificare.articolo_codice)',
 					'modificatoCliente(ddt.clientefornitore_codice)',
 					'modificatoTipoSpedizione(ddt.mezzo_codice)'
@@ -641,8 +641,14 @@ console.log('old focused element', oldFocusedElement);
 				}.bind(this);
 			}
 			modificatoPeso(newValue) {
-				if(this.$.pesolordo.value>0){
-					this.$.pesonetto.value = this.$.pesolordo.value - this.$.tara.value;
+				if ( this.$.pesolordo.value==null){return;}
+				var pesoLordo = this.$.pesolordo.value.replace(",", ".")*1;
+				
+				if ( this.$.tara.value==null){return;}
+				var tara = this.$.tara.value.replace(",", ".")*1;
+				
+				if(pesoLordo > 0){
+					this.$.pesonetto.value = (pesoLordo - tara).toString().replace(".", ",");
 				}
 			}
 			modificatoCliente(newValue) {
