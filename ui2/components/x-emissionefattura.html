@@ -128,6 +128,18 @@
 				this.$.triggerselezioneddt.addEventListener("focus", this._selezionatoreddtdacliente.bind(this)); 
 				this.inizializzaNuovaFt();
 				
+				//esc menu
+				this.addEventListener('keyup', function(event) {
+					switch (event.which){
+						case 27: 
+							//var giveFocusBackTo=document.activeElement;
+							//var giveFocusBackTo=document.querySelector( ':focus' );
+							var giveFocusBackTo=this.shadowRoot.activeElement;
+							this.displayEscMenu(giveFocusBackTo);//display esc menu
+						break; //enter
+					}
+				}.bind(this));
+				
 			}
 			static get properties() {
 				return {
@@ -229,6 +241,7 @@
 						/*RICAVO ALCUNI DATI CHE MI SERVONO*/
 
 					//id ddt
+						var elencoIdDdt = '';
 						var elencoIdDdt = new Array()
 						selection.forEach(function(myDdt) {
 							console.log(myDdt);
@@ -355,6 +368,28 @@
 
 				//imposto la valuta
 				this.set('ft.valuta', 'EUR');
+				
+				//resetto alcuni valori
+				this.set('ft.ddt_id','');
+				this.set('ft.riga_id','');
+				
+				//do il focus al primo campo
+				//console.log(this.$.numero);
+				//this.$.numero.shadowRoot.querySelector('input').focus();
+				setTimeout(function (){
+					//get a list of focusable elements
+					this.fields = this.getFocusableElements();
+					/*
+					//console.log('focusable fields: ', this.fields);
+					//console.log('#########################################################################################');
+					//console.log('will get focus: ', this.fields[0]);
+					*/
+					//give focus to the first one
+					this.fields[0].shadowRoot.querySelector('input').focus();
+				}.bind(this), 1000);
+				
+				
+				
 			}
 
 			displayEscMenu(oldFocusedElement){

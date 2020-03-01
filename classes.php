@@ -244,8 +244,30 @@ class MyClass extends DefaultClass{
 			$assignedId = $db->lastInsertRowid();
 			$this->id->setVal($assignedId);
 
-			//ottengo il numero documento (ddt o ft) più alto e da li aggiungo un numero per assegnarlo al nuovo documento (ddt o ft) che vado a memorizzare
-			$query="SELECT MAX(CAST(numero AS int)) as ULTIMODOCUMENTO FROM $table";
+//echo property_exists($this, 'data');
+
+			if(property_exists($this, 'data')){
+				//ottengo il numero documento (ddt o ft) più alto (del'anno relativo alla data del documento) e da li aggiungo un numero per assegnarlo al nuovo documento (ddt o ft) che vado a memorizzare
+				$year = substr($sting=$this->data->getVal(), 6, 4);// gg/mm/aaaa
+				$startSearchDate = $year."-01-01"; //AAAAMMGG
+				$endSearchDate = $year."-12-31"; //AAAAMMGG
+				/*
+				$query="
+					SELECT MAX(CAST(numero AS int)) as ULTIMODOCUMENTO FROM $table 
+					WHERE DATE(substr(data,7,4) || '-' || substr(data,4,2) || '-'|| substr(data,1,2))
+					BETWEEN DATE('$startSearchDate') AND DATE('$endSearchDate');
+				";
+				*/
+				$query="				
+				SELECT MAX(CAST(numero AS int)) as ULTIMODOCUMENTO FROM $table 
+				WHERE DATE(substr(data,7,4) || '-' || substr(data,4,2) || '-'|| substr(data,1,2)) 
+				BETWEEN DATE('$startSearchDate') AND DATE('$endSearchDate'); 
+				";
+//echo $query;
+			}else{//not sure if really needed ( per le righe )
+				$query="SELECT MAX(CAST(numero AS int)) as ULTIMODOCUMENTO FROM $table";
+			}
+
 			$queryResults = $db->query($query) or die($query);
 			while ($row = $queryResults->fetchArray()) {
 				$lastDocNumber = $row['ULTIMODOCUMENTO'];

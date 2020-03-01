@@ -232,7 +232,7 @@ function buildEmptyModule($pdf){
 	if($config->azienda->_capitalesociale->getVal() !=''){
 		$pdf->Text($x=17.5, $y=43, "Capitale Sociale € ".$config->azienda->_capitalesociale->getVal()." i.v.");
 	}
-	$pdf->Text($x=17.5, $y=46, "R.E.A. ".$config->azienda->_registroimprese->getVal()." - Reg.Imprese di Verona ".$config->azienda->_rea->getVal());
+//	$pdf->Text($x=17.5, $y=46, "R.E.A. ".$config->azienda->_registroimprese->getVal()." - Reg.Imprese di Verona ".$config->azienda->_rea->getVal());
 ///	$pdf->Text($x=17.5, $y=49, "Reg.Imprese di Verona".$config->azienda->_rea->getVal().", Codice Fiscale".$config->azienda->cod_fiscale->getVal()."Partita IVA ".$config->azienda->p_iva->getVal());
 	$pdf->Text($x=17.5, $y=49, "Codice Fiscale ".$config->azienda->codfiscale->getVal()." - Partita IVA ".$config->azienda->piva->getVal());
 	if($config->azienda->_bndoo->getVal() != ''){
@@ -599,23 +599,17 @@ buildEmptyModule($pdf);
 	if ($ddt->mezzo_codice->getVal()=='03' || $ddt->mezzo_codice->getVal()=='04'){
 		//$vettore=$ddt->cod_destinatario->extend()->cod_vettore->extend();
 		
-		$destinatario=$ddt->destinatario_codice->extend();
+		//$destinatario=$ddt->destinatario_codice->extend();
 		
-		//SE NON è IMPOSTATO NESSUN VETTORE PRESUMO CHE SIA LA TRANSLUSIA
-		if ($destinatario->cod_vettore->getVal() *1 == 0){
-			$destinatario->cod_vettore->setVal('02');
-		} 
-		//FORZO IL VETTORE CHE VOGLIO IO
-		if ($_GET['force_vettore']){
-			$destinatario->cod_vettore->setVal($_GET['force_vettore']);
-			//$destinatario->cod_vettore->setVal('02');
-		} 
-
 		//MODIFICO IL VETTORE A MIO PIACIMENTO
 		//$destinatario->cod_vettore->setVal('41');//02=translusia	24=facchini 14=ROCCO TRASPORTI
 		
-		$vettore= $destinatario->cod_vettore->extend();
+		//$vettore= $ddt->vettore_codice->extend();
 
+		$vettore = new Clientefornitore($ddt->vettore_codice_getVal());
+		$vettore->codice->setVal($ddt->vettore_codice_getVal());
+		$vettore->extend();
+		
 		//si presenta il caso in cui la spedizione è stata fatta con vettore ma non sappiamo quale
 		//perchè non ce ne è uno predefinito nel codice cliente quindi gliene assegnamo uno vuoto
 		if($vettore==''){
@@ -632,6 +626,7 @@ buildEmptyModule($pdf);
 		$pdf->Text(18, 58+8*23.7, $vettore->via->getVal().' - '.$vettore->paese->getVal());	
 
 	}
+	
 
 	//inviamo il file pdf
 	//$pdf->Output('DDT_'.$ddt->numero->getVal().'__'.$ddt->data->getVal().'.pdf', 'I');

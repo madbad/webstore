@@ -154,17 +154,19 @@ window.addEventListener('WebComponentsReady', function() {
 		{label:'Elenca Fatture',_action:function (){
 								console.log('test');
 								//elencaDdt().bind(this);
-								elencaFt();
+								elencaFt().bind(this);
 							}.bind(this)},
 		{label:'Emetti Fattura',_action:function (){
-								var ftApp = document.createElement('x-ft');
+								var ftApp = document.createElement('x-emissionefattura');
 								document.body.appendChild(ftApp);
 								//inizializzo un nuovo ddt
-								ftApp.inizializzaNuovoDdt();
+								//ftApp.inizializzaNuovoDdt();
 								ftApp.onQuit = function(){
 									console.log('quitting...');
 									menu.$.searchfield.focus();
 								}.bind(menu)
+								console.log('Focus to ',ftApp.getFocusableElements()[0]);
+								ftApp.getFocusableElements()[0].focus();
 							}.bind(this)},
 	];
 
@@ -278,7 +280,7 @@ window.addEventListener('WebComponentsReady', function() {
 		}
 		*/
 		var params =  {
-			_type: 'Ft',
+			_type: 'Fattura',
 			_select: 'numero,data,clientefornitore_codice',	
 			data: ['!=',''],
 			clientefornitore_codice: ['!=','']
@@ -325,6 +327,8 @@ window.addEventListener('WebComponentsReady', function() {
 </x-window>
 
 -->
+<!--
 <x-emissionefattura></x-emissionefattura>
+-->
 </body>
 </html>

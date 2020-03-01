@@ -170,7 +170,7 @@ function estrapolaDatiPerXmlFt($myFt){
 		$dati->fattura->righe[$contaRighe]->importo_iva = $imponibile * comma2dot($codiva->aliquota->getVal());
 		$dati->fattura->righe[$contaRighe]->importo_totale = $dati->fattura->righe[$contaRighe]->imponibile + $dati->fattura->righe[$contaRighe]->importo_iva;
 		$dati->fattura->righe[$contaRighe]->colli = ($riga->colli->getVal()*1>0 ? $riga->colli->getFormatted(0) : '');
-		$dati->fattura->righe[$contaRighe]->quantita = formatImporto($riga->pesonetto->valore);
+		$dati->fattura->righe[$contaRighe]->quantita = formatImporto(str_replace(',','.',$riga->pesonetto->valore));
 		$dati->fattura->righe[$contaRighe]->cod_iva = formatImporto($riga->iva_codice->getVal());
 		
 		//dati iva
@@ -230,8 +230,8 @@ function estrapolaDatiPerXmlFt($myFt){
 ==============================================================================*/
 function generaXmlDaDatiFattura($dati, $urlFileSaving=''){
 
-	//$xml = new SimpleXMLElement('<p:p:FatturaElettronica/>');
-	$xml = new SimpleXMLElement('<p:FatturaElettronica/>');
+	$xml = new SimpleXMLElement('<p:p:FatturaElettronica/>');
+	//$xml = new SimpleXMLElement('<p:FatturaElettronica/>');
 	//$xml = new SimpleXMLElement('<FatturaElettronica/>');
 	$xml->addAttribute('xmlns:xmlns:ds',"http://www.w3.org/2000/09/xmldsig#");
 	$xml->addAttribute('xmlns:xmlns:p',"http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2");
@@ -439,7 +439,7 @@ function generaXmlDaDatiFattura($dati, $urlFileSaving=''){
 
 			$last = $xml->FatturaElettronicaBody->DatiBeniServizi->addChild('DatiRiepilogo');
 			$last->addChild('AliquotaIVA',formatImporto($rigaiva->aliquota));
-			$last->addChild('ImponibileImporto',formatImporto($rigaiva->imponibile));
+			$last->addChild('ImponibileImporto',formatImporto(round($rigaiva->imponibile,2)));
 			$last->addChild('Imposta',formatImporto($rigaiva->imposta));
 			$last->addChild('EsigibilitaIVA','I');//immediata... potrebbe essere differita
 			
