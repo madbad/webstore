@@ -216,7 +216,10 @@ window.addEventListener('WebComponentsReady', function() {
 		var params =  {
 			_type: 'Ddt',
 			_select: 'numero,data,clientefornitore_codice',	
-			data: ['!=',''],
+			//data: ['!=',''],
+			data: ['<>','01/01/'+(new Date().getFullYear()),'31/12/'+(new Date().getFullYear())],
+			//data: ['<>','20200101','20200331'],
+			//data: ['=','01/01/2020'],
 			clientefornitore_codice: ['!=','']
 		};
 		
@@ -241,6 +244,7 @@ window.addEventListener('WebComponentsReady', function() {
 		//and show us
 		setTimeout(function (){
 			this.addModalBackground();
+			this.hideColumn();//nascondo alcune colonne che non mi interessano
 			var modifier = {
 				top: 50,
 				left: 0,

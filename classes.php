@@ -72,6 +72,9 @@ class MyClass extends DefaultClass{
 	public function mergeParams($params){
 		//importo eventuali valori delle proprietà che mi sono passato come $params nell'oggetto principale
 		$this->_params=$params;
+
+		if (!is_array($params)){return;}//nessun paramestro di cui fare il merge}
+		//else
 		foreach ($params as $key => $value){
 			//se si tratta delle righe devo prepararle in modo particolare
 			if($key=='riga_id'){
@@ -560,7 +563,7 @@ class Ddt  extends MyClass {
 		return $fileUrl;
 	}
 	function getRighe(){
-		if($this->_oRighe){
+		if(property_exists($this, 'oRighe')){
 			//do nothing we already have what we need
 			//echo 'Im fine!';
 			
@@ -1126,6 +1129,12 @@ $test=new MyList(
 );
 */
 	function __construct($params) {
+/* how to fix date queries:		
+SELECT * FROM Ddt where substr(data,7)||substr(data,4,2)||substr(data,1,2) 
+      between '20200101' and '20201231' AND (clientefornitore_codice<>'') ORDER BY id 
+*/
+
+//	print_r($params);
 	
 		$this->_params=$params;
 		$numeroDiValori=0;
@@ -1147,6 +1156,31 @@ $test=new MyList(
 				//se c'è un operatore '=' '<' '>' '<>' '>=' '<=' '!='
 				//il primo valore della variabile $value sarà la stringa dell'operatore
 				//altrimenti è solo un "valore/array di possibili valori" per la $key
+				
+				
+				if($key=='data'){
+
+					for ($a = 1; $a < count($value); $a++) {
+					//echo "\n<br>*".$value[$a]."*\n<br>";
+					//echo count($value[$a]);
+						//echo $value;
+						//make a date 16/01/2020 to 20200116
+						if (strlen($value[$a]) == 10 && strpos($value[$a], '/')){
+							//01/01/2020
+							$value[$a]=substr($value[$a],6,4).substr($value[$a],3,2).substr($value[$a],0,2); 
+						}else if(strlen($value[$a]) == 8 && strpos($value[$a], '/')){
+							//01/01/20
+							$value[$a]='20'.substr($value[$a],6,2).substr($value[$a],3,2).substr($value[$a],0,2);
+						}else if(strlen($value[$a]) == 8){
+							//20200101
+							$value[$a]=$value[$a];	
+						}
+					}
+					
+					//$key = ' substr(data,7)||substr(data,4,2)||substr(data,1,2) ';
+				}
+				
+				
 				switch ($value[0]){
 					case '=':
 						$tOperator='=';
@@ -1171,7 +1205,8 @@ $test=new MyList(
 						break;
 					case '<>'://compreso tra
 						//inverto i simboli per mia comodita
-						$tOperator=array('>=','<=');
+					//	$tOperator=array('>=','<=');
+						$tOperator=array('between','and');
 						array_shift($value);//rimuovo la condizione e lascio il valore/valori
 						break;
 					case '!='://diverso da
@@ -1186,21 +1221,31 @@ $test=new MyList(
 						//$numeroDiValori=count($value);
 						break;
 				}
+/*				
+				print_r($key);
+
+				print_r($value);
+				
+				
+				print_r($tOperator);
+*/
+				
 				//se ho un array di valori e un arrai di operatori (caso del '<>' compreso tra)
 				if (is_array($value) && is_array($tOperator)){
-					//foreach ($value as $tKey => $tVal){
-					foreach ($params[$key] as $tKey => $tVal){
-						$operator[]=$tOperator[$tKey];
-						$newVal[]=$value[$tKey];
+						$operator[]=$tOperator[0];
+						$newVal[]=$value[0];
 						$newKey[]=$key;
-					}
+						
+						$operator[]=$tOperator[1];
+						$newVal[]=$value[1];
+						$newKey[]=$key;
 				//altrimenti si ho un array di valori ma un solo operatore allora presumo che l'operatore sia lo stesso per tutti i valori
 				}else if (is_array($value) && !is_array($tOperator)){
 					//echo "\n --$key-- ".'sono qui!: ';
 					//print_r($value);
 					//print_r($params[$key]); 
-					//foreach ($value as $tVal){
-					foreach ($params[$key] as $tVal){
+					foreach ($value as $tVal){
+					//foreach ($params[$key] as $tVal){
 						//echo $tVal."\n";
 						$operator[]=$tOperator;
 						$newVal[]=$tVal;
@@ -1260,6 +1305,7 @@ $test=new MyList(
 				}
 				$c3=0;
 				foreach ($operatorValue as $val){
+									
 					//echo $c3.' '.$myOperatorKey.'<br>';
 					if ($c3>0){
 						if($myOperatorKey=='='){
@@ -1280,7 +1326,24 @@ $test=new MyList(
 						default: $separatore="'";break;
 			
 					}
-					$where.=$fakeObj->$property->nome.$operator.$separatore.$val.$separatore;
+
+					//so sqlite use a different way of handling searching values in a range
+					//the next 10/15 lines are for this case
+					if(@$nextShouldBeAnd){
+						$nextShouldBeAnd = false;
+						$property=$myKey;
+						$val=$val;
+						$operator=$myOperatorKey;
+						$where.=''.$separatore.$val.$separatore;
+
+					}else{
+						$where.=$fakeObj->$property->nome.$operator.$separatore.$val.$separatore;
+					}
+					//set the flag so we knon next value will be the second aprt of between in 'between x and y'
+					if($myOperatorKey=='between'){
+						$nextShouldBeAnd = true;
+					}
+					
 					$c3++;
 				}
 				$c2++;
@@ -1310,7 +1373,11 @@ $test=new MyList(
 
 		$sqlite=$GLOBALS['config']->sqlite;
 		$table=$fakeObj->getDbName();
+	
 		$query='SELECT '.$select.' FROM '.$table.' '.$where.$order;
+		$query = str_replace('data',' substr(data,7)||substr(data,4,2)||substr(data,1,2) ', $query);
+		//echo $query."\n<br>";
+		
 		//apro il $DATAbase ed eseguo la query
 		if ($fakeObj->getDbType()=='interno'){
 			$db = new SQLite3($sqlite->databaseInterno);

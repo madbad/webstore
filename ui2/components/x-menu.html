@@ -113,6 +113,20 @@
 		</div>
 		<div id="items">
 			<table id="table">
+				
+				<template is="dom-repeat" items="{{visibleitems}}">
+					<template is="dom-if" if="{{_isFirst(index)}}">
+					<colgroup>
+						<template is="dom-repeat" items="{{_itemToArray(item)}}">
+							<col id="col{{item.key}}">
+						</template> 
+					</colgroup>
+					</template>
+				</template>
+				
+
+
+
 				<thead id="tableHead">
 					<template is="dom-repeat" items="{{visibleitems}}">
 						<template is="dom-if" if="{{_isFirst(index)}}">
@@ -235,7 +249,8 @@ events methods
 						if(this.visibleitems.indexOf(this.getSelected()) == 0){
 							if(this.page > 1){
 								this.selectPrevPage();
-								this.selectLastOfThePage();
+								//this.selectLastOfThePage();
+								this.selectFirstOfThePage();
 							}
 						}else{
 							this.selectFirstOfThePage();
@@ -247,7 +262,8 @@ events methods
 							//se ci sono ancora pagine
 							if(this.page < this.pages){
 								this.selectNextPage();
-								this.selectFirstOfThePage();
+								//this.selectFirstOfThePage();
+								this.selectLastOfThePage();
 							}
 						}else{
 							this.selectLastOfThePage();
@@ -500,6 +516,7 @@ custom methods
 					this.set('items', jsonList);
 					this.searchstringChanged();
 					this.onReady();
+					this.updatePositionin();
 				} catch (e) {
 					displayError("Error:\n Bad reaply from the server");
 					console.log("Error:\n Bad reaply from the server");
@@ -706,32 +723,39 @@ custom methods
 		}
 		hideColumn(){
 			//try to hide some columns
-
 			var columnsToHide = [
-				this.querySelector("#numero"),
-				this.querySelector("#via"),
-				this.querySelector("#cap"),
-				this.querySelector("#alboautotrasportatori"),
-				this.querySelector("#mezzo_codice"),
-				this.querySelector("#vettore_codice"),
-				this.querySelector("#iva_codice"),
-				this.querySelector("#web"),
-				this.querySelector("#valuta"),
-				this.querySelector("#telefono"),
-				this.querySelector("#cellulare"),
-				this.querySelector("#fax"),
-				this.querySelector("#email"),
-				this.querySelector("#nome"),
-			];
+				//this.root.querySelector("#colnumero"),
+				this.root.querySelector("#colvia"),
+				this.root.querySelector("#colcap"),
+				this.root.querySelector("#colalboautotrasportatori"),
+				this.root.querySelector("#colmezzo_codice"),
+				this.root.querySelector("#colvettore_codice"),
+				this.root.querySelector("#coliva_codice"),
+				this.root.querySelector("#colweb"),
+				this.root.querySelector("#colvaluta"),
+				this.root.querySelector("#coltelefono"),
+				this.root.querySelector("#colcellulare"),
+				this.root.querySelector("#colfax"),
+				this.root.querySelector("#colemail"),
+				this.root.querySelector("#colnome"),
 
-			//console.log(columnsToHide);
-			for (var i=0; i <= columnsToHide.length; i++){
+				this.root.querySelector("#colid"),
+				//this.root.querySelector("#colfattura_id"),
+				this.root.querySelector("#colriga_id")
+
+			];
+			var sizeOfCollapsedColumns = 0;
+				for (var i=0; i <= columnsToHide.length; i++){
 				var column = columnsToHide[i];
 				if(column){
 					//console.log('Column hidden', column);
+					sizeOfCollapsedColumns+=column.offsetWidth;
 					column.style.visibility='collapse';
+					console.log(column.offsetWidth)
+					//column.style.display='none';
 				}
 			}
+			return sizeOfCollapsedColumns;
 		}
 		_itemToArray(obj){
 			//console.log("Converting to array...")
@@ -780,6 +804,26 @@ custom methods
 			}else{
 				console.log('NOT removed because it as not there in selection', this.getSelected(), index);
 			}
+		}
+		updatePositionin(){
+			//update the positionin
+			//remove previous set limit
+			this.style.width = 'auto';	
+
+			//remove unwanted columns
+			var sizeOfCollapsedColumns = this.hideColumn();
+			
+			console.log(this.offsetWidth);
+			this.style.width = ((this.offsetWidth-sizeOfCollapsedColumns))+'px';
+			//end
+			//
+			var modifier = {
+				top: 50,
+				left: 0,
+			}
+			this.setPosition('tc','tc',document.body, modifier);
+
+
 		}
 	}
 		

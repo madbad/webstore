@@ -578,7 +578,7 @@ buildEmptyModule($pdf);
 	
 
 	$html.=$myddtrighe->iterate(function($riga){
-		$strResult.= MyOwnDdtRow($riga->articolo_codice->getVal(),
+		$strResult= MyOwnDdtRow($riga->articolo_codice->getVal(),
 							$riga->articolo_codice->extend()->descrizione->getVal(),
 							$riga->prezzo->getVal(),
 							$riga->um_codice->getVal(),
@@ -596,25 +596,11 @@ buildEmptyModule($pdf);
 	//**********************************************************
 	//**********************************************************
 	//se la spedizione è con vettore stampo i suoi dati
-	if ($ddt->mezzo_codice->getVal()=='03' || $ddt->mezzo_codice->getVal()=='04'){
-		//$vettore=$ddt->cod_destinatario->extend()->cod_vettore->extend();
-		
-		//$destinatario=$ddt->destinatario_codice->extend();
-		
-		//MODIFICO IL VETTORE A MIO PIACIMENTO
-		//$destinatario->cod_vettore->setVal('41');//02=translusia	24=facchini 14=ROCCO TRASPORTI
-		
-		//$vettore= $ddt->vettore_codice->extend();
+	if ($ddt->vettore_codice->getVal()!=''){
 
-		$vettore = new Clientefornitore($ddt->vettore_codice_getVal());
-		$vettore->codice->setVal($ddt->vettore_codice_getVal());
-		$vettore->extend();
-		
-		//si presenta il caso in cui la spedizione è stata fatta con vettore ma non sappiamo quale
-		//perchè non ce ne è uno predefinito nel codice cliente quindi gliene assegnamo uno vuoto
-		if($vettore==''){
-			$vettore=new Vettore(array('_autoExtend'=>-1));
-		}
+		$vettore = new Clientefornitore($ddt->vettore_codice->getVal());
+		$vettore->codice->setVal($ddt->vettore_codice->getVal());		
+		$vettore->getFromDb();
 		
 		//imposto le dimensioni del font
 		$pdf->SetFont($def_font, '', $def_size-3);
@@ -624,7 +610,6 @@ buildEmptyModule($pdf);
 
 		//indirizzo
 		$pdf->Text(18, 58+8*23.7, $vettore->via->getVal().' - '.$vettore->paese->getVal());	
-
 	}
 	
 

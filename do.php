@@ -91,7 +91,7 @@ switch ($_POST["action"]){
 		$params = json_decode($_POST["params"], true);
 		$myObj = new $params["_type"]($params);
 		
-		
+/*		
 		//creo una mylist vuota
 		$myddtrighe = new MyList(array( '_type'=>'Riga',
 										'ddt_id'=>''
@@ -106,7 +106,9 @@ switch ($_POST["action"]){
 		}
 		$myObj->_oRighe = $myddtrighe;
 		
-		//print_r($myddtrighe);
+		print_r($myddtrighe);
+*/
+		//print_r($myObj);
 		$myObj->stampa();
 		break;
 	/*
