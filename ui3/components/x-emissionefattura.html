@@ -1,0 +1,520 @@
+<link rel="import"  href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/polymer-element.html">
+<link rel="import" href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/lib/elements/dom-repeat.html">
+
+<dom-module id='x-emissionefattura'>
+	<template>
+		<style>
+
+		.displayRighe tbody {
+
+		}
+		.displayRighe thead{
+
+		}
+		.displayRighe tbody tr {
+			background-image: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 88%,#eaeaea 100%);
+		}
+		.displayRighe table, thead, tbody, tfooter {
+			width: 100%;
+			border: 0px;
+			padding:0px;
+			margin:0px;
+			border-collapse: collapse;
+			border-spacing: 0;
+		}
+		.displayRighe thead td{
+			padding: 0.3em;
+			background: linear-gradient(0deg, #616161 0%,#616161 4%,#7c7c7c 100%); /* W3C */
+			border-left:2px solid grey;
+			font-weight:bold;
+			color:white;
+			font-size: 0.8em;
+		}
+		.alignRight{
+			text-align:right;
+		}
+		</style>
+		<x-window title="Emissione fattura">
+			<div id="intestazione">
+				Numero: <x-numerodoc value="{{ft.numero}}" id="numero"></x-numerodoc>
+				<br>Data: <x-data id="data" value={{ft.data}} id="data"></x-data>
+				<br>Tipo fattura: <x-codicetipofattura value={{ft.tipofattura_codice}} id="tipofattura"></x-codicetipofattura>
+				<br>Cliente: <x-codiceclientefornitore value={{ft.clientefornitore_codice}} id="codiceclientefornitore"></x-codiceclientefornitore>
+				<br>Valuta: <x-valuta value={{ft.valuta}} id="valuta"></x-valuta>
+				<br>Pagamento Scadenza: <x-codicepagamentoscadenza value={{ft.pagamentoscadenza_codice}} id="codicepagamentoscadenza"></x-codicepagamentoscadenza>
+				<br>Pagamento Modalita: <x-codicepagamentomodalita value={{ft.pagamentomodalita_codice}} id="codicepagamentomodalita"></x-codicepagamentomodalita>
+				<br>Pagamento Banca: <x-codicebanca value={{ft.banca_codice}} id="codicebanca"></x-codicebanca>
+
+				<br>DDT:  <input type="button" value="Clicca per selezionare i DDT" id="triggerselezioneddt" >
+				
+				<tbody>
+				<template is="dom-repeat" items="{{ft.ddt_id}}" as="ddt_id" id="displayddtTemplate">
+					<tr>
+						<td>D.d.T. n. {{ddt_id.numero}} del {{ddt_id.data}} cliente {{ddt_id.clientefornitore_codice}}</td>
+					</tr>
+				</template>
+				</tbody>
+
+			</div>
+			<br>
+			Righe:
+			<div class="displayRighe" tabindex="">
+			<table>
+				<thead>
+				<tr>
+					<td>DDT numero</td>
+					<td>DDT data</td>
+					<td>Numero</td>
+					<td>Articolo</td>
+					<td>UM</td>
+					<td>Netto</td>
+					<td>Prezzo</td>
+					<!--
+					<td>Colli</td>
+					<td>Imballaggio</td>
+					<td>Lordo</td>
+					<td>Tara</td>
+					-->
+					<!--
+					<td>Lotto</td>
+					-->
+					<td>Iva</td>
+				</tr>
+				</thead>
+				<tbody>
+				<template is="dom-repeat" items="{{ft.riga_id}}" as="r" id="displayrigheTemplate">
+					<tr id="r{{r.numero}}">
+						<td><x-numerodoc value="{{r.ddt_numero}}" label=" {{r.ddt_numero}}" disabled="true" hiddeninput="true"></x-numerodoc></td>
+						<td><x-data value="{{r.ddt_data}}" label=" {{r.ddt_data}}" disabled="true" hiddeninput="true"></x-data></td>
+
+						<td><x-numeroriga value="{{r.numero}}" label=" {{r.numero}}" disabled="true" hiddeninput="true"></x-numeroriga></td>
+						<td><x-codicearticolo value="{{r.articolo_codice}}" label=" " disabled="true" hiddeninput="true"></x-codicearticolo></td>
+						<td><x-codiceum value="{{r.um_codice}}" label=" " disabled="true" hiddeninput="true"></x-codiceum></td>
+						<!--<td><x-numerocolli value="{{r.colli}}" label=" {{r.colli}}" disabled="true" hiddeninput="true"></x-numerocolli></td>-->
+						<!--<td><x-codiceimballaggio value="{{r.imballaggio_codice}}" label=" " disabled="true" hiddeninput="true"></x-codiceimballaggio></td>-->
+						<!--<td><x-peso value="{{r.pesolordo}}" label=" {{r.pesolordo}}" disabled="true" hiddeninput="true"></x-peso></td>-->
+						<!--<td><x-peso value="{{r.tara}}" label=" {{r.tara}}" disabled="true" hiddeninput="true"></x-peso></td>--->
+						<td><x-peso value="{{r.pesonetto}}" label=" {{r.pesonetto}}" disabled="true" hiddeninput="true"></x-peso></td>
+						<td><x-prezzo value="{{r.prezzo}}" label=" {{r.prezzo}}" disabled="true" hiddeninput="true"></x-prezzo></td>
+						<!--<td><x-lotto value="{{r.lotto}}" label=" {{r.lotto}}" disabled="true" hiddeninput="true"></x-lotto></td>-->
+						<td><x-codiceiva value="{{r.iva_codice}}" label=" " disabled="true" hiddeninput="true"></x-codiceiva></td>
+					</tr>
+				</template>
+				</tbody>
+			</table>
+			</div>
+			<table>
+				<tr>
+					<td>Imponibile:</td>
+					<td class="alignRight">{{ft.imponibile}}</td>
+				</tr>
+				<tr>
+					<td>Iva:</td>
+					<td class="alignRight">{{ft.iva}}</td>
+				</tr>
+				<tr>
+					<td>Tot.Fattura:</td>
+					<td class="alignRight">{{ft.totale}}</td>
+				</tr>
+			</table>
+		</x-window>
+	</template>
+	<script>
+		class xEmissionefattura extends Polymer.Element {
+			static get is() { return "x-emissionefattura"; }
+			constructor() {
+				super();
+				
+				this.$.triggerselezioneddt.addEventListener("focus", this._selezionatoreddtdacliente.bind(this)); 
+				this.inizializzaNuovaFt();
+				
+			}
+			static get properties() {
+				return {
+					ft: {
+						type: Object,
+						reflectToAttribute: true,
+						notify: true
+					},
+				}
+			}
+			static get observers() {
+				return [
+					// Observer method name, followed by a list of dependencies, in parenthesis
+					'_clienteChanged(ft.clientefornitore_codice)',
+					'_ricalcolatotali(ft.riga_id)',
+				]
+			}
+			_ricalcolatotali (newValue, oldValue){
+				var totImponibileFattura = 0;
+				var totIvaFattura = 0;
+				var totFattura = 0;
+				
+				
+				//codici IVA
+				var params ={};
+				params._type = 'Iva';
+				params.codice = ['!=',''];
+				var request = new XMLHttpRequest();
+				var requestData ={
+							action: 'getAll',
+							params: params
+				};
+				var obj=params;
+				var arr = Object.keys(obj).map(function(k) { return obj[k] });
+				request.open('POST', "./../do.php", false);
+				request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				console.log(requestData.action);
+				console.log(requestData.params);
+				console.log(JSON.stringify(requestData.params));
+				request.send("action="+requestData.action+"&params="+JSON.stringify(requestData.params));
+				var codiciIva = [];
+				if (request.status === 200) {
+					var codici = JSON.parse(request.responseText);
+					codici.forEach(function(codIva) {
+						codiciIva[codIva.codice]=codIva;
+					});
+					console.log('CodiciIva',codiciIva);
+				}
+				
+				
+				
+				this.ft.riga_id.forEach(function(myRiga) {
+					//elencoIdRighe.push(myRiga.id);
+					var peso = myRiga.pesonetto.replace(/,/, ".");
+					var prezzo = myRiga.prezzo.replace(/,/, "."); 
+					if(isNaN(peso) || isNaN(prezzo)){
+						alert('Errore: \n Per il ddt\n'+myRiga.ddt_numero+' del '+myRiga.ddt_data+'\n\ni seguenti valori non sono numerici:\npeso: '+peso+'\nprezo: '+prezzo);
+					}
+					var imponibileRiga = peso * prezzo
+					totImponibileFattura += imponibileRiga;
+					var aliquotaIva =  codiciIva[myRiga.iva_codice].aliquota.replace(/,/, ".");
+					totIvaFattura += (imponibileRiga * aliquotaIva);
+				});
+				this.set('ft.imponibile', totImponibileFattura.toFixed(2) );
+				this.set('ft.iva', totIvaFattura.toFixed(2));
+				this.set('ft.totale', (this.ft.imponibile*1 + this.ft.iva*1).toFixed(2));
+			}
+			_selezionatoreddtdacliente (newValue, oldValue){
+				console.log('UPDATING THE DDT LIST');
+				//console.log(this.$.ddtselector);
+
+				//var ddtList = document.querySelector("x-menum");
+				var ddtList = document.createElement('x-menu');
+				ddtList.allowmultipleselection = true;
+				ddtList.title="Seleziona DDT da fatturare";
+				
+				var params =  {
+					_type: 'Ddt',
+					_select: 'numero,data,clientefornitore_codice',	
+					data: ['!=',''],
+					clientefornitore_codice: ['==',this.ft.clientefornitore_codice],
+					fattura_id: ['==','']
+				};
+				
+				
+				ddtList.params = JSON.stringify(params);
+				
+				//RETRIEVE FROM THE SERVER
+				ddtList.getFromServer();
+
+				ddtList.onconfirm = function (selection){
+					//when the selection is confirmed start editing the ddt
+					console.log('selezione confermata');
+					console.log(selection);
+					if(selection.legth < 1){
+						alert('Nessun ddt selezionato per la fatturazzione')
+					}else{
+						confirm('Procedere con la fatturazzione dei ddt selezionati?');
+						/*RICAVO ALCUNI DATI CHE MI SERVONO*/
+
+					//id ddt
+						var elencoIdDdt = new Array()
+						selection.forEach(function(myDdt) {
+							console.log(myDdt);
+							elencoIdDdt.push(myDdt.id)
+						});
+						this.set('ft.ddt_id',selection);
+					//id righe
+						var params = {};
+						params._type ='Riga';
+						//ddt_id.unshift('==');
+						params.ddt_id = elencoIdDdt;
+						console.log('Parametri richiesta righe', params)
+						var request = new XMLHttpRequest();
+						var requestData ={
+									action: 'getAll',
+									params: params
+						};
+						var obj=params;
+						var arr = Object.keys(obj).map(function(k) { return obj[k] });
+						request.open('POST', "./../do.php", false);
+						request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+						request.send("action="+requestData.action+"&params="+JSON.stringify(requestData.params));
+						
+						//var elencoIdRighe = new Array()
+						if (request.status === 200) {
+							var objRighe = JSON.parse(request.responseText);
+							
+							this.set('ft.riga_id',objRighe);
+							console.log('Righe',objRighe);
+						}
+
+						
+						//this.ft = {};
+//						this.set('ft.numero','');
+						//this.set('ft.data',this.$.data);
+						//this.set('ft.clientefornitore_codice',this.$.codiceclientefornitore.value);
+//						this.set('ft.tipofattura_codice','FT');
+		
+
+
+//						this.set('ft.ddt_id', elencoIdDdt);
+						//this.set('ft.riga_id', elencoIdRighe);
+//						this.set('ft.riga_id', objRighe);
+						
+						console.log(this.ft);
+					}
+					this.displayEscMenu();
+				}.bind(this);
+				ddtList.oncancel = function (selection){
+					this.$.codiceclientefornitore.focus();
+					this.displayEscMenu();
+				}.bind(this);
+				document.body.appendChild(ddtList);
+
+				//wait a little and then position the help window in the middle of the body
+				//and remember his width so that it does not change during future modifcation of contents
+				//and show us
+				setTimeout(function (){
+					//this.addModalBackground();
+					var modifier = {
+						top: 50,
+						left: 0,
+						}
+					this.setPosition('tc','tc',document.body, modifier);
+					console.log(this.offsetWidth);
+					this.style.width = this.offsetWidth+'px';
+					this.show();
+					this.focus();
+				}.bind(ddtList), 150);
+			}
+			
+			_clienteChanged(newValue, oldValue){
+				//cliente:
+				var params ={};
+				params._type = 'Clientefornitore';
+				params.codice = this.$.codiceclientefornitore.value;
+				var request = new XMLHttpRequest();
+				var requestData ={
+							action: 'getAll',
+							params: params
+				};
+				var obj=params;
+				var arr = Object.keys(obj).map(function(k) { return obj[k] });
+				request.open('POST', "./../do.php", false);
+				request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				console.log(requestData.action);
+				console.log(requestData.params);
+				console.log(JSON.stringify(requestData.params));
+				request.send("action="+requestData.action+"&params="+JSON.stringify(requestData.params));
+				var objCliente = {};
+				if (request.status === 200) {
+					objCliente = JSON.parse(request.responseText)[0];
+					console.log('Cliente',objCliente);
+				}
+				
+				this.set('ft.banca_codice', objCliente.banca_codice);
+				this.set('ft.pagamentoscadenza_codice', objCliente.pagamentoscadenza_codice);
+				this.set('ft.pagamentomodalita_codice', objCliente.pagamentomodalita_codice);
+			}
+
+			inizializzaNuovaFt(){
+				this.set('ft',{});
+				this.set('ft.riga_id',[]);
+				
+				//ricavo la data odierna
+				var today = new Date();
+				var dd = today.getDate();
+				var mm = today.getMonth() + 1; //January is 0!
+
+				var yyyy = today.getFullYear();
+				if (dd < 10) {
+				  dd = '0' + dd;
+				} 
+				if (mm < 10) {
+				  mm = '0' + mm;
+				} 
+				var today = dd + '/' + mm + '/' + yyyy;
+				
+				//la imposto nel ddt
+				this.set('ft.data', today);
+				
+				//imposto la causale del ddt a vendita (02) per default
+				this.set('ft.tipofattura_codice', 'FT');
+
+				//imposto la valuta
+				this.set('ft.valuta', 'EUR');
+			}
+
+			displayEscMenu(oldFocusedElement){
+				//console.log('create the menu');
+				var menu = document.createElement('x-menu');
+				menu.title="Gestione FT"
+				var list= [
+					{label:'Memorizza FT',_action:function (){this.memorizzaFt();}.bind(this)},
+					{label:'Stampa FT',_action:function (){this.stampaFt(oldFocusedElement);}.bind(this)},
+					{label:'Stampa e memorizza FT',_action:'none'},
+					{label:'Abbandona FT',_action:function (){this.abbandonaFt();}.bind(this)},
+					{label:'Cancella FT',_action:function (){this.cancellaFt();}.bind(this)}
+				];
+				//remember the full list that compose the menu
+				menu.set('items', list);
+				menu.set('visibleitems', menu.items);
+
+				//console.log('Appending menu to the body:', menu);
+				document.body.appendChild(menu);
+				menu.selectFirstOfThePage();
+
+				//
+				menu.oncancel = function (){
+					//give the focus back to the elemnt who called us
+					console.log('Cancelling the FT exit menu, try to give the focus back to',this);
+					this.focus();
+					this.$.field.focus()
+					//this.fields[0].querySelector('input').focus();
+				}.bind(oldFocusedElement);
+
+				//wait a little and then position the help window in the middle of the body
+				//and remember his width so that it does not change during future modifcation of contents
+				//and show us
+				setTimeout(function (){
+					this.addModalBackground();
+					this.setPosition('cc','cc',document.body);
+					this.show();
+					this.focus();
+				}.bind(menu), 150);
+				return menu;
+			}
+			
+			
+			
+
+			memorizzaFt(){
+				//impostiamo il tipo in quanto non sempre è già impostato
+				this.set('ft._type','Fattura');
+
+				// prepare an ajax request
+				var ajaxRequest = new XMLHttpRequest();
+				
+				//callback for managing results
+				ajaxRequest.onload = function (e) {
+					alert('Ft saved?');
+					console.log(e.target.responseText);
+					//console.log(msg);
+					this.abbandonaFt();
+				}.bind(this);
+			
+				//request setup
+				var requestData ={
+					action: 'save',
+					params: JSON.stringify(this.ft)
+				};
+				//console.log(requestData.params);
+				var obj=requestData.params;
+				var arr = Object.keys(obj).map(function(k) { return obj[k] });
+				
+				ajaxRequest.open('POST', "./../do.php", true);
+				ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				ajaxRequest.responseType = 'text';
+				ajaxRequest.send("action="+requestData.action+"&params="+requestData.params);
+
+			}
+			abbandonaFt(){
+				this.onQuit();
+				this.parentNode.removeChild(this);
+			}
+			cancellaFt(){
+				confirm ("Confermi la cancellazzione della fattura?")
+
+				// prepare an ajax request
+				var ajaxRequest = new XMLHttpRequest();
+				
+				//callback for managing results
+				ajaxRequest.onload = function (e) {
+					alert('Ft deletted?');
+					//console.log(msg);
+					this.abbandonaFt();
+				}.bind(this);
+			
+				//request setup
+				var requestData ={
+					action: 'delette',
+					params: JSON.stringify(this.ft)
+				};
+				//console.log(requestData.params);
+				var obj=requestData.params;
+				var arr = Object.keys(obj).map(function(k) { return obj[k] });
+				
+				ajaxRequest.open('POST', "./../do.php", true);
+				ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				ajaxRequest.responseType = 'text';
+				ajaxRequest.send("action="+requestData.action+"&params="+requestData.params);
+
+			}
+			stampaFt(oldFocusedElement){
+				//impostiamo il tipo in quanto non sempre è già impostato
+
+				// prepare an ajax request
+				var ajaxRequest = new XMLHttpRequest();
+				
+				//callback for managing results
+				ajaxRequest.onload = function (e) {
+
+					//console.log(e.target.response);
+					
+					var a = document.createElement('a');
+					a.href = window.URL.createObjectURL(e.target.response);
+					// Give filename you wish to download
+					a.download = "file.pdf";
+					a.style.display = 'none';
+					document.body.appendChild(a);
+					a.click();
+
+					alert('Ft printed?');
+					//redisplay the esc menu
+					this.displayEscMenu(oldFocusedElement);//display esc menu
+				}.bind(this);
+			
+				//request setup
+				var requestData ={
+					action: 'print',
+					params: JSON.stringify(this.ft)
+				};
+				//console.log(requestData.params);
+				var obj=requestData.params;
+				var arr = Object.keys(obj).map(function(k) { return obj[k] });
+				
+				ajaxRequest.open('POST', "./../do.php", true);
+				ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				ajaxRequest.responseType = 'blob';
+				ajaxRequest.send("action="+requestData.action+"&params="+requestData.params);
+			}
+			
+			
+			onQuit(){
+				//use this as a callback
+				//for when the aplication is closed/quitted
+			}
+			
+			getFocusableElements(){
+				var focusables = Array();
+				Array.prototype.push.apply(focusables, this.shadowRoot.querySelector('#intestazione').querySelectorAll('[id]:not([disabled])'));
+				//Array.prototype.push.apply(focusables, this.shadowRoot.querySelector('#inserimentoRiga').querySelectorAll('[id]:not([disabled])'));
+				return focusables;
+			}
+		}
+		// Register the new element with the browser
+		customElements.define(xEmissionefattura.is, xEmissionefattura);
+	</script>
+</dom-module>

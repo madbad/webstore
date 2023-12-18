@@ -1,0 +1,736 @@
+<link rel="import"  href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/polymer-element.html">
+<link rel="import" href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/lib/elements/dom-if.html">
+
+<dom-module id='x-menum'>
+    <script src="./../libs/drag.js"></script>
+	<template>
+		<style>
+		:host {
+			/*box-shadow: 3px 3px 5px 1px #ccc;*/
+			border: 1px solid #a1a1a1;
+			color: #000000;
+			display: inline-block;
+			min-width:15em;
+			max-width:90%;
+			position:relative;
+			background-color:white;
+			border-radius: 0.8em;
+			overflow:hidden;
+			z-index: 100;
+			margin-left:50%
+			margin-rigth:50%;
+			visibility: hidden;
+			position:fixed;
+			border-collapse:separate;
+		}
+		.selected {
+			background-image: none;
+			border-color:orange;
+			outline: none;
+			box-shadow: 0 0 10px orange;
+			background-color: orange;
+		}
+		.selected td{
+			background-color: orange;
+		}
+		.hidden {
+			width: 0px;
+			height: 0px;
+			visibility:hidden;
+			display:none;
+			overflow:hidden;
+		}
+		.title {
+			background: linear-gradient(to bottom, #cdd2d8 8%,#989a9b 100%); /* W3C */
+			text-shadow:#CECECE 0px 1px 0, #000 0 -1px 0;
+			font-weight:bold;
+			font-size:0.8em;
+			color: #757575;
+			text-align: center;
+/*			position:fixed;*/
+		}
+		.title span {
+			position:absolute;
+			top:0px;
+			right:1em; 
+		}
+		.title input {
+			padding:0.4em;
+			border-radius: 0.4em;
+			color: grey;
+			font-size:1.2em;
+			width:90%;
+			margin:0.8em;
+			margin-top:0px;
+		}
+		table, thead, tbody, tfooter {
+			width: 100%;
+			border: 0px;
+			padding:0px;
+			margin:0px;
+			/*border-collapse: collapse;*/
+			border-spacing: 0;
+		}
+		thead {
+			font-weight:bold;
+			color:white;
+			font-size: 0.8em;
+		}
+		thead td{
+			background: linear-gradient(15deg, #616161 0%,#616161 4%,#7c7c7c 100%); /* W3C */
+			padding: 0.2em;
+		}
+		tbody tr {
+			background-image: linear-gradient(to bottom, #ffffff 0%,#ffffff 88%,#eaeaea 100%);
+		}
+		tbody td {
+			border-left: 1px solid #e1e1e1;
+			padding: 0.2em;
+		}
+		.hiddenColumn #foo.hide2 tr *:nth-child(2) {
+    display: none;
+}
+
+		</style>
+		<div class="title">
+			<div id="dragger" class="dragger">{{title}} <span>pag.{{page}}/{{pages}}</span></div>
+			<input 
+				id="searchfield"
+				placeholder="Digita qui per cercare..."
+				type="text"
+				tabindex="0"
+				value="{{searchstring:change}}"
+				on-focus="onInputFocus"
+				on-blur="onInputBlur"
+				on-keyup="onInputKeyup"
+			>
+		</div>
+		<div id="items">
+			<table id="table">
+				<thead id="tableHead">
+					<template is="dom-repeat" items="{{visibleitems}}">
+						<template is="dom-if" if="{{_isFirst(index)}}">
+						<tr>
+							<template is="dom-repeat" items="{{_itemToArray(item)}}">
+								<td>
+									{{item.key}}
+								</td>
+							</template> 
+						</tr>
+						</template>
+					</template>
+				</thead>
+				<tbody id="tableBody">
+					<template is="dom-repeat" items="{{visibleitems}}" id="mymenuitems">
+					<tr>
+						<template is="dom-repeat" items="{{_itemToArray(item)}}">
+							<td>
+								{{item.value}}
+							</td>
+						</template> 
+					</tr>
+					</template> 
+				</tbody>
+				<tfoot id="tableFooter"></tfoot>
+			</table>
+		</div>
+		
+	</template>
+	<script>
+		// Define the class for a new element called custom-element
+		class xMenum extends Polymer.Element {
+			static get is() { return "x-menum"; }
+			constructor() {
+				super();
+			}
+			static get properties() {
+				return {
+					title: {
+						type: String,
+						reflectToAttribute: true,
+						value:'Default Title',
+					},
+					page: {
+						type: Number,
+						reflectToAttribute: true,
+						value:1,
+					},
+					pages: {
+						type: Number,
+						reflectToAttribute: true,
+					},
+					searchstring: {
+						type: String,
+						reflectToAttribute: true,
+						notify: true,
+					},
+					items: {
+						type: Array,
+						reflectToAttribute: true,
+						notify: true,
+					},
+					itemsProperties: {
+						type: Array,
+						reflectToAttribute: true,
+						notify: true,
+					},
+					filtereditems: {
+						type: Array,
+						reflectToAttribute: true,
+						notify: true,
+					},
+					visibleitems: {
+						type: Array,
+						reflectToAttribute: true,
+						notify: true,
+					},
+					selectedId:{
+						type: Number,
+						reflectToAttribute: true,
+						value:0,
+					},
+				}
+			}
+/*
+events methods
+*/
+			onInputFocus(event, detail, sender){
+				//console.log("x-menu: got focus");
+			}
+			onInputBlur(event, detail, sender){
+				//console.log("x-menu: lost focus");
+			}
+			onInputKeyup(event, detail, sender){
+				//console.log("x-menu: keydown");
+				switch (event.which){
+					case 38: this.selectPrev();break; //up
+					case 40: this.selectNext();break; //down
+					case 33://pgup
+					console.log(
+						this.visibleitems.indexOf(this.getSelected()),
+						this.visibleitems.length-1
+					)
+					console.log(
+						'curpage:',
+						this.page
+					)
+						//se sono gia al primo elemento seleziono ultimo elemento della pagina precedente
+						if(this.visibleitems.indexOf(this.getSelected()) == 0){
+							if(this.page > 1){
+								this.selectPrevPage();
+								this.selectLastOfThePage();
+							}
+						}else{
+							this.selectFirstOfThePage();
+						}
+						break; 
+					case 34: //pgdown
+						//se sono gia al ultimo elemento seleziono il primo elemento della pagina successiva
+						if(this.visibleitems.indexOf(this.getSelected()) == (this.visibleitems.length-1)){
+							//se ci sono ancora pagine
+							if(this.page < this.pages){
+								this.selectNextPage();
+								this.selectFirstOfThePage();
+							}
+						}else{
+							this.selectLastOfThePage();
+						}
+						break; 
+					case 13: this.confirm(); break; //enter
+					case 27: this.cancel(); break; //esc
+					default:
+						//every time a key is pressed we schedule a future search on the visible items list
+						//if another key is pressed before the search actually happen 
+						//we cancel the previous search and re schedule a new one
+						//console.log("Deffered search");
+						clearTimeout(this.deferredsearch); 
+						this.deferredsearch = setTimeout(function(){ 
+							//console.log("search activated");
+							this.searchstringChanged();
+						}.bind(this), 250);
+				}
+			}
+/*
+custom methods
+*/
+		ready(){
+			super.ready();
+			
+			//make our element focusable
+			this.tabIndex = 0
+			
+			//and draggable
+			Drag.init(
+				this.$.dragger,
+				this
+			);
+			
+			//this.keepAliveOnConfirm=false;
+			
+			if(this.params!=null){
+				//console.log('XMENU: Send a request to the server with params: ',this.params);
+				this.getFromServer();
+			}else{
+				//console.log('XMENU: No params set at creation time, wait for some');
+			}
+			this.focus();
+			
+			/*
+			//manage keyboard events
+			this.addEventListener("onkeydown", function(event) {
+				switch (event.which){
+					case 38: this.selectPrev();break; //up
+					case 40: this.selectNext();break; //down
+					case 33: this.selectFirstOfThePage();break; //pgup
+					case 34: this.selectLastOfThePage();break; //pgdown
+					case 13: this.confirm(); break; //enter
+					case 27: this.cancel(); break; //esc
+				}
+			},false);
+			*/
+			//manage keyboard events
+			this.addEventListener("focus", function(event) {
+				//console.log("give focus to the input");
+				this.$.searchfield.focus()
+			}.bind(this),false);
+			
+			//manage propchange events
+			this.addEventListener("items-changed", function(event) {
+				//console.log("Menu data",this, " changed with event", event);
+				//update the visible menu-items
+				this.set('visibleitems', this.items);
+				
+				//console.log("Menu data - Elements:",this.items.length);
+				//console.log(this.$.table.tBodies[0]);
+				//console.log(this.$.table.tBodies[0].rows);
+				
+				// workaround: se non uso settimeout il css non mostra la voce come selezionata
+				if(this.selectedId ==''){
+					setTimeout(function(){
+						//console.log("Timeout selection");
+						if(this.items.length > 0){
+							this.selectedId=0;
+							this.selectItemById(this.selectedId);
+						}
+					}.bind(this), 0);
+				}
+				
+			}.bind(this),false);
+			
+			//manage propchange events
+			this.addEventListener("visibleitems-changed", function(event) {
+				//console.log("Menu visible data",this, " changed with event", event);
+				//select the first element
+				if(this.items.length > 0){
+					this.selectedId=0;
+					this.selectItemById(this.selectedId);
+				}
+			}.bind(this),false);
+			
+		}
+		selectItemById(id){
+			//force a render of the menu items
+			//we need to do this or we could not be able to select the proper item
+			this.$.mymenuitems.render();
+			//remove selected class from current element
+			//console.log(this.$.table.tBodies[0]);
+			/*
+			console.log('Righe:',this.$.table.tBodies[0].rows.length,this.$.table.tBodies[0].rows);
+			console.log('Selezione attuale:',this.selectedId);
+			console.log('Nuova selezione:', id);
+			*/
+			/*todo: check id is in range*/
+			if(this.$.table.tBodies[0].rows.length > 0){
+				this.$.table.tBodies[0].rows[this.selectedId].classList.remove("selected");
+
+				//select the new element
+				this.selectedId = id;
+				//apply the selected class to the new element
+				this.$.table.tBodies[0].rows[id].classList.add("selected");
+			}
+		}
+		selectNext(){
+			//console.log("select next");
+			//console.log("items: ", this.visibleitems.length);
+			//console.log("current: ", this.selectedId);
+			if(this.visibleitems.length - 1 > this.selectedId){
+				//console.log("selecting: ", this.selectedId+1);
+				this.selectItemById(this.selectedId+1);
+			}else{
+				//ci sono altre pagine nel menu?
+				if(this.page < this.pages){
+					this.selectNextPage();
+				}
+				//console.log("selec next aborted: out of range");
+			}
+			//console.log(this.selectedId);
+		}
+		selectPrev(id){
+			//console.log("select prev");
+			//console.log("items: ", this.visibleitems.length);
+			//console.log("current: ", this.selectedId);
+			if(this.selectedId > 0 && this.visibleitems.length > 0){
+				//console.log("selecting: ", this.selectedId-1);
+				this.selectItemById(this.selectedId-1);
+			}else{
+				//ci sono altre pagine nel menu?
+				if(this.page > 1){
+					this.selectPrevPage();
+				}
+				//console.log("selec prev aborted: out of range");
+			}
+		}
+		selectFirstOfThePage(){
+			//console.log("select first");
+			if(this.visibleitems.length > 0){
+				this.selectItemById(0);
+			}
+		}
+		selectLastOfThePage(){
+			//console.log("select last");
+			if(this.visibleitems.length > 0){
+				this.selectItemById(this.visibleitems.length-1);
+			}
+		}
+		getSelected(){
+			//console.log("You have selected: ",this.visibleitems[this.selectedId]);
+			return this.visibleitems[this.selectedId];
+		}
+		selectNextPage(){
+			console.log('pages', this.page, this.pages)
+			if(this.page < this.pages){
+				this.page++;
+				this.filterElementsByPage();
+			}
+		}
+		selectPrevPage(){
+			console.log('pages', this.page, this.pages)
+			if(this.page > 1){
+				this.page--;
+				this.filterElementsByPage();
+			}
+		}
+		confirm(){
+			//an utility function
+			function isFunction(functionToCheck) {
+				var getType = {};
+				return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+			}
+			console.log('Was confirmed', this.getSelected())
+			console.log('With action', this.getSelected()._action);
+			//fire the action assigned to the element if there is one
+			if (isFunction(this.getSelected()._action)){
+				this.getSelected()._action();
+			}
+			
+			//call the onConfirma callback
+			this.onconfirm(this.getSelected());
+
+			//if is present remove the modalbackground
+			if(this.modalBackground){
+				//console.log('XMENU: remove the modal  background')
+				this.parentNode.removeChild(this.modalBackground);
+			}
+			//remove me from the dom
+			//console.log('XMENU: remove the menu from the dom')
+			if(!this.keepAliveOnConfirm){
+				this.parentNode.removeChild(this);
+			}
+			//and quit
+			
+			return;
+		}
+		cancel(){
+			this.oncancel();
+			//if is present remove the modalbackground
+			if(this.modalBackground){
+				this.parentNode.removeChild(this.modalBackground);
+			}
+			//remove me from the dom without returning any value
+			this.parentNode.removeChild(this);
+		}
+		onconfirm(selectedObj){
+			//use this as a callback
+			//return an obj of the selected menu-entry
+			return selectedObj;
+		}
+		oncancel(){
+			//use this as a callback
+		}
+
+		getFromServer(){
+			var ajaxRequest = new XMLHttpRequest();
+			ajaxRequest.onload = function (e) {
+				//console.log(e);
+				//console.log(e.target.response.message);
+				//console.log(e.target.responseText);
+
+				try {
+					var jsonList = JSON.parse(e.target.responseText);
+				} catch (e) {
+					alert("Error happened: bad reaply from the server");
+					alert("Error: "+e.target.responseText);
+
+					console.log("This was the error:",e);
+				}
+
+				var jsonList = JSON.parse(e.target.responseText);
+				console.log(jsonList);
+				//the full array of objects we will use
+				this.fulllist = jsonList;
+				this.set('items', jsonList);
+				this.searchstringChanged();
+				this.onReady();
+				
+			}.bind(this);
+			var requestData ={
+						action: 'getAll',
+						params: JSON.parse(this.params)
+						};
+			/*
+			console.log("++++++++");
+			console.log(this.params);
+			console.log(JSON.parse(this.params));
+			console.log("++++++++");
+			console.log(requestData.params);
+			console.log(JSON.stringify(requestData.params));
+			*/
+			
+			var obj=JSON.parse(this.params);
+			var arr = Object.keys(obj).map(function(k) { return obj[k] });
+			
+			//console.log(arr);
+			
+			ajaxRequest.open('POST', "./../do.php", true);
+			ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			ajaxRequest.responseType = 'text';
+			ajaxRequest.send("action="+requestData.action+"&params="+JSON.stringify(requestData.params));
+		}
+
+		setPosition(myPoint, targetPoint, targetElement, modifier){
+			//console.log('XMENU: my current position: ', this.getPosition(this))
+			//console.log(this.impl)
+
+			var targetPosition = this.getPosition(targetElement);
+			var targetDimensions = {
+				width : targetElement.offsetWidth,
+				height:  targetElement.offsetHeight,
+			};
+			var myDimensions = {
+				width : this.offsetWidth,
+				height:  this.offsetHeight,
+			};
+			
+			var np ={
+				top:0,
+				left:0,
+			}
+			
+			switch(myPoint[0]){
+				case 't':np.top+=0;break;
+				case 'b':np.top-=myDimensions.height;break;
+				case 'c':np.top-=myDimensions.height/2;break;
+			}
+
+			switch(targetPoint[0]){
+				case 't':np.top+=0;break;
+				case 'b':np.top+=targetDimensions.height;break;
+				case 'c':np.top+=targetDimensions.height/2;break;
+			}
+			
+			switch(myPoint[1]){
+				case 'l':np.left+=0;break;
+				case 'r':np.left-=myDimensions.width;break;
+				case 'c':np.left-=myDimensions.width/2;break;
+			}
+
+			switch(targetPoint[1]){
+				case 'l':np.left+=0;break;
+				case 'r':np.left+=targetDimensions.width;break;
+				case 'c':np.left+=targetDimensions.width/2;break;
+			}
+			
+			//apply the modifier if exist
+			if(modifier){
+				targetPosition.left+= modifier.left;
+				targetPosition.top+= modifier.top;
+			}
+			
+			//
+			np.left+=targetPosition.left;
+			np.top+=targetPosition.top;
+			
+			//console.log('XMENU: new position:', np);
+			
+			//assign the new position
+			this.style.top = np.top+'px';
+			this.style.left = np.left+'px';
+			
+			//console.log('XMENU: targetPOS', targetPosition, 'targetDIM: ', targetDimensions, 'myDIM: ', myDimensions);
+			
+		}
+		getPosition(element) {
+			var xPosition = 0;
+			var yPosition = 0;
+			while(element) {
+				xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+				yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
+				element = element.offsetParent;
+			}
+			return { left: xPosition, top: yPosition };
+		}
+		show(){
+			this.style.visibility='visible';
+		}
+		hide(){
+			this.style.visibility='hidden';
+		}
+		paramsChanged(){
+			//creo i parametri della query da una stringa json
+			if(this.params){
+				this.params = this.params.replace("'/g", '"');
+				//ricavo i dati con cui riempire la finestra
+				this.getFromServer();
+			}
+		}
+		searchstringChanged(){
+			console.log('XMENU: the search string has been changed');
+			//console.log('XMENU: searching for >'+this.searchstring+'< into: ', this.list);
+			//console.log("search string is: ", this.$.searchfield.value);
+			this.set('searchstring',this.$.searchfield.value);
+			//update the input field
+			
+			/*
+			if(this.$.searchfield.value == ''){
+				this.$.searchfield.value = this.searchstring;
+			}
+			*/
+			
+			var searchstring = this.searchstring.toLowerCase();
+			
+			//filtro in base al paramentro di ricerca
+			this.set('filteredItems',
+				this.items.filter(function(item){
+					//console.log(item);
+					var result = false;
+					for (var prop in item){
+						if(prop[0] != '_'){
+							//console.log(prop);
+							var fullstring = item[prop].toLowerCase();
+							result = fullstring.search(searchstring);
+							//console.log('XMENU: scanned: ', fullstring, ' for: ', searchstring, 'with result: ', result)
+							//the string match
+							if (result > -1){
+								return true;
+							}
+						}
+					}
+				})
+			);
+			
+			//filter by page
+			this.filterElementsByPage();
+
+			//seleziono il primo elemento
+			this.selectFirstOfThePage();
+		}
+		
+		filterElementsByPage(){
+			var filterOptions = {};
+			filterOptions.maxVisibleElements = 10;
+			filterOptions.dontFilter = false;
+			
+			console.log(
+				'Prova filtro pagine:',
+				((this.page-1)*filterOptions.maxVisibleElements),
+				((this.page-1)*filterOptions.maxVisibleElements)+filterOptions.maxVisibleElements
+			)
+			
+			//arrotondo le pagine al numero superiore
+			this.pages = Math.ceil(this.filteredItems.length / filterOptions.maxVisibleElements);
+			
+			//mostro solo x elementi per pagina
+			this.visibleitems = this.filteredItems.slice(
+				((this.page-1)*filterOptions.maxVisibleElements),
+				((this.page-1)*filterOptions.maxVisibleElements)+filterOptions.maxVisibleElements
+			)
+		}
+		/*
+		onfocus(){
+			//send the focus to the input field
+			//this.$.searchfield.focus();
+		}
+		*/
+		
+		addModalBackground(){
+			this.modalBackground = document.createElement('div');
+			this.modalBackground.classList.add('modalBackgroundShadow');
+			document.body.insertBefore(this.modalBackground, this);
+		}
+		removeModalBackground(){
+			document.body.removeChild(this.modalBackground);
+		}
+		onReady(){
+			//callback for whe we istantiate from the server and are ready to show us
+		}
+		hideColumn(){
+			//try to hide some columns
+
+			var columnsToHide = [
+				this.querySelector("#numero"),
+				this.querySelector("#via"),
+				this.querySelector("#cap"),
+				this.querySelector("#alboautotrasportatori"),
+				this.querySelector("#mezzo_codice"),
+				this.querySelector("#vettore_codice"),
+				this.querySelector("#iva_codice"),
+				this.querySelector("#web"),
+				this.querySelector("#valuta"),
+				this.querySelector("#telefono"),
+				this.querySelector("#cellulare"),
+				this.querySelector("#fax"),
+				this.querySelector("#email"),
+				this.querySelector("#nome"),
+			];
+
+			//console.log(columnsToHide);
+			for (var i=0; i <= columnsToHide.length; i++){
+				var column = columnsToHide[i];
+				if(column){
+					//console.log('Column hidden', column);
+					column.style.visibility='collapse';
+				}
+			}
+		}
+		_itemToArray(obj){
+			//console.log("Converting to array...")
+			//console.log(obj);
+			var toArray = new Array();
+			for(var prop in obj){
+				if (obj.hasOwnProperty(prop)) {
+					if(prop[0]!='_'){ // hide internal properties (the ones that start with a "_"
+						toArray.push({
+							key:prop,
+							value:obj[prop] 
+							});
+					}
+				}
+			}
+			//console.log(toArray);
+			return toArray;
+			
+		}
+		_isFirst(index){
+			if (index ==0){
+				return true;
+			}else{
+				return false;
+			}
+		}
+	}
+		
+		// Register the new element with the browser
+		customElements.define(xMenum.is, xMenum);
+	</script>
+</dom-module>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>My Website</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+	<script src="./libs/keycodes.js"></script>
+	<script src="./components/x-menu.js"></script>
+	<!--
+	<?php
+	$components='';
+		function loadComponentsFromDir ($dir){
+		global $components;
+			// create a handler for the directory
+			$handler = opendir($dir);
+
+			// open directory and walk through the filenames
+			while ($file = readdir($handler)) {
+				if (strpos($file, '.js')) {
+					echo "\n".'<script src="./'.$dir.'/'.$file.'"></script>';
+				}
+			}
+		echo $components;
+		};
+		loadComponentsFromDir('components');
+	?>
+	-->
+  </head>
+  <body>
+    <main>
+        <h1>Welcome to My Website</h1>
+        <!-- 
+        <x-menu color="red" menuitems='[{"name":"Priva voce", "url":"www.vaffanculo.com"},{"name":"Seconda voce", "url":"www.vaffanculo.com"},{"name":"Terza voce", "url":"www.vaffanculo.com"},{"name":"Quarta voce", "url":"www.vaffanculo.com"},{"name":"Quinta voce", "url":"www.vaffanculo.com"}]';">Test</x-menu>
+		-->
+    </main>
+
+	
+<div id="errorDisplay">Here we will put some error</div>
+
+<!--
+<script>
+function displayError(errorMsg, params){
+	params={};
+	params.time = 2;
+
+	var div = document.getElementById("errorDisplay");
+	div.innerHTML = '<span style="font-weight:bold; color: #ff5926;">Errore: </span>'+errorMsg;
+	div.style.visibility = 'visible';
+	console.log('errordiv:',div);
+	//remove it after the time has passed
+	
+	setTimeout(function (){
+		this.style.visibility = 'hidden';
+	}.bind(div), params.time*1000);
+}
+
+
+addEventListener("DOMContentLoaded", (event) => {
+	console.log("MAIN DOCUMENT: WebComponents are ready to be used!");
+/*================================
+  CREATE THE MAIN MENU
+=================================*/
+	//create the main app menu
+	console.log("MAIN DOCUMENT: create an x-menu");
+	var menu = document.createElement('x-menu');
+	menu.title = "Menu principale"
+	var list= [
+		{label:'Elenca DDT',_action:function (){
+								console.log('test');
+								//elencaDdt().bind(this);
+								elencaDdt();
+							}.bind(this)},
+		{label:'Inserisci DDT di vendita',_action:function (){
+								var ddtApp = document.createElement('x-ddt');
+								document.body.appendChild(ddtApp);
+								//inizializzo un nuovo ddt
+								ddtApp.inizializzaNuovoDdt();
+								//imposto la causale vendita
+								ddtApp.set('ddt.causale','02');
+								ddtApp.shadowRoot.querySelector('x-codicecausale').disabled = true;
+								//ddtApp.set('ddt.numero','99');
+								ddtApp.shadowRoot.querySelector('x-numerodoc').disabled = true;
+								//select the second input
+								//ddtApp.getFocusableElements()[1].shadowRoot.querySelector('input').focus();
+								ddtApp.onQuit = function(){
+									console.log('quitting...');
+									menu.$.searchfield.focus();
+								}.bind(menu)
+							}.bind(this)},
+		{label:'Inserisci DDT di acquisto',_action:function (){
+								var ddtApp = document.createElement('x-ddt');
+								document.body.appendChild(ddtApp);
+								//inizializzo un nuovo ddt
+								ddtApp.inizializzaNuovoDdt();
+								ddtApp.onQuit = function(){
+									console.log('quitting...');
+									menu.$.searchfield.focus();
+								}.bind(menu)
+							}.bind(this)},
+		{label:'Elenca Fatture',_action:function (){
+								console.log('test');
+								//elencaDdt().bind(this);
+								elencaFt();
+							}.bind(this)},
+		{label:'Emetti Fattura',_action:function (){
+								var ftApp = document.createElement('x-ft');
+								document.body.appendChild(ftApp);
+								//inizializzo un nuovo ddt
+								ftApp.inizializzaNuovoDdt();
+								ftApp.onQuit = function(){
+									console.log('quitting...');
+									menu.$.searchfield.focus();
+								}.bind(menu)
+							}.bind(this)},
+	];
+
+	menu.keepAliveOnConfirm = true;
+
+	console.log("MAIN DOCUMENT: appending x-menu to the page body");
+	document.body.appendChild(menu);
+
+	menu.items=list;
+	
+	menu.oncancel = function (){
+		//this.$.numeroriga.$.field.focus();
+	}.bind(this);
+	
+	//sovrascrivo la funzione di uscita in modo che non sia possibile uscire
+	menu.cancel = function(){
+		console.log("Mi spiace non si esce da qui! Questo e' il main menu")
+	};
+
+	//wait a little and then position the help window in the middle of the body
+	//and remember his width so that it does not change during future modifcation of contents
+	//and show us
+	setTimeout(function (){
+		var modifier = {
+			top: 50,
+			left: 50,
+			}
+		this.setPosition('tl','tl',document.body, modifier);
+		this.show();
+		this.focus();
+	}.bind(menu), 150);
+
+	/*================================
+	  LIST DDT
+	=================================*/
+	function elencaDdt(params){
+		console.log('create the menu');
+		var ddtList = document.createElement('x-menu');
+		ddtList.title="Seleziona DDT";
+		/*
+		ddtList.params = {
+			_type: 'Ddt',
+			data: ['!=',''],
+			cliente_codice: ['!=','']
+		}
+		*/
+		var params =  {
+			_type: 'Ddt',
+			_select: 'numero,data,clientefornitore_codice',	
+			data: ['!=',''],
+			clientefornitore_codice: ['!=','']
+		};
+		
+		ddtList.params = JSON.stringify(params);
+		console.log(ddtList.params);
+		console.log(ddtList.params);
+		ddtList.onconfirm = function (selection){
+			//when the selection is confirmed start editing the ddt
+			//console.log("selezionato il ddt", selection);
+			//console.log("Procedo alla modifica...");
+			modificaDdt(selection);
+		}.bind(this);
+		ddtList.oncancel = function (selection){
+			console.log('XINPUT: HELP CANCELLED, claim focus back from the help menu');
+			//get the focus back
+			menu.$.searchfield.focus();
+		}.bind(this);
+		document.body.appendChild(ddtList);
+
+		//wait a little and then position the help window in the middle of the body
+		//and remember his width so that it does not change during future modifcation of contents
+		//and show us
+		setTimeout(function (){
+			this.addModalBackground();
+			var modifier = {
+				top: 50,
+				left: 0,
+				}
+			this.setPosition('tc','tc',document.body, modifier);
+			console.log(this.offsetWidth);
+			this.style.width = this.offsetWidth+'px';
+			this.show();
+			this.focus();
+		}.bind(ddtList), 150);
+	}
+	/*================================
+	  EDIT DDT
+	=================================*/
+	function modificaDdt(ddt){
+	var ddtApp = document.createElement('x-ddt');
+		ddtApp.set('ddt',ddt);
+		ddtApp.getDdtFromServer();
+		ddtApp.onQuit = function (){
+			menu.focus();
+		}
+		document.body.appendChild(ddtApp);
+	}
+	
+	/*================================
+	  LIST FATTURE
+	=================================*/
+	function elencaFt(params){
+		console.log('create the menu');
+		var ftList = document.createElement('x-menu');
+		ftList.title="Seleziona FATTURA";
+		/*
+		ftList.params = {
+			_type: 'Ddt',
+			data: ['!=',''],
+			cliente_codice: ['!=','']
+		}
+		*/
+		var params =  {
+			_type: 'Ft',
+			_select: 'numero,data,clientefornitore_codice',	
+			data: ['!=',''],
+			clientefornitore_codice: ['!=','']
+		};
+		
+		ftList.params = JSON.stringify(params);
+		ftList.onconfirm = function (selection){
+			//when the selection is confirmed start editing the ft
+			//console.log("selezionata la ft", selection);
+			//console.log("Procedo alla modifica...");
+			modificaFt(selection);
+		}.bind(this);
+		ftList.oncancel = function (selection){
+			console.log('XINPUT: HELP CANCELLED, claim focus back from the help menu');
+			//get the focus back
+			menu.$.searchfield.focus();
+		}.bind(this);
+		document.body.appendChild(ftList);
+
+		//wait a little and then position the help window in the middle of the body
+		//and remember his width so that it does not change during future modifcation of contents
+		//and show us
+		setTimeout(function (){
+			this.addModalBackground();
+			var modifier = {
+				top: 50,
+				left: 0,
+				}
+			this.setPosition('tc','tc',document.body, modifier);
+			console.log(this.offsetWidth);
+			this.style.width = this.offsetWidth+'px';
+			this.show();
+			this.focus();
+		}.bind(ftList), 150);
+	}
+});
+</script>
+-->
+<x-menu mtitle="HTML title">Test</x-menu>
+  </body>
+
+</html>
