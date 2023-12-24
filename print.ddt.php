@@ -232,7 +232,7 @@ function buildEmptyModule($pdf){
 	if($config->azienda->_capitalesociale->getVal() !=''){
 		$pdf->Text($x=17.5, $y=43, "Capitale Sociale € ".$config->azienda->_capitalesociale->getVal()." i.v.");
 	}
-	$pdf->Text($x=17.5, $y=46, "R.E.A. ".$config->azienda->_registroimprese->getVal()." - Reg.Imprese di Verona ".$config->azienda->_rea->getVal());
+	$pdf->Text($x=17.5, $y=46, "R.E.A. ".$config->azienda->_registroimprese->getVal()." - Reg.Imprese di ".$config->azienda->_reaufficio->getVal().$config->azienda->_reanumero->getVal());
 ///	$pdf->Text($x=17.5, $y=49, "Reg.Imprese di Verona".$config->azienda->_rea->getVal().", Codice Fiscale".$config->azienda->cod_fiscale->getVal()."Partita IVA ".$config->azienda->p_iva->getVal());
 	$pdf->Text($x=17.5, $y=49, "Codice Fiscale ".$config->azienda->codfiscale->getVal()." - Partita IVA ".$config->azienda->piva->getVal());
 	if($config->azienda->_bndoo->getVal() != ''){
@@ -575,7 +575,7 @@ buildEmptyModule($pdf);
 	));
 	*/
 	$myddtrighe = $ddt->getRighe();
-	
+//print_r($myddtrighe);	
 
 	$html.=$myddtrighe->iterate(function($riga){
 		$strResult.= MyOwnDdtRow($riga->articolo_codice->getVal(),

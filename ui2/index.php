@@ -2,7 +2,9 @@
 <html>
 <head>
 	<script src="./libs/keycodes.js"></script>
-	<script src="https://polygit.org/webcomponentsjs+1.0.0-rc.5/components/webcomponentsjs/webcomponents-loader.js"></script>
+	<!--<script src="https://polygit.org/webcomponentsjs+1.0.0-rc.5/components/webcomponentsjs/webcomponents-loader.js"></script>-->
+	<script src="./../libs/webcomponentsjs/webcomponents-loader.js"></script>
+	<link rel="import" href="./la_miapatata.html">
 	<?php
 	$components='';
 		function loadComponentsFromDir ($dir){
@@ -15,6 +17,7 @@
 				if (strpos($file, '.html')) {
 					echo "\n".'<link rel="import" href="./'.$dir.'/'.$file.'">';
 					//$components.= "\n<br>".$file."<br> <".str_replace('.html','',$file).'></'.str_replace('.html','',$file).'>';
+					
 				}
 			}
 		echo $components;
@@ -84,7 +87,7 @@ input:disabled {
 	z-index: 10000;
 	position:absolute;
 	top: 0px;
-	let: 0px;
+	left: 0px;
 }
 
 </style>

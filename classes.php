@@ -502,10 +502,22 @@ class Ddt  extends MyClass {
 		generaPdfDdt($this);
 		//url completo del file pdf
 		$pdfUrl=$this->getPdfFileUrl();
+echo 'test';		
+/*		
 		// impostiamo l'header di un file pdf
 		header('Content-type: application/pdf');
 		// e inviamolo al browser
 		readfile($pdfUrl);
+*/
+
+		$sumatrapdfexe = 'C:\Programmi\SumatraPDF\SumatraPDF.exe';
+		$filename = '"'.$this->getPdfFileUrl().'"';
+//		//$printername = '"HP LaserJet M1530 MFP Series PCL 6"';
+		$printername = '"HPNUOVA"';
+		$printCommand = $sumatrapdfexe.' -print-to '.$printername.' -print-settings "1x,fit" -silent -exit-when-done '.$filename;
+		exec($printCommand);
+
+
 		return;
 	}
 	function getPdfFileName(){
@@ -538,18 +550,19 @@ class Ddt  extends MyClass {
 		return $fileUrl;
 	}
 	function getRighe(){
-		if($this->_oRighe){
+		/*todo we commented out this part, are we rights?*/
+//		if($this->_oRighe){
 			//do nothing we already have what we need
 			//echo 'Im fine!';
 			
-		}else{
+//		}else{
 			//echo 'I need righe!';
 			//get them from the db
 			$this->_oRighe = new MyList(array(
 				'_type'=>'Riga',
 				'ddt_id'=>$this->id->getVal()
 			));
-		}
+//		}
 		return $this->_oRighe;
 	}
 	function getTotaleColli(){

@@ -1,5 +1,5 @@
-<link rel="import"  href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/polymer-element.html">
-<link rel="import" href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="./../../libs/polymer-2.0.0/polymer-element.html">
+<link rel="import" href="./../../libs/polymer-2.0.0/lib/elements/dom-repeat.html">
 
 <dom-module id='x-ddt'>
 	<template>
@@ -441,7 +441,8 @@ console.log('old focused element', oldFocusedElement);
 				
 				//callback for managing results
 				ajaxRequest.onload = function (e) {
-					alert('Ddt saved?');
+					//alert('Ddt saved?');
+					console.log('ddt saved');
 					console.log(e.target.responseText);
 					//console.log(msg);
 					this.abbandonaDdt();
@@ -513,7 +514,8 @@ console.log('old focused element', oldFocusedElement);
 					document.body.appendChild(a);
 					a.click();
 
-					alert('Ddt printed?');
+					//alert('Ddt printed?');
+					console.log('Ddt printed?');
 					//redisplay the esc menu
 					this.displayEscMenu(oldFocusedElement);//display esc menu
 					//console.log(msg);

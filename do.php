@@ -108,6 +108,22 @@ switch ($_POST["action"]){
 		
 		//print_r($myddtrighe);
 		$myObj->stampa();
+
+		
+		// impostiamo l'header di un file pdf
+		header('Content-type: application/pdf');
+		// e inviamolo al browser
+		readfile($pdfUrl);
+
+/*
+		$sumatrapdfexe = 'C:\Programmi\SumatraPDF\SumatraPDF.exe';
+		$filename = '"'.$myObj->getPdfFileUrl().'"';
+		$printername = '"HPNUOVA"';
+		$printCommand = $sumatrapdfexe.' -print-to '.$printername.' -print-settings "1x,fit" -silent -exit-when-done '.$filename;
+		exec($printCommand);
+*/
+
+
 		break;
 	/*
 	case "emettift":
