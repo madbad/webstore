@@ -4,7 +4,7 @@ error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR);
 ini_set('display_errors','On');
 //attiva o disattiva i messaggi di debug
 $config = (object)"";
-$config->debugger=0;//1=acceso || 0=spento
+$config->debugger=-1;//1=acceso || 0=spento
 error_reporting(0); //0=spento || -1=acceso
 set_time_limit (0); //0=nessun limite di tempo
 
@@ -36,12 +36,12 @@ $params= Array(
 	'provincia'		=> 'VR',
 	'cap'			=> '37063',
 	'piva'			=> '02844920237',
-	'sigla_paese'	=> 'IT',
+	'nazione'		=> 'IT',
 	'codfiscale'	=> 'BRNGMM79D01E349M',
-	'telefono'		=> '335-5956258',
+	'telefono'		=> '',
 	'fax'			=> '',
 	'email'			=> 'gimmi.brun@gmail.com',
-//	'emailpec'		=> 'lafavorita_srl@pec.it',
+	'pec'			=> 'gimmi.brun@pec.it',
 	'website'		=> '',
 	'_autoExtend'	=> -1,
 );
@@ -49,23 +49,58 @@ $params= Array(
 $config->azienda= new ClienteFornitore($params);
 $config->azienda->addProp('_emailpec');
 $config->azienda->addProp('_bndoo');
-$config->azienda->addProp('_rea');
+$config->azienda->addProp('_reaufficio');
+$config->azienda->addProp('_reanumero');
 $config->azienda->addProp('_capitalesociale');
 $config->azienda->addProp('_registroimprese');
 $config->azienda->addProp('_logo');
 $config->azienda->addProp('_logobg');
 $config->azienda->addProp('_ragionesocialeestesa');
 $config->azienda->addProp('_titolare');
+$config->azienda->addProp('_regimefiscale');
+$config->azienda->addProp('_sociounicoBolean');
+$config->azienda->addProp('_inliquidazioneBolean');
 
-$config->azienda->_emailpec->setVal				('gimmi.brun@pec.it');
+
 $config->azienda->_bndoo->setVal				('');
-$config->azienda->_rea->setVal					('VR-288164');
+$config->azienda->_reaufficio->setVal			('VR');
+$config->azienda->_reanumero->setVal			('288164');
+
 $config->azienda->_capitalesociale->setVal		('');
-$config->azienda->_registroimprese->setVal		('VR-1998-25814');
+$config->azienda->_registroimprese->setVal		('BRNGMM79D01E349M');
 $config->azienda->_logo->setVal					('./dati/brungimmi/logo.png');
 $config->azienda->_logobg->setVal				('./dati/brungimmi/logobg.png');
 $config->azienda->_ragionesocialeestesa->setVal	('');
 $config->azienda->_titolare->setVal				('Brun Gimmi');
+$config->azienda->_regimefiscale->setVal('ordinario');
+
+$config->azienda->_sociounicoBolean->setVal(FALSE);
+$config->azienda->_inliquidazioneBolean->setVal(FALSE);
 
 
+
+
+/*-------------------------------------
+**    PEC
+-------------------------------------*/
+$config->pec=new stdClass();
+$config->pec->Host       = "ssl://smtps.pec.aruba.it"; // SMTP server //ricordarsi di decommentare "extension=php_openssl.dll" nel file php.ini !!! per abilitare l'autenticazione SSL
+$config->pec->SMTPDebug  = 2;                     // (0) disattivato (2)enables SMTP debug information (for testing)
+$config->pec->SMTPAuth   = true;                  // enable SMTP authentication
+$config->pec->Port       = 465;                    // set the SMTP port
+$config->pec->Username   = "gimmi.brun@pec.it"; // SMTP account username
+$config->pec->Password   = "";        // SMTP account password
+$config->pec->From=new stdClass();
+$config->pec->From->Mail ='gimmi.brun@pec.it';     //chi invia
+$config->pec->From->Name ='Brun Gimmi';     //chi invia
+$config->pec->ReplyTo=new stdClass();
+$config->pec->ReplyTo->Mail ='gimmi.brun@pec.it';     //chi invia
+$config->pec->ReplyTo->Name ='Brun Gimmi';     //chi invia     //chi invia
+
+/*-------------------------------------
+**    DATI SDI
+-------------------------------------*/
+//$config->SDIpec = 'sdi01@pec.fatturapa.it';
+//$config->SDIpec = 'gionni.brun@gmail.com';
+$config->SDIpec = 'sdi28@pec.fatturapa.it';
 ?>
