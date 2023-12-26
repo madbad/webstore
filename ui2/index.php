@@ -160,10 +160,10 @@ window.addEventListener('WebComponentsReady', function() {
 								elencaFt();
 							}.bind(this)},
 		{label:'Emetti Fattura',_action:function (){
-								var ftApp = document.createElement('x-ft');
+								var ftApp = document.createElement('x-emissionefattura');
 								document.body.appendChild(ftApp);
 								//inizializzo un nuovo ddt
-								ftApp.inizializzaNuovoDdt();
+								ftApp.inizializzaNuovaFt();
 								ftApp.onQuit = function(){
 									console.log('quitting...');
 									menu.$.searchfield.focus();
@@ -328,6 +328,8 @@ window.addEventListener('WebComponentsReady', function() {
 </x-window>
 
 -->
+<!--
 <x-emissionefattura></x-emissionefattura>
+-->
 </body>
 </html>

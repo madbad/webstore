@@ -4,9 +4,10 @@
 <dom-module id='x-emissionefattura'>
 	<template>
 		<style>
-
 		.displayRighe tbody {
-
+				display: block;
+				height: 10em;
+				overflow: auto;
 		}
 		.displayRighe thead{
 
@@ -33,6 +34,27 @@
 		.alignRight{
 			text-align:right;
 		}
+		.ddtDaFatturare{
+			background-color: orange;
+			border: 1px solid black;
+			border-radius: 3px;
+			padding: 0.3em;
+			font-size: 0.8em;
+			display: inline-block;
+			overflow: hidden;
+			height: 1.5em;
+			line-height: 1.4em;
+		}
+		.ddtDaFatturare span{
+			visibility: hidden;
+			width: 0px;
+			display: inline-block;
+		}
+		.ddtDaFatturare:hover span{
+			visibility: visible;
+			width: auto;
+			display: inline-block;
+		}
 		</style>
 		<x-window title="Emissione fattura">
 			<div id="intestazione">
@@ -46,17 +68,11 @@
 				<br>Pagamento Banca: <x-codicebanca value={{ft.banca_codice}} id="codicebanca"></x-codicebanca>
 
 				<br>DDT:  <input type="button" value="Clicca per selezionare i DDT" id="triggerselezioneddt" >
-				
-				<tbody>
+				<br>
 				<template is="dom-repeat" items="{{ft.ddt_id}}" as="ddt_id" id="displayddtTemplate">
-					<tr>
-						<td>D.d.T. n. {{ddt_id.numero}} del {{ddt_id.data}} cliente {{ddt_id.clientefornitore_codice}}</td>
-					</tr>
+					<div alt="{{ddt_id.clientefornitore_codice}}" class="ddtDaFatturare"><b><big>{{ddt_id.numero}}</big></b> <span>{{ddt_id.data}}</span></div>
 				</template>
-				</tbody>
-
 			</div>
-			<br>
 			Righe:
 			<div class="displayRighe" tabindex="">
 			<table>
@@ -124,10 +140,11 @@
 			static get is() { return "x-emissionefattura"; }
 			constructor() {
 				super();
-				
-				this.$.triggerselezioneddt.addEventListener("focus", this._selezionatoreddtdacliente.bind(this)); 
 				this.inizializzaNuovaFt();
-				
+			}
+			ready() {
+				super.ready();
+				this.$.triggerselezioneddt.addEventListener('focus', this._selezionatoreddtdacliente.bind(this));
 			}
 			static get properties() {
 				return {
@@ -320,8 +337,13 @@
 				request.send("action="+requestData.action+"&params="+JSON.stringify(requestData.params));
 				var objCliente = {};
 				if (request.status === 200) {
-					objCliente = JSON.parse(request.responseText)[0];
-					console.log('Cliente',objCliente);
+					try {
+						objCliente = JSON.parse(request.responseText)[0];
+						console.log('Cliente',objCliente);
+					} catch (error) {
+						console.warn('La risposta del server non è un json valido.', request);
+						//console.error(error);
+					}
 				}
 				
 				this.set('ft.banca_codice', objCliente.banca_codice);

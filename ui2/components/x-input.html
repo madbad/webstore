@@ -468,7 +468,10 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='numeri';
 				this.length=5;
-				//only allow numbers and slashes
+
+			}
+			ready() {
+				super.ready();
 				//only allow numbers and slashes
 				this.$.field.addEventListener('keypress', function (event){
 					
@@ -519,6 +522,8 @@ hidden$="{{hiddeninput}}"
 					}
 				}.bind(this));
 			}
+
+
 		}
 		customElements.define(xPeso.is, xPeso);
 	</script>
@@ -553,7 +558,9 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='prezzo';
 				this.length=10;
-				
+			}
+			ready() {
+				super.ready();
 				//only allow numbers and slashes
 				//only allow numbers and slashes
 				this.$.field.addEventListener('keypress', function (event){
@@ -606,6 +613,7 @@ hidden$="{{hiddeninput}}"
 					}
 				}.bind(this));
 			}
+
 		}
 		customElements.define(xPrezzo.is, xPrezzo);
 	</script>
@@ -640,7 +648,9 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='data';
 				this.length=10;
-				
+			}
+			ready() {
+				super.ready();
 				//filtraggio INPUT
 				//only allow numbers and slashes
 				this.$.field.addEventListener('keypress', function (event){
@@ -713,6 +723,9 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=6;
+			}
+			ready() {
+				super.ready();
 				//validazione
 				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
@@ -748,6 +761,9 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=2;
+			}
+			ready() {
+				super.ready();
 				//validazione
 				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
@@ -783,6 +799,9 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=2;
+			}
+			ready() {
+				super.ready();
 				//validazione
 				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
@@ -819,6 +838,9 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=6;
+			}
+			ready() {
+				super.ready();
 				//validazione
 				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
@@ -853,6 +875,9 @@ hidden$="{{hiddeninput}}"
 			constructor() {
 				super();
 				this.tipo='testo';
+			}
+			ready() {
+				super.ready();
 				//validazione
 				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
@@ -890,6 +915,9 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=5;
+			}
+			ready() {
+				super.ready();
 				//validazione
 				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
@@ -926,6 +954,9 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=3;
+			}
+			ready() {
+				super.ready();
 				//validazione
 				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
@@ -1023,6 +1054,9 @@ hidden$="{{hiddeninput}}"
 			constructor() {
 				super();
 				this.tipo='testo';
+			}
+			ready() {
+				super.ready();
 				//validazione
 				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
@@ -1056,6 +1090,9 @@ hidden$="{{hiddeninput}}"
 			constructor() {
 				super();
 				this.tipo='testo';
+			}
+			ready() {
+				super.ready();
 				//validazione
 				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
@@ -1089,6 +1126,9 @@ hidden$="{{hiddeninput}}"
 			constructor() {
 				super();
 				this.tipo='testo';
+			}
+			ready() {
+				super.ready();
 				//validazione
 				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
@@ -1122,6 +1162,9 @@ hidden$="{{hiddeninput}}"
 			constructor() {
 				super();
 				this.tipo='testo';
+			}
+			ready() {
+				super.ready();
 				//validazione
 				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
@@ -1155,6 +1198,9 @@ hidden$="{{hiddeninput}}"
 				super();
 				this.tipo='testo';
 				this.length=3;
+			}
+			ready() {
+				super.ready();
 				//validazione
 				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
 			}
