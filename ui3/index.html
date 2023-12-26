@@ -1,10 +1,15 @@
-<!doctype html>
-<html>
-<head>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>My Website</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
 	<script src="./libs/keycodes.js"></script>
-	<!--<script src="https://polygit.org/webcomponentsjs+1.0.0-rc.5/components/webcomponentsjs/webcomponents-loader.js"></script>-->
-	<script src="./../libs/webcomponentsjs/webcomponents-loader.js"></script>
-	<link rel="import" href="./la_miapatata.html">
+	<script src="./components/x-menu.js"></script>
+	<!--
 	<?php
 	$components='';
 		function loadComponentsFromDir ($dir){
@@ -14,88 +19,28 @@
 
 			// open directory and walk through the filenames
 			while ($file = readdir($handler)) {
-				if (strpos($file, '.html')) {
-					echo "\n".'<link rel="import" href="./'.$dir.'/'.$file.'">';
-					//$components.= "\n<br>".$file."<br> <".str_replace('.html','',$file).'></'.str_replace('.html','',$file).'>';
-					
+				if (strpos($file, '.js')) {
+					echo "\n".'<script src="./'.$dir.'/'.$file.'"></script>';
 				}
 			}
 		echo $components;
 		};
 		loadComponentsFromDir('components');
 	?>
+	-->
+  </head>
+  <body>
+    <main>
+        <h1>Welcome to My Website</h1>
+        <!-- 
+        <x-menu color="red" menuitems='[{"name":"Priva voce", "url":"www.vaffanculo.com"},{"name":"Seconda voce", "url":"www.vaffanculo.com"},{"name":"Terza voce", "url":"www.vaffanculo.com"},{"name":"Quarta voce", "url":"www.vaffanculo.com"},{"name":"Quinta voce", "url":"www.vaffanculo.com"}]';">Test</x-menu>
+		-->
+    </main>
 
-<style>
-input {
-	color:black;
-	border: 1px solid #a1a1a1;
-	background-color: white;
-	font-size:1em;
-	font-family: 'Inconsolata', sans-serif;
-}
-html, body{
-	height: 100%;
-	margin:0px;
-	padding:0px;
-}
-body{
-	font-size:1em;
-	line-height: 2;
-	width:100%;
-}
-
-
-label {
-	color:black;
-	font-size:1em;
-	background-color: #F2F2F2;/*if I uncomment this all the label get this color...even if I style them properly*/
-	padding:0.5em;
-	width:0px;
-}
-input {
-	color:blue;
-}
-input:focus {
-	border-color: orange;
-	background-color:#ffe28e;
-}
-input:disabled {
-	color: #848484;
-	background-color: #D6D6D6;
-}
-.modalBackgroundShadow {
-	top:0px;
-	left:0px;
-	position:absolute;
-	width: 100%;
-	height: 100%;
-	display: block;
-	position:absolute;
-	background-color:black;
-	z-index: 100;
-	opacity:0.5;
-}
-#errorDisplay{
-	width: 100%;
-	height: 1.5em;
-	background-color:#ad0f0f;
-	color:white;
-	text-align: center;
-	visibility: hidden;
-	font-size:1.5em;
-	font-family: 'Inconsolata', sans-serif;
-	z-index: 10000;
-	position:absolute;
-	top: 0px;
-	left: 0px;
-}
-
-</style>
-</head>
-<body>
+	
 <div id="errorDisplay">Here we will put some error</div>
 
-
+<!--
 <script>
 function displayError(errorMsg, params){
 	params={};
@@ -112,7 +57,8 @@ function displayError(errorMsg, params){
 	}.bind(div), params.time*1000);
 }
 
-window.addEventListener('WebComponentsReady', function() {
+
+addEventListener("DOMContentLoaded", (event) => {
 	console.log("MAIN DOCUMENT: WebComponents are ready to be used!");
 /*================================
   CREATE THE MAIN MENU
@@ -157,19 +103,17 @@ window.addEventListener('WebComponentsReady', function() {
 		{label:'Elenca Fatture',_action:function (){
 								console.log('test');
 								//elencaDdt().bind(this);
-								elencaFt().bind(this);
+								elencaFt();
 							}.bind(this)},
 		{label:'Emetti Fattura',_action:function (){
-								var ftApp = document.createElement('x-emissionefattura');
+								var ftApp = document.createElement('x-ft');
 								document.body.appendChild(ftApp);
 								//inizializzo un nuovo ddt
-								ftApp.inizializzaNuovaFt();
+								ftApp.inizializzaNuovoDdt();
 								ftApp.onQuit = function(){
 									console.log('quitting...');
 									menu.$.searchfield.focus();
 								}.bind(menu)
-								console.log('Focus to ',ftApp.getFocusableElements()[0]);
-								ftApp.getFocusableElements()[0].focus();
 							}.bind(this)},
 	];
 
@@ -178,7 +122,7 @@ window.addEventListener('WebComponentsReady', function() {
 	console.log("MAIN DOCUMENT: appending x-menu to the page body");
 	document.body.appendChild(menu);
 
-	menu.set('items', list);
+	menu.items=list;
 	
 	menu.oncancel = function (){
 		//this.$.numeroriga.$.field.focus();
@@ -219,10 +163,7 @@ window.addEventListener('WebComponentsReady', function() {
 		var params =  {
 			_type: 'Ddt',
 			_select: 'numero,data,clientefornitore_codice',	
-			//data: ['!=',''],
-			data: ['<>','01/01/'+(new Date().getFullYear()),'31/12/'+(new Date().getFullYear())],
-			//data: ['<>','20200101','20200331'],
-			//data: ['=','01/01/2020'],
+			data: ['!=',''],
 			clientefornitore_codice: ['!=','']
 		};
 		
@@ -247,7 +188,6 @@ window.addEventListener('WebComponentsReady', function() {
 		//and show us
 		setTimeout(function (){
 			this.addModalBackground();
-			this.hideColumn();//nascondo alcune colonne che non mi interessano
 			var modifier = {
 				top: 50,
 				left: 0,
@@ -287,7 +227,7 @@ window.addEventListener('WebComponentsReady', function() {
 		}
 		*/
 		var params =  {
-			_type: 'Fattura',
+			_type: 'Ft',
 			_select: 'numero,data,clientefornitore_codice',	
 			data: ['!=',''],
 			clientefornitore_codice: ['!=','']
@@ -323,10 +263,10 @@ window.addEventListener('WebComponentsReady', function() {
 			this.focus();
 		}.bind(ftList), 150);
 	}
-},false);
-
-
+});
 </script>
+-->
+<x-menu mtitle="HTML title">Test</x-menu>
+  </body>
 
-</body>
 </html>

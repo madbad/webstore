@@ -1,0 +1,1164 @@
+<link rel="import"  href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/polymer-element.html">
+
+<dom-module id='x-input'>
+	<template>
+		<style>
+			#field:focus {
+				background-color: yellow;
+			}
+		</style>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::input}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+				hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		// Define the class for a new element called custom-element
+		class xInput extends Polymer.Element {
+			static get is() { return "x-input"; }
+			constructor() {
+				super();
+			}
+			static get properties() {
+				return {
+					value: {
+						type: String,
+						reflectToAttribute: true,
+						notify: true,
+						observer: '_valueChanged'
+					},
+					label: {
+						type: String,
+						reflectToAttribute: true,
+						notify: true
+					},
+					descrizionecodice: {
+						type: String,
+						reflectToAttribute: true
+					},
+					disabled: {
+						type: Boolean,
+						reflectToAttribute: true,
+						notify: true
+					},
+					length: {
+						type: Number,
+						reflectToAttribute: true,
+						value:10,
+					},
+					hiddeninput: {
+						type: Boolean,
+						reflectToAttribute: true,
+						notify: true
+					},
+				}
+			}
+/*
+events methods
+*/
+
+			onfocus(event, detail, sender){
+				
+				//console.log("x-input: got focus", this);
+				//console.log('real target was: ', event.target);
+				//call our custom focus
+				//this.focus();
+				//select everithing on the field
+				var element = event.target;
+				element.select();
+				
+			}
+			onblur(event, detail, sender){
+				//console.log("x-input: lost focus", this);
+				var element = event.target;
+				this.$.field.blur();
+			}
+			onkeydown(event, detail, sender){
+				//console.log("x-input: keydown");
+				switch (event.which){
+					//F1
+					case 112: this.getHelp();
+					break;
+				}
+			}
+/*
+custom methods
+*/
+			getHelp(){
+				
+				//extract from the nodeName the object type removing the 'x-codice' string
+				var objType = this.getFieldType();
+				//now capitalize it: the php class has it capitalized: so we need it
+				objType = objType.charAt(0).toUpperCase() + objType.slice(1);
+
+				var params={};
+				params._type= objType,
+				params.codice= ['!=',''];
+
+				//console.log('Cerco solo i vettori?: ', this.isvettore);
+				if(this.isvettore){
+					params.alboautotrasportatori = ['!=',''];
+				}
+				
+				//console.log(params);
+				params = JSON.stringify(params);
+				//console.log(params);
+				//console.log('create the menu');
+				var helpWindow = document.createElement('x-menu');
+				helpWindow.title='Seleziona '+this.label;
+				//console.log('modify params');
+				helpWindow.params = params;
+				//console.log(helpWindow);
+				//console.log('append menu');
+				helpWindow.onconfirm = function (selection){
+					//console.log('XINPUT: HELP CONFIRMED, retrieving data');
+					//retrieve the data
+					this.value=selection.codice;
+					//this.$.field.value = selection.codice;
+					//console.log('XINPUT: HELP CONFIRMED, claim focus back from the help menu');
+					//get the focus back
+					this.$.field.focus();
+				}.bind(this);
+				helpWindow.oncancel = function (selection){
+					//console.log('XINPUT: HELP CANCELLED, claim focus back from the help menu');
+					//get the focus back
+					this.$.field.focus();
+				}.bind(this);
+				document.body.appendChild(helpWindow);
+				console.log('before',helpWindow.searchstring);
+				
+				//aggiornaimo direttamente l'input field altrimenti non funzionava
+				if(this.value != undefined){
+					helpWindow.$.searchfield.value = this.value;
+				}
+
+				//helpWindow.set('searchstring',this.value);
+				
+				console.log('after',helpWindow.searchstring);
+
+
+				helpWindow.addModalBackground();
+				helpWindow.show();
+				helpWindow.focus();
+				
+				helpWindow.onReady = function (){
+					this.hideColumn();
+					var modifier = {
+						top: 50,
+						left: 0,
+						};
+					this.setPosition('tc','tc',document.body, modifier);
+					//console.log(this.offsetWidth);
+					this.style.width = this.offsetWidth+'px';
+					//auto remove once we have run one time
+					this.onReady = function(){};
+				}.bind(helpWindow);
+
+			}
+			aggiornaDescrizioneCodice(){
+				if(this.nodeName.search('CODICE')>0){
+					//extract from the nodeName the object type removing the 'x-codice' string
+					var objType = this.getFieldType();
+					//now capitalize it: the php class has it capitalized: so we need it
+					objType = objType.charAt(0).toUpperCase() + objType.slice(1);
+					
+					// prepare an ajax request
+					var ajaxRequest = new XMLHttpRequest();
+					
+					//callback for managing results
+					ajaxRequest.onload = function (e) {
+						//console.log(e.target.responseText);
+						var myFullObj = JSON.parse(e.target.responseText);
+						//remember the full obj retrieved from the server
+						this.fullObj = e.target.responseText;
+						//extract from the nodeName the object type removing the 'x-codice' string
+						var objType = this.getFieldType();
+						if(myFullObj[objType].descrizione){ 
+							//se l'oggetto ha una proprietà descrizine mostro quella
+							this.descrizionecodice = myFullObj[objType].descrizione;
+						}else if(myFullObj[objType].ragionesociale){ 
+							//se invece ha una proprietà ragione sociale mostro quella
+							this.descrizionecodice = myFullObj[objType].ragionesociale;
+						}else{
+							this.descrizionecodice = '';
+						}
+						this.onDataReady();
+						
+					}.bind(this);
+				
+					//request setup
+					var requestData ={
+						action: 'getOne',
+						params: {
+							_type: objType,
+							codice: this.value
+							//_autoExtend: -2,
+						},
+					};
+					//console.log(requestData.params);
+					var obj=requestData.params;
+					var arr = Object.keys(obj).map(function(k) { return obj[k] });
+					
+					ajaxRequest.open('POST', "./../do.php", true);
+					ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+					ajaxRequest.responseType = 'text';
+					ajaxRequest.send("action="+requestData.action+"&params="+JSON.stringify(requestData.params));
+					
+				}
+			}
+			getFieldType(){
+				//make sure it is lowercase
+				var nodeName = this.nodeName.toLowerCase();
+				//extract from the nodeName the object type removing the 'x-codice' string
+				var objType = nodeName.replace('x-codice', '');
+				return objType;
+			}
+			_valueChanged(newValue, oldValue){
+				//console.log("value changed");
+				this.aggiornaDescrizioneCodice();
+				/*
+				if(this.hiddeninput){
+					this.$.field.hiddenInput.add("hiddenInput");
+				}else{
+					this.$.field.hiddenInput.remove("hiddenInput");
+				}
+				*/
+			}
+			onDataReady(){
+				//use this as a callback;
+			}
+			validatoreCodici (event){
+				if(event.keyCode == 13 || event.keyCode == 9){
+					
+					//check if we allow empty values
+
+					if (this.attributes.hasOwnProperty('allowempty')){
+						if(this.attributes.allowempty.nodeValue == "true" && event.target.value==''){
+							console.log('The input is empty but we allow it');
+							return true;
+						}
+					}
+					
+					//check if this exist in the database...
+
+					//extract from the nodeName the object type removing the 'x-codice' string
+					var objType = this.getFieldType();
+					//now capitalize it: the php class has it capitalized: so we need it
+					objType = objType.charAt(0).toUpperCase() + objType.slice(1);
+					
+					//request setup
+					var requestData ={
+						action: 'getOne',
+						params: {
+							_type: objType,
+							codice: event.target.value
+						},
+					};
+					var obj=requestData.params;
+					var arr = Object.keys(obj).map(function(k) { return obj[k] });
+					
+					// prepare an ajax request
+					var ajaxRequest = new XMLHttpRequest();
+					ajaxRequest.open('POST', "./../do.php", false);
+					ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+					ajaxRequest.send("action="+requestData.action+"&params="+JSON.stringify(requestData.params));
+
+					var serverReply = JSON.parse(ajaxRequest.responseText)[objType.toLowerCase()];
+					console.log(serverReply);
+					
+					if (serverReply.hasOwnProperty('ragionesociale')){
+						var propToCheck = 'ragionesociale';
+					}else{
+						var propToCheck = 'descrizione';
+					}
+					
+					if(serverReply[propToCheck] !=''){
+						var found = true;
+					}else{
+						var found = false;
+					}
+
+					if (found){
+						console.log('Found:', serverReply);
+						return true;
+					}else{
+						event.target.focus();
+						event.preventDefault();
+						event.stopPropagation();
+						console.log(event.target);
+						//displayError('Valore non valido per il campo '+event.target.parentElement.innerText+' di tipo ' +objType);
+						displayError('Codice * '+event.target.parentElement.innerText+'* inesistente');
+						return false;
+					}
+					//return result;
+				}
+			}
+		}
+		// Register the new element with the browser
+		customElements.define(xInput.is, xInput);
+	</script>
+</dom-module>
+
+
+
+<dom-module id='x-numerodoc'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xNumerodoc extends xInput {
+			static get is() { return "x-numerodoc"; }
+			constructor() {
+				super();
+				this.tipo='numeri';
+				this.length=6;
+				//console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
+			}
+		}
+		customElements.define(xNumerodoc.is, xNumerodoc);
+	</script>
+</dom-module>
+
+
+
+<dom-module id='x-numeroriga'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xNumeroriga extends xInput {
+			static get is() { return "x-numeroriga"; }
+			constructor() {
+				super();
+				this.tipo='numeri';
+				this.length=4;
+				//console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
+			}
+		}
+		customElements.define(xNumeroriga.is, xNumeroriga);
+	</script>
+</dom-module>
+
+
+
+<dom-module id='x-numerocolli'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xNumerocolli extends xInput {
+			static get is() { return "x-numerocolli"; }
+			constructor() {
+				super();
+				this.tipo='numeri';
+				this.length=5;
+				//console.log(this.attributes);
+				/*todo: questo è un hack... 
+				in pratica per far passare un valore che imposto come
+				attributo (quando scrivo l'html) 
+				alla relativa proprietà dell'oggetto (la classe js del mio custom elment)
+				devo copiarlo io manualmente...
+				... perchè polymer non lo fa da solo?*/
+				if(this.attributes.hasOwnProperty('label')){
+					//this.label = this.attributes.label.nodeValue;
+				}
+			}
+		}
+		customElements.define(xNumerocolli.is, xNumerocolli);
+	</script>
+</dom-module>
+
+
+
+
+
+<dom-module id='x-peso'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xPeso extends xInput {
+			static get is() { return "x-peso"; }
+			constructor() {
+				super();
+				this.tipo='numeri';
+				this.length=5;
+				//only allow numbers and slashes
+				//only allow numbers and slashes
+				this.$.field.addEventListener('keypress', function (event){
+					
+					var allowedKeys =allowedKeysNumbers;
+					allowedKeys.push(',');
+					
+					if (allowedKeys.indexOf(event.key) > -1){
+						//console.log('al good go on', event.keyCode);
+						return true;
+					}else{
+						//console.log('returning false');
+						//replace eventual dots with commas
+						console.log(event.key);
+						if (event.key =='.'){
+							event.target.value +=',';
+						}
+						event.preventDefault();
+						return false;
+					}
+				}.bind(this));
+				
+				this.$.field.addEventListener('keyup', function(event){
+					if(event.keyCode == 13 || event.keyCode == 9){
+						console.log('on focus out');
+						console.log(event.target.value);
+						
+						//try to match a number with decimals
+						var matched = /^([0-9]*,[0-9]*)$/.test(event.target.value); 
+						
+						//if not try to match an integer number
+						if (!matched){
+							var matched = /^([0-9]*)$/.test(event.target.value); 
+						}
+						//if both failed
+						if (!matched){
+							console.log('matched:', matched);
+							console.log('keep the focus');
+							event.target.focus();
+							event.preventDefault();
+							event.stopPropagation();
+							displayError('Valore non valido per il campo peso');
+							return false;
+						}else{
+							console.log('matched:', matched);
+							return true;
+						}
+						//return result;
+					}
+				}.bind(this));
+			}
+		}
+		customElements.define(xPeso.is, xPeso);
+	</script>
+</dom-module>
+
+
+
+
+
+<dom-module id='x-prezzo'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xPrezzo extends xInput {
+			static get is() { return "x-prezzo"; }
+			constructor() {
+				super();
+				this.tipo='prezzo';
+				this.length=10;
+				
+				//only allow numbers and slashes
+				//only allow numbers and slashes
+				this.$.field.addEventListener('keypress', function (event){
+					
+					var allowedKeys =allowedKeysNumbers;
+					allowedKeys.push(',');
+					
+					if (allowedKeys.indexOf(event.key) > -1){
+						//console.log('al good go on', event.keyCode);
+						return true;
+					}else{
+						//console.log('returning false');
+						//replace eventual dots with commas
+						console.log(event.key);
+						if (event.key =='.'){
+							event.target.value +=',';
+						}
+						event.preventDefault();
+						return false;
+					}
+				}.bind(this));
+				
+				this.$.field.addEventListener('keyup', function(event){
+					if(event.keyCode == 13 || event.keyCode == 9){
+						console.log('on focus out');
+						console.log(event.target.value);
+						
+						//try to match a number with decimals
+						var matched = /^([0-9]*,[0-9]*)$/.test(event.target.value); 
+						
+						//if not try to match an integer number
+						if (!matched){
+							var matched = /^([0-9]*)$/.test(event.target.value); 
+						}
+						
+						//if both failed
+						if (!matched){
+							console.log('matched:', matched);
+							console.log('keep the focus');
+							event.target.focus();
+							event.preventDefault();
+							event.stopPropagation();
+							displayError('Valore non valido per il campo prezzo.');
+							return false;
+						}else{
+							console.log('matched:', matched);
+							return true;
+						}
+						//return result;
+					}
+				}.bind(this));
+			}
+		}
+		customElements.define(xPrezzo.is, xPrezzo);
+	</script>
+</dom-module>
+
+
+
+
+
+<dom-module id='x-data'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xData extends xInput {
+			static get is() { return "x-data"; }
+			constructor() {
+				super();
+				this.tipo='data';
+				this.length=10;
+				
+				//filtraggio INPUT
+				//only allow numbers and slashes
+				this.$.field.addEventListener('keypress', function (event){
+					
+					var allowedKeys =allowedKeysNumbers;
+					allowedKeys.push('/');
+					
+					if (allowedKeys.indexOf(event.key) > -1){
+						//console.log('al good go on', event.keyCode);
+						return true;
+					}else{
+						//console.log('returning false');
+						event.preventDefault();
+						return false;
+					}
+				}.bind(this));
+				
+				//validazione
+				this.$.field.addEventListener('keyup', function(event){
+					if(event.keyCode == 13 || event.keyCode == 9){
+						console.log('on focus out');
+						console.log(event.target.value);
+						var matched = /^([0-9][0-9]\/[0-9][0-9]\/[0-9][0-9][0-9][0-9])$/.test(event.target.value); 
+						if (!matched){
+							console.log('matched:', matched);
+							console.log('keep the focus');
+							event.target.focus();
+							event.preventDefault();
+							event.stopPropagation();
+							displayError('Valore non valido per il campo data. Formato atteso gg/mm/aaaa');
+							return false;
+						}else{
+							console.log('matched:', matched);
+							return true;
+						}
+						//return result;
+					}
+				}.bind(this));
+			}
+		}
+		customElements.define(xData.is, xData);
+	</script>
+</dom-module>
+
+
+
+
+<dom-module id='x-codiceclientefornitore'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodiceclientefornitore extends xInput {
+			static get is() { return "x-codiceclientefornitore"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.length=6;
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodiceclientefornitore.is, xCodiceclientefornitore);
+	</script>
+</dom-module>
+
+
+
+<dom-module id='x-codicecausale'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodicecausale extends xInput {
+			static get is() { return "x-codicecausale"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.length=2;
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodicecausale.is, xCodicecausale);
+	</script>
+</dom-module>
+
+
+
+<dom-module id='x-codicemezzo'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodicemezzo extends xInput {
+			static get is() { return "x-codicemezzo"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.length=2;
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodicemezzo.is, xCodicemezzo);
+	</script>
+</dom-module>
+
+
+
+
+<dom-module id='x-codicearticolo'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodicearticolo extends xInput {
+			static get is() { return "x-codicearticolo"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.length=6;
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodicearticolo.is, xCodicearticolo);
+	</script>
+</dom-module>
+
+
+
+<dom-module id='x-codiceum'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodiceum extends xInput {
+			static get is() { return "x-codiceum"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodiceum.is, xCodiceum);
+	</script>
+</dom-module>
+
+
+
+
+
+<dom-module id='x-codiceimballagio'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodiceimballagio extends xInput {
+			static get is() { return "x-codiceimballagio"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.length=5;
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodiceimballagio.is, xCodiceimballagio);
+	</script>
+</dom-module>
+
+
+
+
+<dom-module id='x-codiceiva'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodiceiva extends xInput {
+			static get is() { return "x-codiceiva"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.length=3;
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodiceiva.is, xCodiceiva);
+	</script>
+</dom-module>
+
+
+<dom-module id='x-lotto'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xLotto extends xInput {
+			static get is() { return "x-lotto"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.length=15;
+			}
+		}
+		customElements.define(xLotto.is, xLotto);
+	</script>
+</dom-module>
+
+
+
+<dom-module id='x-note'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xNote extends xInput {
+			static get is() { return "x-note"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.length=100;
+			}
+		}
+		customElements.define(xNote.is, xNote);
+	</script>
+</dom-module>
+
+<dom-module id='x-codicebanca'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodicebanca extends xInput {
+			static get is() { return "x-codicebanca"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodicebanca.is, xCodicebanca);
+	</script>
+</dom-module>
+
+
+<dom-module id='x-codicepagamentoscadenza'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodicepagamentoscadenza extends xInput {
+			static get is() { return "x-codicepagamentoscadenza"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodicepagamentoscadenza.is, xCodicepagamentoscadenza);
+	</script>
+</dom-module>
+
+
+<dom-module id='x-codicepagamentomodalita'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodicepagamentomodalita extends xInput {
+			static get is() { return "x-codicepagamentomodalita"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodicepagamentomodalita.is, xCodicepagamentomodalita);
+	</script>
+</dom-module>
+
+
+<dom-module id='x-codicetipofattura'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xCodicetipofattura extends xInput {
+			static get is() { return "x-codicetipofattura"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xCodicetipofattura.is, xCodicetipofattura);
+	</script>
+</dom-module>
+
+<dom-module id='x-valuta'>
+	<template>
+		<label>
+			<span style="color:grey">{{label}}</span>
+			<input 
+				id="field"
+				value="{{value::change}}"
+				size$="{{length}}"
+				maxlength="{{length}}"
+				on-focus="onfocus"
+				on-blur="onblur"
+				on-keydown="onkeydown"
+				disabled$="{{disabled}}"
+hidden$="{{hiddeninput}}"
+			>
+			[[descrizionecodice]]
+		</label>
+	</template>
+	<script>
+		class xValuta extends xInput {
+			static get is() { return "x-valuta"; }
+			constructor() {
+				super();
+				this.tipo='testo';
+				this.length=3;
+				//validazione
+				this.$.field.addEventListener('keyup', this.validatoreCodici.bind(this));
+			}
+		}
+		customElements.define(xValuta.is, xValuta);
+	</script>
+</dom-module>

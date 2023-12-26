@@ -1,18 +1,12 @@
-<link rel="import" href="./../../libs/polymer-2.0.0/polymer-element.html">
-<link rel="import" href="./../../libs/polymer-2.0.0/lib/elements/dom-repeat.html">
+<link rel="import"  href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/polymer-element.html">
+<link rel="import" href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/lib/elements/dom-repeat.html">
 
 <dom-module id='x-emissionefattura'>
 	<template>
 		<style>
-		.displayRighe {
-			max-height:20em;
-			overflow-y: scroll;
-		}
 
 		.displayRighe tbody {
-				display: block;
-				height: 10em;
-				overflow: auto;
+
 		}
 		.displayRighe thead{
 
@@ -39,50 +33,6 @@
 		.alignRight{
 			text-align:right;
 		}
-
-		.ddtDaFatturare{
-			background-color: orange;
-			border: 1px solid black;
-			border-radius: 3px;
-			padding: 0.3em;
-			font-size: 0.8em;
-			display: inline-block;
-			overflow: hidden;
-			height: 1.5em;
-			line-height: 1.4em;
-		}
-		.ddtDaFatturare span{
-			visibility: hidden;
-			width: 0px;
-			display: inline-block;
-		}
-		.ddtDaFatturare:hover span{
-			visibility: visible;
-			width: auto;
-			display: inline-block;
-		}
-		/*
-		.scrollableTable tbody{
-		  display:block;
-		  overflow:auto;
-		  height:9em;
-		  width:100%;
-		}
-		.scrollableTable thead tr{
-		  display:block;
-		}
-		*/
-		.ddt{
-			display: inline-block;
-			border-radius: 0.4em;
-			border: 1px solid orange;
-			background-color: #dedede;
-			border-size: 0.1em;
-			padding-left: 0.3em;		
-			padding-left: 0.3em;			
-			color:black;
-		}
-
 		</style>
 		<x-window title="Emissione fattura">
 			<div id="intestazione">
@@ -96,11 +46,17 @@
 				<br>Pagamento Banca: <x-codicebanca value={{ft.banca_codice}} id="codicebanca"></x-codicebanca>
 
 				<br>DDT:  <input type="button" value="Clicca per selezionare i DDT" id="triggerselezioneddt" >
-				<br>
+				
+				<tbody>
 				<template is="dom-repeat" items="{{ft.ddt_id}}" as="ddt_id" id="displayddtTemplate">
-					<div alt="{{ddt_id.clientefornitore_codice}}" class="ddtDaFatturare"><b><big>{{ddt_id.numero}}</big></b> <span>{{ddt_id.data}}</span></div>
+					<tr>
+						<td>D.d.T. n. {{ddt_id.numero}} del {{ddt_id.data}} cliente {{ddt_id.clientefornitore_codice}}</td>
+					</tr>
 				</template>
+				</tbody>
+
 			</div>
+			<br>
 			Righe:
 			<div class="displayRighe" tabindex="">
 			<table>
@@ -147,7 +103,7 @@
 				</tbody>
 			</table>
 			</div>
-			<table style="line-height:1.2">
+			<table>
 				<tr>
 					<td>Imponibile:</td>
 					<td class="alignRight">{{ft.imponibile}}</td>
@@ -168,23 +124,10 @@
 			static get is() { return "x-emissionefattura"; }
 			constructor() {
 				super();
-				this.inizializzaNuovaFt();
-			}
-			ready() {
-				super.ready();
-				this.$.triggerselezioneddt.addEventListener('focus', this._selezionatoreddtdacliente.bind(this));
 				
-				//esc menu
-				this.addEventListener('keyup', function(event) {
-					switch (event.which){
-						case 27: 
-							//var giveFocusBackTo=document.activeElement;
-							//var giveFocusBackTo=document.querySelector( ':focus' );
-							var giveFocusBackTo=this.shadowRoot.activeElement;
-							this.displayEscMenu(giveFocusBackTo);//display esc menu
-						break; //enter
-					}
-				}.bind(this));
+				this.$.triggerselezioneddt.addEventListener("focus", this._selezionatoreddtdacliente.bind(this)); 
+				this.inizializzaNuovaFt();
+				
 			}
 			static get properties() {
 				return {
@@ -286,7 +229,6 @@
 						/*RICAVO ALCUNI DATI CHE MI SERVONO*/
 
 					//id ddt
-						var elencoIdDdt = '';
 						var elencoIdDdt = new Array()
 						selection.forEach(function(myDdt) {
 							console.log(myDdt);
@@ -378,13 +320,8 @@
 				request.send("action="+requestData.action+"&params="+JSON.stringify(requestData.params));
 				var objCliente = {};
 				if (request.status === 200) {
-					try {
-						objCliente = JSON.parse(request.responseText)[0];
-						console.log('Cliente',objCliente);
-					} catch (error) {
-						console.warn('La risposta del server non è un json valido.', request);
-						//console.error(error);
-					}
+					objCliente = JSON.parse(request.responseText)[0];
+					console.log('Cliente',objCliente);
 				}
 				
 				this.set('ft.banca_codice', objCliente.banca_codice);
@@ -418,28 +355,6 @@
 
 				//imposto la valuta
 				this.set('ft.valuta', 'EUR');
-				
-				//resetto alcuni valori
-				this.set('ft.ddt_id','');
-				this.set('ft.riga_id','');
-				
-				//do il focus al primo campo
-				//console.log(this.$.numero);
-				//this.$.numero.shadowRoot.querySelector('input').focus();
-				setTimeout(function (){
-					//get a list of focusable elements
-					this.fields = this.getFocusableElements();
-					/*
-					//console.log('focusable fields: ', this.fields);
-					//console.log('#########################################################################################');
-					//console.log('will get focus: ', this.fields[0]);
-					*/
-					//give focus to the first one
-					this.fields[0].shadowRoot.querySelector('input').focus();
-				}.bind(this), 1000);
-				
-				
-				
 			}
 
 			displayEscMenu(oldFocusedElement){

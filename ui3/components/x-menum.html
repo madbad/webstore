@@ -1,8 +1,8 @@
-<link rel="import"  href="./../../libs/polymer-2.0.0/polymer-element.html">
-<link rel="import" href="./../../libs/polymer-2.0.0/lib/elements/dom-repeat.html">
-<link rel="import" href="./../../libs/polymer-2.0.0/lib/elements/dom-if.html">
+<link rel="import"  href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/polymer-element.html">
+<link rel="import" href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="https://polygit.org/polymer+2.0.0-rc.2/components/polymer/lib/elements/dom-if.html">
 
-<dom-module id='x-menu'>
+<dom-module id='x-menum'>
     <script src="./../libs/drag.js"></script>
 	<template>
 		<style>
@@ -23,11 +23,6 @@
 			visibility: hidden;
 			position:fixed;
 			border-collapse:separate;
-		}
-		
-		.multipleselected {
-			color:green;
-			font-weight: bold;
 		}
 		.selected {
 			background-image: none;
@@ -113,20 +108,6 @@
 		</div>
 		<div id="items">
 			<table id="table">
-				
-				<template is="dom-repeat" items="{{visibleitems}}">
-					<template is="dom-if" if="{{_isFirst(index)}}">
-					<colgroup>
-						<template is="dom-repeat" items="{{_itemToArray(item)}}">
-							<col id="col{{item.key}}">
-						</template> 
-					</colgroup>
-					</template>
-				</template>
-				
-
-
-
 				<thead id="tableHead">
 					<template is="dom-repeat" items="{{visibleitems}}">
 						<template is="dom-if" if="{{_isFirst(index)}}">
@@ -158,8 +139,8 @@
 	</template>
 	<script>
 		// Define the class for a new element called custom-element
-		class xMenu extends Polymer.Element {
-			static get is() { return "x-menu"; }
+		class xMenum extends Polymer.Element {
+			static get is() { return "x-menum"; }
 			constructor() {
 				super();
 			}
@@ -209,17 +190,6 @@
 						reflectToAttribute: true,
 						value:0,
 					},
-					multipleselectionitems: {
-						type: Array,
-						reflectToAttribute: true,
-						notify: true,
-						value: new Array(),
-					},
-					allowmultipleselection: {
-						type: Boolean,
-						reflectToAttribute: true,
-						value:false,
-					},
 				}
 			}
 /*
@@ -249,8 +219,7 @@ events methods
 						if(this.visibleitems.indexOf(this.getSelected()) == 0){
 							if(this.page > 1){
 								this.selectPrevPage();
-								//this.selectLastOfThePage();
-								this.selectFirstOfThePage();
+								this.selectLastOfThePage();
 							}
 						}else{
 							this.selectFirstOfThePage();
@@ -262,8 +231,7 @@ events methods
 							//se ci sono ancora pagine
 							if(this.page < this.pages){
 								this.selectNextPage();
-								//this.selectFirstOfThePage();
-								this.selectLastOfThePage();
+								this.selectFirstOfThePage();
 							}
 						}else{
 							this.selectLastOfThePage();
@@ -271,8 +239,6 @@ events methods
 						break; 
 					case 13: this.confirm(); break; //enter
 					case 27: this.cancel(); break; //esc
-					case 39: if(this.allowmultipleselection) {this.addCurrentItemToMultipleSelection();} break;//rightarrow
-					case 37: if(this.allowmultipleselection) {this.removeCurrentItemFromMultipleSelection();}break; //leftaarrow
 					default:
 						//every time a key is pressed we schedule a future search on the visible items list
 						//if another key is pressed before the search actually happen 
@@ -309,9 +275,6 @@ custom methods
 				//console.log('XMENU: No params set at creation time, wait for some');
 			}
 			this.focus();
-			
-			//reset some value
-			this.set('multipleselectionitems',[]);
 			
 			/*
 			//manage keyboard events
@@ -462,11 +425,7 @@ custom methods
 			}
 			
 			//call the onConfirma callback
-			if(this.allowmultipleselection){
-				this.onconfirm(this.multipleselectionitems);
-			}else{
-				this.onconfirm(this.getSelected());
-			}
+			this.onconfirm(this.getSelected());
 
 			//if is present remove the modalbackground
 			if(this.modalBackground){
@@ -476,7 +435,6 @@ custom methods
 			//remove me from the dom
 			//console.log('XMENU: remove the menu from the dom')
 			if(!this.keepAliveOnConfirm){
-				console.log('XMENU: deletting ourself');
 				this.parentNode.removeChild(this);
 			}
 			//and quit
@@ -504,29 +462,26 @@ custom methods
 		getFromServer(){
 			var ajaxRequest = new XMLHttpRequest();
 			ajaxRequest.onload = function (e) {
+				//console.log(e);
+				//console.log(e.target.response.message);
+				//console.log(e.target.responseText);
+
 				try {
-					if(e.target.responseText==''){
-						console.log("Warning:\nEmpty reply from the server:",e);
-						var jsonList=[];
-					}else{
-						var jsonList = JSON.parse(e.target.responseText);
-					}
-					//the full array of objects we will use
-					this.fulllist = jsonList;
-					this.set('items', jsonList);
-					this.searchstringChanged();
-					this.onReady();
-					this.updatePositionin();
+					var jsonList = JSON.parse(e.target.responseText);
 				} catch (e) {
-					displayError("Error:\n Bad reaply from the server");
-					console.log("Error:\n Bad reaply from the server");
-					if(e.hasOwnProperty('target')){
-						if(e.target.hasOwnProperty('responseText')){
-							alert("(***see the console for more info*** \n\nError:\n "+e.target.responseText);
-						}
-					}
+					alert("Error happened: bad reaply from the server");
+					alert("Error: "+e.target.responseText);
+
 					console.log("This was the error:",e);
 				}
+
+				var jsonList = JSON.parse(e.target.responseText);
+				console.log(jsonList);
+				//the full array of objects we will use
+				this.fulllist = jsonList;
+				this.set('items', jsonList);
+				this.searchstringChanged();
+				this.onReady();
 				
 			}.bind(this);
 			var requestData ={
@@ -683,16 +638,14 @@ custom methods
 		
 		filterElementsByPage(){
 			var filterOptions = {};
-			filterOptions.maxVisibleElements = 15;
+			filterOptions.maxVisibleElements = 10;
 			filterOptions.dontFilter = false;
 			
-			/*
 			console.log(
 				'Prova filtro pagine:',
 				((this.page-1)*filterOptions.maxVisibleElements),
 				((this.page-1)*filterOptions.maxVisibleElements)+filterOptions.maxVisibleElements
 			)
-			*/
 			
 			//arrotondo le pagine al numero superiore
 			this.pages = Math.ceil(this.filteredItems.length / filterOptions.maxVisibleElements);
@@ -719,43 +672,36 @@ custom methods
 			document.body.removeChild(this.modalBackground);
 		}
 		onReady(){
-			//callback for when we istantiate from the server and are ready to show us
+			//callback for whe we istantiate from the server and are ready to show us
 		}
 		hideColumn(){
 			//try to hide some columns
+
 			var columnsToHide = [
-				//this.root.querySelector("#colnumero"),
-				this.root.querySelector("#colvia"),
-				this.root.querySelector("#colcap"),
-				this.root.querySelector("#colalboautotrasportatori"),
-				this.root.querySelector("#colmezzo_codice"),
-				this.root.querySelector("#colvettore_codice"),
-				this.root.querySelector("#coliva_codice"),
-				this.root.querySelector("#colweb"),
-				this.root.querySelector("#colvaluta"),
-				this.root.querySelector("#coltelefono"),
-				this.root.querySelector("#colcellulare"),
-				this.root.querySelector("#colfax"),
-				this.root.querySelector("#colemail"),
-				this.root.querySelector("#colnome"),
-
-				this.root.querySelector("#colid"),
-				//this.root.querySelector("#colfattura_id"),
-				this.root.querySelector("#colriga_id")
-
+				this.querySelector("#numero"),
+				this.querySelector("#via"),
+				this.querySelector("#cap"),
+				this.querySelector("#alboautotrasportatori"),
+				this.querySelector("#mezzo_codice"),
+				this.querySelector("#vettore_codice"),
+				this.querySelector("#iva_codice"),
+				this.querySelector("#web"),
+				this.querySelector("#valuta"),
+				this.querySelector("#telefono"),
+				this.querySelector("#cellulare"),
+				this.querySelector("#fax"),
+				this.querySelector("#email"),
+				this.querySelector("#nome"),
 			];
-			var sizeOfCollapsedColumns = 0;
-				for (var i=0; i <= columnsToHide.length; i++){
+
+			//console.log(columnsToHide);
+			for (var i=0; i <= columnsToHide.length; i++){
 				var column = columnsToHide[i];
 				if(column){
 					//console.log('Column hidden', column);
-					sizeOfCollapsedColumns+=column.offsetWidth;
 					column.style.visibility='collapse';
-					console.log(column.offsetWidth)
-					//column.style.display='none';
 				}
 			}
-			return sizeOfCollapsedColumns;
 		}
 		_itemToArray(obj){
 			//console.log("Converting to array...")
@@ -782,52 +728,9 @@ custom methods
 				return false;
 			}
 		}
-		addCurrentItemToMultipleSelection(){
-			//se non è già tra i selezionati lo aggiungo
-			var index = this.multipleselectionitems.indexOf(this.getSelected());
-			if (index < 0){
-				console.log('add to multiple selction', this.getSelected());
-				this.push('multipleselectionitems', this.getSelected());
-				this.$.table.tBodies[0].rows[this.selectedId].classList.add("multipleselected");
-				console.log('selection is now', this.multipleselectionitems);
-			}else{
-				console.log('NOT added because already present in selection', this.getSelected(), index);
-			}
-		}
-		removeCurrentItemFromMultipleSelection(){
-			console.log('remove from multiple selction', this.getSelected());
-			var index = this.multipleselectionitems.indexOf(this.getSelected());
-			if(index > -1){
-				this.splice('multipleselectionitems', index, 1);
-				this.$.table.tBodies[0].rows[this.selectedId].classList.remove("multipleselected");
-				console.log('selection is now', this.multipleselectionitems);
-			}else{
-				console.log('NOT removed because it as not there in selection', this.getSelected(), index);
-			}
-		}
-		updatePositionin(){
-			//update the positionin
-			//remove previous set limit
-			this.style.width = 'auto';	
-
-			//remove unwanted columns
-			var sizeOfCollapsedColumns = this.hideColumn();
-			
-			console.log(this.offsetWidth);
-			this.style.width = ((this.offsetWidth-sizeOfCollapsedColumns))+'px';
-			//end
-			//
-			var modifier = {
-				top: 50,
-				left: 0,
-			}
-			this.setPosition('tc','tc',document.body, modifier);
-
-
-		}
 	}
 		
 		// Register the new element with the browser
-		customElements.define(xMenu.is, xMenu);
+		customElements.define(xMenum.is, xMenum);
 	</script>
 </dom-module>
