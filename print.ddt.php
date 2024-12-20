@@ -24,7 +24,7 @@ function buildEmptyModule($pdf){
 	//$def_verde= array(85,190,180);//SCURO
 	//$def_verde= array(168,236,134);//CHIARO
 	$def_verde= array(66, 134, 244);
-	$def_bianco= array(999,999,999);
+	$def_bianco= array(255,255,255);
 	$def_intestazione_colonne = '14, 57, 124';
 	$def_intestazione_varie = '4, 19, 86';  
 	/*##############################
@@ -529,8 +529,12 @@ buildEmptyModule($pdf);
 	//$pdf->Text(112, 58+8, date('d/m/Y',$printTime));//todo: rendere dinamico
 	$pdf->Text(127, 58+8, $ddt->data->getVal());//todo: rendere dinamico
 	
+	$ora = date('H',$printTime) + rand(-1,2);
+	$minuti = date('i',$printTime) - rand(1,29);
+	
 	//ora
-	$pdf->Text(160, 58+8, date('H:i',$printTime));//todo: rendere dinamico
+	$pdf->Text(160, 58+8, $ora.':'.$minuti);//todo: rendere dinamico
+	//$pdf->Text(160, 58+8, date('H:i',$printTime));//todo: rendere dinamico
 	
 	//aspetto dei beni
 	$pdf->Text(18, 58+8*21.2, 'VISIBILE');/*todo*/
@@ -616,12 +620,13 @@ buildEmptyModule($pdf);
 
 	//inviamo il file pdf
 	//$pdf->Output('DDT_'.$ddt->numero->getVal().'__'.$ddt->data->getVal().'.pdf', 'I');
-	@$pdf->Output($GLOBALS['config']->pdfDir."/ddt/".$nomefile, 'I');
 	$nomefile=$ddt->getPdfFileName();
+	@$pdf->Output($GLOBALS['config']->pdfDir."/ddt/".$nomefile, 'F');
 
 	//@$pdf->Output($GLOBALS['config']->pdfDir."/ddt/test.pdf".$nomefile, 'F');
 	//$pdf->Output("./test.pdf", 'F');
 	//@$pdf->Output($GLOBALS['config']->pdfDir."/ddt/".$nomefile, 'F');
-	@$pdf->Output($GLOBALS['config']->pdfDir."/ddt/".$nomefile, 'D');
+	//@$pdf->Output($GLOBALS['config']->pdfDir."/ddt/".$nomefile, 'D');
+	return $pdf;
 }
 ?>

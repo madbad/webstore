@@ -234,8 +234,10 @@
 					console.log('CodiciIva',codiciIva);
 				}
 				
-				
-				
+				//fix
+				console.log(this.ft.riga_id); 
+				if (this.ft.riga_id == undefined){return};
+				if (this.ft.riga_id == ''){return};
 				this.ft.riga_id.forEach(function(myRiga) {
 					//elencoIdRighe.push(myRiga.id);
 					var peso = myRiga.pesonetto.replace(/,/, ".");
@@ -414,7 +416,7 @@
 				this.set('ft.data', today);
 				
 				//imposto la causale del ddt a vendita (02) per default
-				this.set('ft.tipofattura_codice', 'FT');
+				this.set('ft.tipofattura_codice', 'FTD');
 
 				//imposto la valuta
 				this.set('ft.valuta', 'EUR');
@@ -448,7 +450,7 @@
 				menu.title="Gestione FT"
 				var list= [
 					{label:'Memorizza FT',_action:function (){this.memorizzaFt();}.bind(this)},
-					{label:'Stampa FT',_action:function (){this.stampaFt(oldFocusedElement);}.bind(this)},
+					{label:'Visualizza PDF FT',_action:function (){this.visualizzaPdfFt(oldFocusedElement);}.bind(this)},
 					{label:'Stampa e memorizza FT',_action:'none'},
 					{label:'Abbandona FT',_action:function (){this.abbandonaFt();}.bind(this)},
 					{label:'Cancella FT',_action:function (){this.cancellaFt();}.bind(this)}
@@ -547,7 +549,7 @@
 				ajaxRequest.send("action="+requestData.action+"&params="+requestData.params);
 
 			}
-			stampaFt(oldFocusedElement){
+			visualizzaPdfFt(oldFocusedElement){
 				//impostiamo il tipo in quanto non sempre è già impostato
 
 				// prepare an ajax request
@@ -573,7 +575,7 @@
 			
 				//request setup
 				var requestData ={
-					action: 'print',
+					action: 'visualizzapdf',
 					params: JSON.stringify(this.ft)
 				};
 				//console.log(requestData.params);

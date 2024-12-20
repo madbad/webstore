@@ -331,12 +331,13 @@ class MyClass extends DefaultClass{
 		//creo la tabella
 		//to fix : letto su internet che se vado ad aggiornare una riga com esempio solo 3 campi su quattro il campo che non vado ad aggiornare in questo momento con i nuovi valori viene resettato al valore di default o messo a null
 		$query="INSERT OR REPLACE INTO $table (".implode($fields,',').") VALUES ($values)";
-echo "\n".$query;
+//echo "\n".$query;
 		$db->exec($query) or die($query);
 		return;
 	}
 	
 	public function getFromDb(){
+//		echo $this->id->valore.'1111';
 		//ricava tutti i dati presente nel $DATAbase
 		$fields=$this->getPropertiesNames();
 		$table=$this->getDbName();
@@ -358,7 +359,7 @@ echo "\n".$query;
 		}			
 		//la stringa della query
 		$query='SELECT * FROM '.$table.' '.$where.$order;
-		//echo $query;
+//	echo $query;
 		//apro il $DATAbase ed eseguo la query
 		if ($this->getDbType()=='interno'){
 			$db = new SQLite3($sqlite->databaseInterno);
@@ -523,26 +524,20 @@ class Ddt  extends MyClass {
 		});
 		parent::deletteFromDb();
 	}
+	function visualizzaPdf(){
+		$pdf = generaPdfDdt($this);
+		@$pdf->Output($this->getPdfFileUrl(), 'D');//DOWNLOAD THE FILE
+		return;
+	}
 	function stampa(){
 		generaPdfDdt($this);
-		//url completo del file pdf
-		$pdfUrl=$this->getPdfFileUrl();
-echo 'test';		
-/*		
-		// impostiamo l'header di un file pdf
-		header('Content-type: application/pdf');
-		// e inviamolo al browser
-		readfile($pdfUrl);
-*/
 
 		$sumatrapdfexe = 'C:\Programmi\SumatraPDF\SumatraPDF.exe';
 		$filename = '"'.$this->getPdfFileUrl().'"';
-//		//$printername = '"HP LaserJet M1530 MFP Series PCL 6"';
 		$printername = '"HPNUOVA"';
 		$printCommand = $sumatrapdfexe.' -print-to '.$printername.' -print-settings "1x,fit" -silent -exit-when-done '.$filename;
+echo $printCommand;
 		exec($printCommand);
-
-
 		return;
 	}
 	function getPdfFileName(){
@@ -550,12 +545,13 @@ echo 'test';
 		$tipo=$this->causale_codice->getVal();
 		
 		$arr=explode("/", $this->data->getVal());
+		//20/12/2024
 								//mese   //giorno //anno
-		$newVal=mktime(0, 0, 0, $arr[0], $arr[1], $arr[2]);
+		$newVal=mktime(0, 0, 0, $arr[1], $arr[0], $arr[2]);
 		$newVal=date ( 'Ymd' , $newVal);
 		$data=$newVal;
 		
-		$nomefile=$data.'_'.$tipo.$numero.'.pdf';
+		$nomefile=$data.'_'.$tipo.'_'.$numero.'.pdf';
 		return $nomefile;
 	}
 	function getPdfFileUrl(){
@@ -564,7 +560,7 @@ echo 'test';
 		//la cartella principale delle stampe
 		$dirDelleStampe=$GLOBALS['config']->pdfDir;
 		//l'url completo del file esempio: c:/Program%20Files/EasyPHP-5.3.6.0/www/webcontab/my/php/stampe/ft/20120121_N00000001.pdf
-		$fileUrl=$dirDelleStampe.'/ft/'.$filename;
+		$fileUrl=$dirDelleStampe.'/ddt/'.$filename;
 		
 		//verifichiamo che il file esista prima di comunicarlo
 		//altrimenti lo generiamo "al volo"

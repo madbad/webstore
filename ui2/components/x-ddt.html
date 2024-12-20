@@ -152,7 +152,9 @@
 			static get observers() {
 				return [
 					// Observer method name, followed by a list of dependencies, in parenthesis
-					'modificatoPeso(rigadamodificare.tara,rigadamodificare.pesolordo)',
+					'modificatoPesoLordo(rigadamodificare.pesolordo)',
+					'modificatoTara(rigadamodificare.tara)',
+				    'modificatoPesoNetto(rigadamodificare.pesonetto)',
 					'modificatoArticolo(rigadamodificare.articolo_codice)',
 					'modificatoCliente(ddt.clientefornitore_codice)',
 					'modificatoTipoSpedizione(ddt.mezzo_codice)'
@@ -211,8 +213,8 @@
 				menu.title="Gestione DDT"
 				var list= [
 					{label:'Memorizza DDT',_action:function (){this.memorizzaDdt();}.bind(this)},
-					{label:'Stampa DDT',_action:function (){this.stampaDdt(oldFocusedElement);}.bind(this)},
-					{label:'Stampa e memorizza DDT',_action:'none'},
+					{label:'Visualizza PDF DDT',_action:function (){this.visualizzaPdfDdt(oldFocusedElement);}.bind(this)},
+					{label:'Memorizza e Stampa DDT',_action:function (){this.memorizzaDdt();this.stampaDdt();}.bind(this)},
 					{label:'Abbandona DDT',_action:function (){this.abbandonaDdt();}.bind(this)},
 					{label:'Cancella DDT',_action:function (){this.cancellaDdt();}.bind(this)}
 				];
@@ -495,7 +497,7 @@ console.log('old focused element', oldFocusedElement);
 				ajaxRequest.send("action="+requestData.action+"&params="+requestData.params);
 
 			}
-			stampaDdt(oldFocusedElement){
+			visualizzaPdfDdt(oldFocusedElement){
 				//impostiamo il tipo in quanto non sempre è già impostato
 
 				// prepare an ajax request
@@ -524,7 +526,48 @@ console.log('old focused element', oldFocusedElement);
 			
 				//request setup
 				var requestData ={
-					action: 'print',
+					action: 'visuallizzapdf',
+					params: JSON.stringify(this.ddt)
+				};
+				//console.log(requestData.params);
+				var obj=requestData.params;
+				var arr = Object.keys(obj).map(function(k) { return obj[k] });
+				
+				ajaxRequest.open('POST', "./../do.php", true);
+				ajaxRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				ajaxRequest.responseType = 'blob';
+				ajaxRequest.send("action="+requestData.action+"&params="+requestData.params);
+			}
+			stampaDdt(oldFocusedElement){
+				//impostiamo il tipo in quanto non sempre è già impostato
+
+				// prepare an ajax request
+				var ajaxRequest = new XMLHttpRequest();
+				
+				//callback for managing results
+				ajaxRequest.onload = function (e) {
+
+					//console.log(e.target.response);
+					/*
+					var a = document.createElement('a');
+					a.href = window.URL.createObjectURL(e.target.response);
+					// Give filename you wish to download
+					a.download = "file.pdf";
+					a.style.display = 'none';
+					document.body.appendChild(a);
+					a.click();
+					*/
+					//alert('Ddt printed?');
+					console.log('Ddt printed?');
+					//redisplay the esc menu
+					//this.displayEscMenu(oldFocusedElement);//display esc menu
+					//console.log(msg);
+					//this.abbandonaDdt();
+				}.bind(this);
+			
+				//request setup
+				var requestData ={
+					action: 'stampa',
 					params: JSON.stringify(this.ddt)
 				};
 				//console.log(requestData.params);
@@ -642,12 +685,44 @@ console.log('old focused element', oldFocusedElement);
 					this.$.codicearticolo.onDataReady= function(){};
 				}.bind(this);
 			}
-			modificatoPeso(newValue) {
+			modificatoPesoLordo(newValue) {
+				console.log('modificato peso lordo');
 				if ( this.$.pesolordo.value==null){return;}
 				var pesoLordo = this.$.pesolordo.value.replace(",", ".")*1;
 				
 				if ( this.$.tara.value==null){return;}
-				var tara = this.$.tara.value.replace(",", ".")*1;
+				var tara = this.$.tara.value+"";
+				var tara = tara.replace(",", ".")*1;
+				
+				if(pesoLordo > 0){
+					this.$.pesonetto.value = (pesoLordo - tara).toString().replace(".", ",");
+				}
+			}
+			modificatoPesoNetto(newValue) {
+				console.log('modificato peso netto');
+				if ( this.$.pesolordo.value==null){return;}
+				var pesoLordo = this.$.pesolordo.value.replace(",", ".")*1;
+				
+				if ( this.$.tara.value==null){return;}
+				var tara = this.$.tara.value+"";
+				var tara = tara.replace(",", ".")*1;
+
+				if ( this.$.pesonetto.value==null){return;}
+				var pesoNetto = this.$.pesonetto.value.replace(",", ".")*1;
+			
+				console.log(pesoLordo - pesoNetto);
+
+				this.$.tara.value = pesoLordo - pesoNetto;
+			}
+			modificatoTara(newValue) {
+				console.log('modificata tara');
+				if ( this.$.pesolordo.value==null){return;}
+				var pesoLordo = this.$.pesolordo.value.replace(",", ".")*1;
+				
+				if ( this.$.tara.value==null){return;}
+				console.log(this.$.tara, this.$.tara.value)
+				var tara = this.$.tara.value+"";
+				var tara = tara.replace(",", ".")*1;
 				
 				if(pesoLordo > 0){
 					this.$.pesonetto.value = (pesoLordo - tara).toString().replace(".", ",");

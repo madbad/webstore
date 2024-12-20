@@ -16,6 +16,7 @@ switch ($_POST["action"]){
 		$myObj->getFromDb();
 		echo $myObj->toJson();
 		break;
+		
 	case "getAll":
 		$out="[";
 		$myparams = json_decode($_POST["params"], true);
@@ -33,6 +34,7 @@ switch ($_POST["action"]){
 		$out.= "]";
 		echo $out;
 		break;
+		
 	case "save":
 		echo $_POST["params"];
 		$params = json_decode($_POST["params"], true);
@@ -40,6 +42,7 @@ switch ($_POST["action"]){
 		$myObj = new $params["_type"]($params);
 		$myObj->saveToDb();
 		break;
+		
 	case "saveAll": /*untested*/
 		$objList =  json_decode($_POST["params"], true);
 		foreach ($objList as  $obj){
@@ -53,104 +56,24 @@ switch ($_POST["action"]){
 		$myObj = new $params["_type"]($params);
 		$myObj->deletteFromDb();
 
-		/*
-		$myddtBACKUP = $myddt->toJson();
-
-		$myddtrighe = new MyList(array( '_type'=>'Riga',
-										'ddt_numero'=>$myddt->numero->getVal(),
-										'ddt_data'=>$myddt->data->getVal()));
-
-		$myddtRigheBACKUP = array();
-		$myddtrighe->iterate(function($riga){
-			global $myddtRigheBACKUP;
-			$myddtRigheBACKUP[] = $riga->toJson();
-			$riga->deletteFromDb();
-		});
-		$myddt->deletteFromDb();
-
-		echo '<br>BackupDDT:<br>';
-		echo $myddtBACKUP;
-
-		echo '<br>BackupRigheDDT:<br>';
-		*/
 		break;
 
-/*
-	case "print":
-		$_POST["params"]='{"id":"16","fattura_id":"","riga_id":"","numero":"2222","data":"01/01/2001","clientefornitore_codice":"LAFAVO","causale_codice":"01","mezzo_codice":"02","vettore_codice":"","destinatario_codice":"","note":"","righe":"0","_type":"Ddt"}';
-		$params = json_decode($_POST["params"], true);
-		
-		$myObj = new $params["_type"]($params);
-		$myObj->getFromDb();
-		$myObj->stampa();
-		
-		break;
-*/
-	case "print":
+	case "visuallizzapdf":
 		//echo $_POST["params"];
 		$params = json_decode($_POST["params"], true);
 		$myObj = new $params["_type"]($params);
-		
-/*		
-		//creo una mylist vuota
-		$myddtrighe = new MyList(array( '_type'=>'Riga',
-										'ddt_id'=>''
-		));
-		//print_r($myObj->righe->valore);
-		//aggiungo le mie righe
-		foreach (($myObj->righe->valore) as $key => $value){
-			//echo "\n**".$key.'=>'.$value;
-			$myddtrighe->add($value);
-			//echo 'test';
-		//print_r($myddtrighe);
-		}
-		$myObj->_oRighe = $myddtrighe;
-		
-		print_r($myddtrighe);
-*/
-		//print_r($myObj);
-		$myObj->stampa();
-
-		
-		// impostiamo l'header di un file pdf
-		header('Content-type: application/pdf');
-		// e inviamolo al browser
-		readfile($pdfUrl);
-
-/*
-		$sumatrapdfexe = 'C:\Programmi\SumatraPDF\SumatraPDF.exe';
-		$filename = '"'.$myObj->getPdfFileUrl().'"';
-		$printername = '"HPNUOVA"';
-		$printCommand = $sumatrapdfexe.' -print-to '.$printername.' -print-settings "1x,fit" -silent -exit-when-done '.$filename;
-		exec($printCommand);
-*/
-
-
+		$myObj->visualizzaPdf();
 		break;
-	/*
-	case "emettift":
+
+	case "stampa":
 		//echo $_POST["params"];
 		$params = json_decode($_POST["params"], true);
 		$myObj = new $params["_type"]($params);
-		
-		//creo una mylist vuota
-		$myddtrighe = new MyList(array( '_type'=>'Riga',
-										'ddt_id'=>''
-		));
-		//print_r($myObj->righe->valore);
-		//aggiungo le mie righe
-		foreach (($myObj->righe->valore) as $key => $value){
-			//echo "\n**".$key.'=>'.$value;
-			$myddtrighe->add($value);
-			//echo 'test';
-		//print_r($myddtrighe);
-		}
-		$myObj->_oRighe = $myddtrighe;
-		
-		//print_r($myddtrighe);
+
 		$myObj->stampa();
+
 		break;
-	*/
+
 	default:
 		break;
 }

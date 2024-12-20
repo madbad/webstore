@@ -221,6 +221,7 @@ window.addEventListener('WebComponentsReady', function() {
 			_select: 'numero,data,clientefornitore_codice',	
 			//data: ['!=',''],
 			data: ['<>','01/01/'+(new Date().getFullYear()),'31/12/'+(new Date().getFullYear())],
+//			data: ['<>','01/01/2023','31/12/2023'],
 			//data: ['<>','20200101','20200331'],
 			//data: ['=','01/01/2020'],
 			clientefornitore_codice: ['!=','']
@@ -327,6 +328,8 @@ window.addEventListener('WebComponentsReady', function() {
 
 
 </script>
+<a href="/webstore/dati/" target="_blank">Accedi al database</a>
+|||||| <a href="/webstore/fattura.php" target="_blank">Gestione fattura</a>
 
 </body>
 </html>

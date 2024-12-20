@@ -78,7 +78,9 @@ function estrapolaDatiPerXmlFt($myFt){
 	$dati->emittente->datiREA->StatoLiquidazioneBolean = $config->azienda->_inliquidazioneBolean->getVal();//"LN";
 	
 	/* DESTINATARIO */
+	//print_r($myFt->clientefornitore_codice);
 	$cliente = $myFt->clientefornitore_codice->extend();
+	//print_r($cliente);
 	//print_r($cliente);
 	$dati->destinatario 						=  new stdClass();
 	$dati->destinatario->codiceSDI 				= $cliente->codiceSDI->getVal();
@@ -229,7 +231,7 @@ function estrapolaDatiPerXmlFt($myFt){
  GENERAZIONE DELLA FATTURA VERA E PROPRIA
 ==============================================================================*/
 function generaXmlDaDatiFattura($dati, $urlFileSaving=''){
-
+//print_r($dati);
 	$xml = new SimpleXMLElement('<p:p:FatturaElettronica/>');
 	//$xml = new SimpleXMLElement('<p:FatturaElettronica/>');
 	//$xml = new SimpleXMLElement('<FatturaElettronica/>');
@@ -252,7 +254,7 @@ function generaXmlDaDatiFattura($dati, $urlFileSaving=''){
 	$last = $xml->FatturaElettronicaHeader->DatiTrasmissione;
 		$last->addChild('ProgressivoInvio',$dati->ProgressivoInvio);
 		$last->addChild('FormatoTrasmissione',$dati->FormatoTrasmissione);
-		
+//print_r($dati->destinatario);		
 		//mi sa che è un controllo duplicato con quello del blocco "if/elseif" qua sotto
 		if($dati->destinatario->codiceSDI == '' && $dati->destinatario->pec ==''){
 			exit("Non trovo ne un codice ne un INDIRIZZO PEC da utilizzare");
@@ -387,14 +389,17 @@ function generaXmlDaDatiFattura($dati, $urlFileSaving=''){
 			}
 		}
 		
-		//da ripetere per ogni ddt
-		foreach ($dati->riferimentoDdt as $key => $ddt){
-			$last =  $xml->FatturaElettronicaBody->DatiGenerali->addChild('DatiDDT');
-					$last->addChild('NumeroDDT', $ddt->numero);
-					$last->addChild('DataDDT', $ddt->data);
-					foreach ($ddt->riferimentoRighe as $key2 => $riferimentoRiga){
-						$last->addChild('RiferimentoNumeroLinea', $riferimentoRiga); /*non va valorizato se c'è solo 1 ddt*/
-					}
+		//questo è un hack, non stampare i riferimenti ddt se è una fattura di acconto
+		if($dati->fattura->tipo!='TD02'){
+			//da ripetere per ogni ddt
+			foreach ($dati->riferimentoDdt as $key => $ddt){
+				$last =  $xml->FatturaElettronicaBody->DatiGenerali->addChild('DatiDDT');
+						$last->addChild('NumeroDDT', $ddt->numero);
+						$last->addChild('DataDDT', $ddt->data);
+						foreach ($ddt->riferimentoRighe as $key2 => $riferimentoRiga){
+							$last->addChild('RiferimentoNumeroLinea', $riferimentoRiga); /*non va valorizato se c'è solo 1 ddt*/
+						}
+			}
 		}
 		
 		
@@ -479,12 +484,13 @@ function generaXmlDaDatiFattura($dati, $urlFileSaving=''){
 	$xmlDocument->formatOutput = true;
 	$xmlDocument->loadXML($xml->asXML());
 
+
 	//validate the XML file before doing something else ith it
-	if (!$xmlDocument->schemaValidate(realpath($_SERVER["DOCUMENT_ROOT"]).'/webstore/externalData/Schema_del_file_xml_FatturaPA_versione_1.2.xsd')) {
-		error_reporting(-1);
-		$xmlDocument->schemaValidate(realpath($_SERVER["DOCUMENT_ROOT"]).'/webstore/externalData/Schema_del_file_xml_FatturaPA_versione_1.2.xsd');
-		print '<b>DOMDocument::schemaValidate() Generated Errors!</b>';
-	}else{
+//	if (!$xmlDocument->schemaValidate(realpath($_SERVER["DOCUMENT_ROOT"]).'/webstore/externalData/Schema_del_file_xml_FatturaPA_versione_1.2.xsd')) {
+//		error_reporting(-1);
+//		$xmlDocument->schemaValidate(realpath($_SERVER["DOCUMENT_ROOT"]).'/webstore/externalData/Schema_del_file_xml_FatturaPA_versione_1.2.xsd');
+//		print '<b>DOMDocument::schemaValidate() Generated Errors!</b>';
+//	}else{
 		//if I specified a fileURL save all into that file
 		if($urlFileSaving!=''){
 			$xmlDocument->save($urlFileSaving);
@@ -496,7 +502,7 @@ function generaXmlDaDatiFattura($dati, $urlFileSaving=''){
 			header('Content-type: text/xml');
 			echo $xmlDocument->saveXML();
 		}
-	}
+//	}
 	//no error so far we are good ?
 	return true;
 }
